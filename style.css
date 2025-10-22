@@ -347,3 +347,84 @@
                 font-size: 2rem;
             }
         }
+
+        /* --------------------------------------------------
+           ESTILOS ADICIONALES PARA SUBASTAS
+           -------------------------------------------------- */
+
+        /* Ajuste para que el 'active' funcione en la nav */
+        .logo {
+            text-decoration: none;
+        }
+
+        .nav-links a.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Estilos para la Puja */
+        .puja-info {
+            margin-top: 1.5rem; 
+            margin-bottom: 1.5rem;
+        }
+
+        .puja-label {
+            font-size: 0.9rem;
+            color: #666;
+            display: block;
+        }
+
+        .puja-monto {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: block;
+        }
+
+        /* Contenedor de Botones */
+        .card-botones {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Botón "Pujar Ahora" */
+        .btn-pujar {
+            flex: 1;
+            text-decoration: none;
+            text-align: center;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-pujar:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Botón "Ver Detalles" */
+        .btn-ver-mas {
+            flex: 1;
+            text-decoration: none;
+            text-align: center;
+            background: var(--card-bg);
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+            padding: calc(0.7rem - 2px) 1.5rem; 
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-ver-mas:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }

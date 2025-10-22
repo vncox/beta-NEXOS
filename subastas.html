@@ -4,19 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subastas - Nexos</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <header>
         <nav class="navbar">
-            <div class="logo">
+            <a href="index.html" class="logo">
                 <i class="fas fa-heart"></i>
                 <span>Nexos</span>
-            </div>
+            </a>
             <ul class="nav-links">
                 <li><a href="index.html">Inicio</a></li>
-                <li><a href="subastas.html">Subastas</a></li>
+                
+                <li><a href="subastas.html" class="active">Subastas</a></li>
+                
                 <li><a href="causas.html">Causas</a></li>
                 <li><a href="empresas.html">Empresas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
@@ -25,158 +30,240 @@
         </nav>
     </header>
 
-    <section class="hero" style="padding: 3rem 5%; min-height: 300px;">
-        <div class="hero-content">
-            <h1>Todas las Subastas</h1>
-            <p>Encuentra productos y experiencias únicas que apoyan causas que transforman vidas</p>
-        </div>
-    </section>
+    <main>
+        <section class="trending-section">
+            <h2 class="section-title">Todas las Subastas🔥</h2>
 
-    <section class="trending-section">
-        <h2 class="section-title">Subastas Activas</h2>
-        <div class="auctions-grid">
-            <div class="grid-card">
-                <div class="grid-image" style="background-image: url('images/polera.png');"></div>
-                <div class="grid-content">
-                    <h3 class="card-title">Camiseta de Fútbol Autografiada</h3>
-                    <p class="card-description">Camiseta firmada por el equipo nacional, beneficiando a niños con cáncer.</p>
-                    <div class="beneficiary">
-                        <i class="fas fa-hospital"></i>
-                        <span>Teletón</span>
+            <div class="auctions-grid">
+                
+                <div class="auction-card">
+                    <div class="card-image" style="background-image: url('../images/polera.png');"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Camiseta de Fútbol Autografiada</h3>
+                        <p class="card-description">Camiseta firmada por el equipo nacional, beneficiando a niños con cáncer.</p>
+                        <div class="beneficiary">
+                            <i class="fas fa-hospital"></i>
+                            <span>Teletón</span>
+                        </div>
+                        <div class="trending-badge">
+                            <i class="fas fa-fire"></i>
+                            <span>Tendencia</span>
+                        </div>
+                        
+                        <div class="puja-info">
+                            <span class="puja-label">Subasta Actual:</span>
+                            <span class="puja-monto">$85.000 CLP</span>
+                        </div>
+                        <div class="card-botones">
+                            <a href="#" class="btn-ver-mas">Ver Detalles</a>
+                            <a href="#" class="btn-pujar">Subastar</a>
+                        </div>
                     </div>
-                    <p style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Puja actual: $250.000</p>
-                    <button class="cta-button" style="width: 100%; margin-top: 1rem;">Pujar Ahora</button>
                 </div>
-            </div>
 
-            <div class="grid-card">
-                <div class="grid-image" style="background-image: url('images/consola.png');"></div>
-                <div class="grid-content">
-                    <h3 class="card-title">Consola Retro Coleccionable</h3>
-                    <p class="card-description">Nueva consola limitada para apoyar investigación del síndrome de Duchenne.</p>
-                    <div class="beneficiary">
-                        <i class="fas fa-child"></i>
-                        <span>Fundación Duchenne</span>
+                <div class="auction-card">
+                    <div class="card-image" style="background-image: url('../images/consola.png');"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Consola Retro Coleccionable</h3>
+                        <p class="card-description">Nueva consola limitada para apoyar investigación del síndrome de Duchenne.</p>
+                        <div class="beneficiary">
+                            <i class="fas fa-child"></i>
+                            <span>Fundación Duchenne</span>
+                        </div>
+                        <div class="trending-badge">
+                            <i class="fas fa-fire"></i>
+                            <span>Tendencia</span>
+                        </div>
+
+                        <div class="puja-info">
+                            <span class="puja-label">Subasta Actual:</span>
+                            <span class="puja-monto">$120.000 CLP</span>
+                        </div>
+                        <div class="card-botones">
+                            <a href="#" class="btn-ver-mas">Ver Detalles</a>
+                            <a href="#" class="btn-pujar">Subastar</a>
+                        </div>
                     </div>
-                    <p style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Puja actual: $450.000</p>
-                    <button class="cta-button" style="width: 100%; margin-top: 1rem;">Pujar Ahora</button>
                 </div>
-            </div>
 
-            <div class="grid-card">
-                <div class="grid-image" style="background-image: url('images/experiencia.png');"></div>
-                <div class="grid-content">
-                    <h3 class="card-title">Experiencia con Artista Nacional</h3>
-                    <p class="card-description">Encuentro exclusivo con artista para apoyar a Coaniquem.</p>
-                    <div class="beneficiary">
-                        <i class="fas fa-burn"></i>
-                        <span>Coaniquem</span>
+                <div class="auction-card">
+                    <div class="card-image" style="background-image: url('../images/experiencia.png');"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Experiencia con Artista Nacional</h3>
+                        <p class="card-description">Encuentro exclusivo con artista para apoyar a Coaniquem.</p>
+                        <div class="beneficiary">
+                            <i class="fas fa-burn"></i>
+                            <span>Coaniquem</span>
+                        </div>
+                        <div class="trending-badge">
+                            <i class="fas fa-fire"></i>
+                            <span>Tendencia</span>
+                        </div>
+                        
+                        <div class="puja-info">
+                            <span class="puja-label">Subasta Actual:</span>
+                            <span class="puja-monto">$75.000 CLP</span>
+                        </div>
+                        <div class="card-botones">
+                            <a href="#" class="btn-ver-mas">Ver Detalles</a>
+                            <a href="#" class="btn-pujar">Subastar</a>
+                        </div>
                     </div>
-                    <p style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Puja actual: $800.000</p>
-                    <button class="cta-button" style="width: 100%; margin-top: 1rem;">Pujar Ahora</button>
                 </div>
-            </div>
 
-            <div class="grid-card">
-                <div class="grid-image" style="background-image: url('images/setup.png');"></div>
-                <div class="grid-content">
-                    <h3 class="card-title">Paquete de Equipo Gamer</h3>
-                    <p class="card-description">Set completo de gaming para recaudar fondos para cáncer infantil.</p>
-                    <div class="beneficiary">
-                        <i class="fas fa-laptop"></i>
-                        <span>Fundación Cáncer Infantil</span>
+                <div class="auction-card">
+                    <div class="card-image" style="background-image: url('../images/setup.png');"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Paquete de Equipo Gamer</h3>
+                        <p class="card-description">Set completo de gaming para recaudar fondos para cáncer infantil.</p>
+                        <div class="beneficiary">
+                            <i class="fas fa-laptop"></i>
+                            <span>Fundación Cáncer Infantil</span>
+                        </div>
+                        <div class="trending-badge">
+                            <i class="fas fa-fire"></i>
+                            <span>Tendencia</span>
+                        </div>
+                        
+                        <div class="puja-info">
+                            <span class="puja-label">Subasta Actual:</span>
+                            <span class="puja-monto">$620.000 CLP</span>
+                        </div>
+                        <div class="card-botones">
+                            <a href="#" class="btn-ver-mas">Ver Detalles</a>
+                            <a href="#" class="btn-pujar">Subastar</a>
+                        </div>
                     </div>
-                    <p style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Puja actual: $1.200.000</p>
-                    <button class="cta-button" style="width: 100%; margin-top: 1rem;">Pujar Ahora</button>
                 </div>
-            </div>
-
-            <div class="grid-card">
-                <div class="grid-image" style="background-image: url('images/colocolo.png');"></div>
-                <div class="grid-content">
+            <div class="auction-card">
+                <div class="card-image" style="background-image: url('../images/colocolo.png');"></div>
+                <div class="card-content">
                     <h3 class="card-title">Polera de Jugador Profesional</h3>
                     <p class="card-description">Polera oficial usada en partido oficial, donada para investigación del cáncer.</p>
                     <div class="beneficiary">
                         <i class="fas fa-hospital"></i>
                         <span>Fundación Cáncer</span>
                     </div>
-                    <p style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Puja actual: $180.000</p>
-                    <button class="cta-button" style="width: 100%; margin-top: 1rem;">Pujar Ahora</button>
+                    
+                    <div class="puja-info">
+                        <span class="puja-label">Subasta Actual:</span>
+                        <span class="puja-monto">$55.000 CLP</span>
+                    </div>
+                    <div class="card-botones">
+                        <a href="#" class="btn-ver-mas">Ver Detalles</a>
+                        <a href="#" class="btn-pujar">Subastar</a>
+                    </div>
                 </div>
             </div>
-
-            <div class="grid-card">
-                <div class="grid-image" style="background-image: url('images/coleccionable.png');"></div>
-                <div class="grid-content">
+            <div class="auction-card">
+                <div class="card-image" style="background-image: url('../images/coleccionable.png');"></div>
+                <div class="card-content">
                     <h3 class="card-title">Figura Coleccionable Limitada</h3>
                     <p class="card-description">Pieza única de colección para apoyar a niños con enfermedades raras.</p>
                     <div class="beneficiary">
                         <i class="fas fa-child"></i>
                         <span>Asociación Duchenne</span>
                     </div>
-                    <p style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Puja actual: $350.000</p>
-                    <button class="cta-button" style="width: 100%; margin-top: 1rem;">Pujar Ahora</button>
+
+                    <div class="puja-info">
+                        <span class="puja-label">Subasta Actual:</span>
+                        <span class="puja-monto">$90.000 CLP</span>
+                    </div>
+                    <div class="card-botones">
+                        <a href="#" class="btn-ver-mas">Ver Detalles</a>
+                        <a href="#" class="btn-pujar">Subastar</a>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid-card">
-                <div class="grid-image" style="background-image: url('images/evento.png');"></div>
-                <div class="grid-content">
+            <div class="auction-card">
+                <div class="card-image" style="background-image: url('../images/evento.png');"></div>
+                <div class="card-content">
                     <h3 class="card-title">Experiencia VIP en Evento</h3>
                     <p class="card-description">Acceso exclusivo a evento deportivo para recaudar fondos para Coaniquem.</p>
                     <div class="beneficiary">
                         <i class="fas fa-burn"></i>
                         <span>Coaniquem</span>
                     </div>
-                    <p style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Puja actual: $600.000</p>
-                    <button class="cta-button" style="width: 100%; margin-top: 1rem;">Pujar Ahora</button>
+
+                    <div class="puja-info">
+                        <span class="puja-label">Subasta Actual:</span>
+                        <span class="puja-monto">$92.500 CLP</span>
+                    </div>
+                    <div class="card-botones">
+                        <a href="#" class="btn-ver-mas">Ver Detalles</a>
+                        <a href="#" class="btn-pujar">Subastar</a>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid-card">
-                <div class="grid-image" style="background-image: url('images/laptop.png');"></div>
-                <div class="grid-content">
+            <div class="auction-card">
+                <div class="card-image" style="background-image: url('../images/laptop.png');"></div>
+                <div class="card-content">
                     <h3 class="card-title">Equipo Tecnológico Última Generación</h3>
                     <p class="card-description">Laptop gaming de alta gama para apoyar educación de niños en situación vulnerable.</p>
                     <div class="beneficiary">
                         <i class="fas fa-school"></i>
                         <span>Techo para Chile</span>
                     </div>
-                    <p style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Puja actual: $950.000</p>
-                    <button class="cta-button" style="width: 100%; margin-top: 1rem;">Pujar Ahora</button>
+
+                    <div class="puja-info">
+                        <span class="puja-label">Subasta Actual:</span>
+                        <span class="puja-monto">$980.000 CLP</span>
+                    </div>
+                    <div class="card-botones">
+                        <a href="#" class="btn-ver-mas">Ver Detalles</a>
+                        <a href="#" class="btn-pujar">Subastar</a>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid-card">
-                <div class="grid-image" style="background-image: url('images/pintura.png');"></div>
-                <div class="grid-content">
+            <div class="auction-card">
+                <div class="card-image" style="background-image: url('../images/pintura.png');"></div>
+                <div class="card-content">
                     <h3 class="card-title">Obra de Arte Original</h3>
                     <p class="card-description">Pintura original de artista reconocido para investigación médica.</p>
                     <div class="beneficiary">
                         <i class="fas fa-heartbeat"></i>
                         <span>Fundación Cáncer Infantil</span>
                     </div>
-                    <p style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Puja actual: $1.500.000</p>
-                    <button class="cta-button" style="width: 100%; margin-top: 1rem;">Pujar Ahora</button>
+
+                    <div class="puja-info">
+                        <span class="puja-label">Subasta Actual:</span>
+                        <span class="puja-monto">$250.000 CLP</span>
+                    </div>
+                    <div class="card-botones">
+                        <a href="#" class="btn-ver-mas">Ver Detalles</a>
+                        <a href="#" class="btn-pujar">Subastar</a>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid-card">
-                <div class="grid-image" style="background-image: url('images/bunkers.png');"></div>
-                <div class="grid-content">
-                    <h3 class="card-title">Clase de Música con Músico Nacional</h3>
+            <div class="auction-card">
+                <div class="card-image" style="background-image: url('../images/bunkers.png');"></div>
+                <div class="card-content">
+                    <h3 class="card-title">Clase de Música con Artista Nacional</h3>
                     <p class="card-description">Clase personalizada para apoyar a niños con necesidades especiales.</p>
                     <div class="beneficiary">
                         <i class="fas fa-music"></i>
                         <span>Teletón</span>
                     </div>
-                    <p style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Puja actual: $400.000</p>
-                    <button class="cta-button" style="width: 100%; margin-top: 1rem;">Pujar Ahora</button>
+
+                    <div class="puja-info">
+                        <span class="puja-label">Subasta Actual:</span>
+                        <span class="puja-monto">$81.000 CLP</span>
+                    </div>
+                    <div class="card-botones">
+                        <a href="#" class="btn-ver-mas">Ver Detalles</a>
+                        <a href="#" class="btn-pujar">Subastar</a>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-
+                
+                </div>
+        </section>
+    </main>
+    
     <footer>
         <div class="footer-content">
             <div class="logo">
@@ -194,4 +281,3 @@
         </div>
     </footer>
 </body>
-</html>
