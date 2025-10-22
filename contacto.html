@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto - Nexos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="causas.html">Causas</a></li>
+                <li><a href="empresas.html">Empresas</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+            </ul>
+            <button class="cta-button">Donar Ahora</button>
+        </nav>
+    </header>
+
+    <section class="hero" style="padding: 3rem 5%; min-height: 300px;">
+        <div class="hero-content">
+            <h1>Contáctanos</h1>
+            <p>Estamos aquí para ayudarte a conectar con las causas que transforman vidas</p>
+        </div>
+    </section>
+
+    <section class="trending-section" style="padding: 4rem 5%;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; max-width: 1200px; margin: 0 auto;">
+            <!-- Formulario de Contacto -->
+            <div style="background: white; padding: 3rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);">
+                <h2 style="color: var(--primary); margin-bottom: 2rem; font-size: 2rem;">Envíanos un Mensaje</h2>
+                <form style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Nombre Completo</label>
+                        <input type="text" placeholder="Juan Pérez" style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;">
+                    </div>
+
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Email</label>
+                        <input type="email" placeholder="juan@empresa.com" style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;">
+                    </div>
+
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Empresa / Organización</label>
+                        <input type="text" placeholder="Nombre de tu empresa" style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;">
+                    </div>
+
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Teléfono</label>
+                        <input type="tel" placeholder="+56 9 1234 5678" style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;">
+                    </div>
+
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Tipo de Consulta</label>
+                        <select style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;">
+                            <option>Quiero ser empresa colaboradora</option>
+                            <option>Represento una fundación/ONG</option>
+                            <option>Quiero participar en subastas</option>
+                            <option>Consulta general</option>
+                            <option>Otro</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Mensaje</label>
+                        <textarea placeholder="Cuéntanos más sobre tu consulta..." rows="5" style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; resize: vertical; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: border-color 0.3s;"></textarea>
+                    </div>
+
+                    <button type="submit" class="cta-button" style="width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 1rem;">Enviar Mensaje</button>
+                </form>
+            </div>
+
+            <!-- Información de Contacto -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <div style="background: white; padding: 2.5rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);">
+                    <h2 style="color: var(--primary); margin-bottom: 2rem; font-size: 2rem;">Información de Contacto</h2>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div style="display: flex; align-items: start; gap: 1rem;">
+                            <i class="fas fa-map-marker-alt" style="font-size: 1.5rem; color: var(--primary); margin-top: 0.2rem;"></i>
+                            <div>
+                                <h4 style="margin-bottom: 0.3rem; color: var(--dark);">Dirección</h4>
+                                <p style="color: #666; line-height: 1.6;">Av. Providencia 1234<br>Santiago, Chile</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: start; gap: 1rem;">
+                            <i class="fas fa-phone" style="font-size: 1.5rem; color: var(--secondary); margin-top: 0.2rem;"></i>
+                            <div>
+                                <h4 style="margin-bottom: 0.3rem; color: var(--dark);">Teléfono</h4>
+                                <p style="color: #666;">+56 2 2345 6789</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: start; gap: 1rem;">
+                            <i class="fas fa-envelope" style="font-size: 1.5rem; color: var(--accent); margin-top: 0.2rem;"></i>
+                            <div>
+                                <h4 style="margin-bottom: 0.3rem; color: var(--dark);">Email</h4>
+                                <p style="color: #666;">contacto@nexos.cl</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: start; gap: 1rem;">
+                            <i class="fas fa-clock" style="font-size: 1.5rem; color: var(--primary); margin-top: 0.2rem;"></i>
+                            <div>
+                                <h4 style="margin-bottom: 0.3rem; color: var(--dark);">Horario de Atención</h4>
+                                <p style="color: #666;">Lunes a Viernes<br>9:00 - 18:00 hrs</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: white; padding: 2.5rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);">
+                    <h2 style="color: var(--primary); margin-bottom: 1.5rem; font-size: 1.5rem;">Síguenos en Redes Sociales</h2>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <a href="#" style="display: flex; align-items: center; gap: 0.5rem; background: var(--gradient-start); padding: 0.8rem 1.2rem; border-radius: 8px; text-decoration: none; color: var(--dark); transition: transform 0.3s;">
+                            <i class="fab fa-facebook" style="font-size: 1.5rem; color: #1877f2;"></i>
+                            <span style="font-weight: 500;">Facebook</span>
+                        </a>
+                        <a href="#" style="display: flex; align-items: center; gap: 0.5rem; background: var(--gradient-start); padding: 0.8rem 1.2rem; border-radius: 8px; text-decoration: none; color: var(--dark); transition: transform 0.3s;">
+                            <i class="fab fa-twitter" style="font-size: 1.5rem; color: #1da1f2;"></i>
+                            <span style="font-weight: 500;">Twitter</span>
+                        </a>
+                        <a href="#" style="display: flex; align-items: center; gap: 0.5rem; background: var(--gradient-start); padding: 0.8rem 1.2rem; border-radius: 8px; text-decoration: none; color: var(--dark); transition: transform 0.3s;">
+                            <i class="fab fa-instagram" style="font-size: 1.5rem; color: #e4405f;"></i>
+                            <span style="font-weight: 500;">Instagram</span>
+                        </a>
+                        <a href="#" style="display: flex; align-items: center; gap: 0.5rem; background: var(--gradient-start); padding: 0.8rem 1.2rem; border-radius: 8px; text-decoration: none; color: var(--dark); transition: transform 0.3s;">
+                            <i class="fab fa-linkedin" style="font-size: 1.5rem; color: #0077b5;"></i>
+                            <span style="font-weight: 500;">LinkedIn</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div style="background: linear-gradient(135deg, var(--primary), var(--secondary)); padding: 2.5rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); color: white; text-align: center;">
+                    <i class="fas fa-question-circle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.9;"></i>
+                    <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">¿Tienes Preguntas?</h3>
+                    <p style="margin-bottom: 1.5rem; opacity: 0.9; line-height: 1.6;">Nuestro equipo está listo para ayudarte. No dudes en contactarnos.</p>
+                    <button class="cta-button" style="background: white; color: var(--primary);">Ver FAQ</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </div>
+            <p>Conectando empresas con causas que transforman vidas</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p class="copyright">© 2025 Nexos. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <style>
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .social-links a:hover {
+            transform: translateY(-3px);
+        }
+    </style>
+</body>
+</html>
