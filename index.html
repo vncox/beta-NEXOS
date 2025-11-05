@@ -31,7 +31,7 @@
         <div class="hero-content">
             <h1>Conectando Empresas con Causas que Importan</h1>
             <p>Descubre subastas especiales donde tu donación tiene un impacto directo en causas específicas como investigación del cáncer, síndrome de Duchenne y organizaciones como Coaniquem.</p>
-            <button class="cta-button">Explorar Subastas</button>
+            <button class="cta-button" onclick="window.location.href='subastas.html'">Explorar Subastas</button>
         </div>
     </section>
 
@@ -39,7 +39,7 @@
         <h2 class="section-title">Subastas Destacadas 🔥</h2>
         <div class="carousel-container">
             <div class="carousel">
-                <div class="auction-card">
+                <div class="auction-card" onclick="window.location.href='detalle-subasta.html?id=prueba_1'" style="cursor: pointer;">
                     <div class="card-image" style="background-image: url('images/polera.png');"></div>
                     <div class="card-content">
                         <h3 class="card-title">Camiseta de Fútbol Autografiada</h3>
@@ -55,7 +55,7 @@
                     </div>
                 </div>
 
-                <div class="auction-card">
+                <div class="auction-card" onclick="window.location.href='detalle-subasta.html?id=prueba_2'" style="cursor: pointer;">
                     <div class="card-image" style="background-image: url('images/consola.png');"></div>
                     <div class="card-content">
                         <h3 class="card-title">Consola Retro Coleccionable</h3>
@@ -71,7 +71,7 @@
                     </div>
                 </div>
 
-                <div class="auction-card">
+                <div class="auction-card" onclick="window.location.href='detalle-subasta.html?id=prueba_3'" style="cursor: pointer;">
                     <div class="card-image" style="background-image: url('images/experiencia.png');"></div>
                     <div class="card-content">
                         <h3 class="card-title">Experiencia con Artista Nacional</h3>
@@ -87,7 +87,7 @@
                     </div>
                 </div>
 
-                <div class="auction-card">
+                <div class="auction-card" onclick="window.location.href='detalle-subasta.html?id=prueba_4'" style="cursor: pointer;">
                     <div class="card-image" style="background-image: url('images/setup.png');"></div>
                     <div class="card-content">
                         <h3 class="card-title">Paquete de Equipo Gamer</h3>
@@ -104,7 +104,7 @@
                 </div>
 
                 <!-- Duplicado para efecto infinito -->
-                <div class="auction-card">
+                <div class="auction-card" onclick="window.location.href='detalle-subasta.html?id=prueba_1'" style="cursor: pointer;">
                     <div class="card-image" style="background-image: url('images/polera.png');"></div>
                     <div class="card-content">
                         <h3 class="card-title">Camiseta de Fútbol Autografiada</h3>
@@ -120,7 +120,7 @@
                     </div>
                 </div>
 
-                <div class="auction-card">
+                <div class="auction-card" onclick="window.location.href='detalle-subasta.html?id=prueba_2'" style="cursor: pointer;">
                     <div class="card-image" style="background-image: url('images/consola.png');"></div>
                     <div class="card-content">
                         <h3 class="card-title">Consola Retro Coleccionable</h3>
@@ -136,7 +136,7 @@
                     </div>
                 </div>
 
-                <div class="auction-card">
+                <div class="auction-card" onclick="window.location.href='detalle-subasta.html?id=prueba_3'" style="cursor: pointer;">
                     <div class="card-image" style="background-image: url('images/experiencia.png');"></div>
                     <div class="card-content">
                         <h3 class="card-title">Experiencia con Artista Nacional</h3>
@@ -152,7 +152,7 @@
                     </div>
                 </div>
 
-                <div class="auction-card">
+                <div class="auction-card" onclick="window.location.href='detalle-subasta.html?id=prueba_4'" style="cursor: pointer;">
                     <div class="card-image" style="background-image: url('images/setup.png');"></div>
                     <div class="card-content">
                         <h3 class="card-title">Paquete de Equipo Gamer</h3>
@@ -326,5 +326,7 @@
             carousel.style.setProperty('--scroll-distance', `-${totalWidth}px`);
         });
     </script>
+    <script src="auth.js"></script>
+    <script src="config.js"></script>
 </body>
 </html>

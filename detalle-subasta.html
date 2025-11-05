@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Subasta - Nexos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <style>
+        .detalle-container {
+            max-width: 1400px;
+            margin: 100px auto 50px;
+            padding: 0 20px;
+        }
+
+        .breadcrumb {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .subasta-header {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 50%, #2868a8 100%);
+            padding: 3rem 3rem 2.5rem;
+            border-radius: 20px 20px 0 0;
+            color: white;
+            box-shadow: 0 8px 30px rgba(74, 144, 226, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subasta-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .subasta-header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .subasta-tipo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.3rem;
+            background: rgba(255,255,255,0.25);
+            border-radius: 25px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .subasta-titulo {
+            font-size: 2.8rem;
+            margin: 0.8rem 0 1.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .subasta-empresa {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.15rem;
+            opacity: 0.95;
+            background: rgba(255,255,255,0.15);
+            padding: 0.8rem 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            width: fit-content;
+        }
+
+        .subasta-empresa i {
+            font-size: 1.3rem;
+        }
+
+        .subasta-main {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .subasta-main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .imagen-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .imagen-subasta {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0), 
+                        linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .precio-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .precio-actual {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .precio-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .precio-valor {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .precio-inicial {
+            font-size: 0.9rem;
+            color: #999;
+            margin-top: 0.5rem;
+        }
+
+        .tiempo-restante {
+            display: flex;
+            justify-content: space-around;
+            padding: 1.5rem;
+            background: #fff3cd;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .tiempo-item {
+            text-align: center;
+        }
+
+        .tiempo-numero {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--dark);
+            display: block;
+        }
+
+        .tiempo-texto {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .pujar-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .pujar-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            box-sizing: border-box;
+        }
+
+        .pujar-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn-pujar {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-pujar:hover {
+            background: linear-gradient(135deg, #357abd 0%, #2868a8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.5);
+        }
+
+        .btn-pujar:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-pujar:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .incrementos-sugeridos {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-incremento {
+            flex: 1;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-incremento:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .info-pujas {
+            padding: 1rem;
+            background: #e7f3ff;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #0066cc;
+            margin-bottom: 1.5rem;
+        }
+
+        .detalles-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .detalle-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detalle-row:last-child {
+            border-bottom: none;
+        }
+
+        .detalle-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .detalle-valor {
+            color: var(--dark);
+            text-align: right;
+        }
+
+        .descripcion-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .descripcion-card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .descripcion-texto {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .historial-pujas {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .historial-pujas h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .puja-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-left: 4px solid var(--primary);
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .puja-item.destacada {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+            border-left-color: #ffc107;
+        }
+
+        .puja-usuario {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .puja-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .puja-info {
+            flex: 1;
+        }
+
+        .puja-nombre {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .puja-tiempo {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .puja-monto {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .participantes-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .participante-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .participante-item:hover {
+            background: #f8f9fa;
+        }
+
+        .participante-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .participante-nombre {
+            flex: 1;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .participante-pujas {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .accesibilidad-tools {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .btn-accesibilidad {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+
+        .btn-accesibilidad:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .accesibilidad-menu {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            background: white;
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            min-width: 250px;
+            display: none;
+        }
+
+        .accesibilidad-menu.active {
+            display: block;
+        }
+
+        .accesibilidad-option {
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .accesibilidad-option:hover {
+            background: #f8f9fa;
+        }
+
+        .alerta-estado {
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .alerta-estado.finalizada {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .alerta-estado.activa {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #666;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .refresh-dot {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="causas.html">Causas</a></li>
+                <li><a href="empresas.html">Empresas</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+            </ul>
+            <button class="cta-button" onclick="window.location.href='login.html'">Iniciar Sesión</button>
+        </nav>
+    </header>
+
+    <div class="detalle-container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="subastas.html">Subastas</a>
+            <i class="fas fa-chevron-right"></i>
+            <span id="breadcrumb-titulo">Cargando...</span>
+        </div>
+
+        <!-- Header de la Subasta -->
+        <div class="subasta-header">
+            <div class="subasta-header-content">
+                <span class="subasta-tipo" id="tipo-badge">
+                    <i class="fas fa-gavel"></i> <span id="tipo-texto">Subasta</span>
+                </span>
+                <h1 class="subasta-titulo" id="subasta-titulo">Cargando...</h1>
+                <div class="subasta-empresa">
+                    <i class="fas fa-heart"></i>
+                    <span>Organizado por: <strong id="empresa-nombre">Empresa</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="subasta-main">
+            <!-- Columna Izquierda -->
+            <div>
+                <!-- Imagen -->
+                <div class="imagen-container">
+                    <img id="subasta-imagen" class="imagen-subasta" alt="Producto">
+                </div>
+
+                <!-- Descripción -->
+                <div class="descripcion-card">
+                    <h2><i class="fas fa-info-circle"></i> Descripción</h2>
+                    <p class="descripcion-texto" id="subasta-descripcion">
+                        Cargando descripción...
+                    </p>
+                </div>
+
+                <!-- Detalles -->
+                <div class="detalles-card">
+                    <h2><i class="fas fa-list-ul"></i> Detalles de la Subasta</h2>
+                    <div class="detalle-row">
+                        <span class="detalle-label">Fecha de inicio</span>
+                        <span class="detalle-valor" id="fecha-inicio">-</span>
+                    </div>
+                    <div class="detalle-row">
+                        <span class="detalle-label">Fecha de finalización</span>
+                        <span class="detalle-valor" id="fecha-fin">-</span>
+                    </div>
+                    <div class="detalle-row">
+                        <span class="detalle-label">Total de pujas</span>
+                        <span class="detalle-valor" id="total-pujas">0</span>
+                    </div>
+                    <div class="detalle-row">
+                        <span class="detalle-label">Participantes</span>
+                        <span class="detalle-valor" id="total-participantes">0</span>
+                    </div>
+                    <div class="detalle-row">
+                        <span class="detalle-label">Estado</span>
+                        <span class="detalle-valor" id="estado-subasta">Activa</span>
+                    </div>
+                </div>
+
+                <!-- Historial de Pujas -->
+                <div class="historial-pujas">
+                    <h2><i class="fas fa-history"></i> Historial de Pujas</h2>
+                    <div id="lista-pujas">
+                        <!-- Se llena con JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha (Sidebar) -->
+            <div class="sidebar">
+                <!-- Alerta de Estado -->
+                <div id="alerta-estado"></div>
+
+                <!-- Precio Actual -->
+                <div class="precio-card">
+                    <div class="precio-actual">
+                        <div class="precio-label">Precio Actual</div>
+                        <div class="precio-valor" id="precio-actual">$0</div>
+                        <div class="precio-inicial">
+                            Precio inicial: <strong id="precio-inicial">$0</strong>
+                        </div>
+                    </div>
+
+                    <!-- Tiempo Restante -->
+                    <div class="tiempo-restante" id="contador-tiempo">
+                        <div class="tiempo-item">
+                            <span class="tiempo-numero" id="dias">0</span>
+                            <span class="tiempo-texto">Días</span>
+                        </div>
+                        <div class="tiempo-item">
+                            <span class="tiempo-numero" id="horas">0</span>
+                            <span class="tiempo-texto">Horas</span>
+                        </div>
+                        <div class="tiempo-item">
+                            <span class="tiempo-numero" id="minutos">0</span>
+                            <span class="tiempo-texto">Min</span>
+                        </div>
+                        <div class="tiempo-item">
+                            <span class="tiempo-numero" id="segundos">0</span>
+                            <span class="tiempo-texto">Seg</span>
+                        </div>
+                    </div>
+
+                    <!-- Información de Pujas -->
+                    <div class="info-pujas">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Incremento mínimo:</strong> $<span id="incremento-minimo">1,000</span>
+                    </div>
+
+                    <!-- Formulario de Puja -->
+                    <div id="formulario-puja">
+                        <div class="incrementos-sugeridos">
+                            <button class="btn-incremento" onclick="aplicarIncremento(1000)">+$1K</button>
+                            <button class="btn-incremento" onclick="aplicarIncremento(5000)">+$5K</button>
+                            <button class="btn-incremento" onclick="aplicarIncremento(10000)">+$10K</button>
+                        </div>
+                        <div class="pujar-form">
+                            <input type="number" id="monto-puja" class="pujar-input" placeholder="$0" min="0" step="1000">
+                            <button class="btn-pujar" onclick="realizarPuja()">
+                                <i class="fas fa-gavel"></i> Pujar
+                            </button>
+                        </div>
+                        <div class="auto-refresh">
+                            <span class="refresh-dot"></span>
+                            Actualización automática cada 10 segundos
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Participantes -->
+                <div class="participantes-card">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);">
+                        <i class="fas fa-users"></i> Participantes (<span id="num-participantes">0</span>)
+                    </h3>
+                    <div id="lista-participantes">
+                        <!-- Se llena con JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Herramientas de Accesibilidad -->
+    <div class="accesibilidad-tools">
+        <button class="btn-accesibilidad" onclick="toggleAccesibilidad()">
+            <i class="fas fa-universal-access"></i>
+        </button>
+        <div class="accesibilidad-menu" id="accesibilidad-menu">
+            <div class="accesibilidad-option" onclick="ajustarTexto('aumentar')">
+                <i class="fas fa-plus-circle"></i> Aumentar texto
+            </div>
+            <div class="accesibilidad-option" onclick="ajustarTexto('reducir')">
+                <i class="fas fa-minus-circle"></i> Reducir texto
+            </div>
+            <div class="accesibilidad-option" onclick="toggleAltoContraste()">
+                <i class="fas fa-adjust"></i> Alto contraste
+            </div>
+            <div class="accesibilidad-option" onclick="leerPrecioActual()">
+                <i class="fas fa-volume-up"></i> Leer precio actual
+            </div>
+            <div class="accesibilidad-option" onclick="notificarCambios()">
+                <i class="fas fa-bell"></i> Notificaciones de cambio
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Nexos. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script src="config.js"></script>
+    <script>
+        let subastaActual = null;
+        let intervaloCuenta = null;
+        let intervaloActualizacion = null;
+        let notificacionesActivas = false;
+        let ultimoPrecio = 0;
+
+        // Obtener ID de la subasta desde URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const subastaId = urlParams.get('id');
+
+        if (!subastaId) {
+            alert('No se especificó una subasta');
+            window.location.href = 'subastas.html';
+        }
+
+        // Cargar datos de la subasta
+        cargarSubasta();
+
+        // Actualizar cada 10 segundos
+        intervaloActualizacion = setInterval(cargarSubasta, 10000);
+
+        function cargarSubasta() {
+            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
+            subastaActual = subastas.find(function(s) { return s.id === subastaId; });
+
+            if (!subastaActual) {
+                alert('Subasta no encontrada');
+                window.location.href = 'subastas.html';
+                return;
+            }
+
+            // Si es primera carga, generar datos de prueba
+            if (!subastaActual.pujas || subastaActual.pujas.length === 0) {
+                generarDatosPrueba();
+            }
+
+            mostrarSubasta();
+            actualizarContador();
+            
+            // Notificar si cambió el precio
+            if (notificacionesActivas && ultimoPrecio > 0 && subastaActual.precioActual > ultimoPrecio) {
+                notificarCambioPrecio();
+            }
+            ultimoPrecio = subastaActual.precioActual;
+        }
+
+        function generarDatosPrueba() {
+            // Generar pujas de prueba
+            const usuarios = [
+                { nombre: 'Carlos Martínez', iniciales: 'CM' },
+                { nombre: 'Ana Silva', iniciales: 'AS' },
+                { nombre: 'Pedro González', iniciales: 'PG' },
+                { nombre: 'María López', iniciales: 'ML' },
+                { nombre: 'Juan Pérez', iniciales: 'JP' }
+            ];
+
+            const ahora = new Date();
+            const pujas = [];
+            let precioActual = subastaActual.precioInicial;
+
+            for (let i = 0; i < 5; i++) {
+                const usuario = usuarios[i % usuarios.length];
+                const tiempoAtras = (5 - i) * 15 * 60 * 1000; // 15 minutos entre pujas
+                precioActual += Math.floor(Math.random() * 5000) + 2000;
+
+                pujas.push({
+                    usuario: usuario.nombre,
+                    iniciales: usuario.iniciales,
+                    monto: precioActual,
+                    fecha: new Date(ahora - tiempoAtras).toISOString()
+                });
+            }
+
+            subastaActual.pujas = pujas;
+            subastaActual.precioActual = precioActual;
+            subastaActual.participantes = usuarios.map(function(u) { return u.nombre; });
+
+            // Guardar
+            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
+            const index = subastas.findIndex(function(s) { return s.id === subastaId; });
+            if (index !== -1) {
+                subastas[index] = subastaActual;
+                localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
+            }
+        }
+
+        function mostrarSubasta() {
+            // Breadcrumb y título
+            document.getElementById('breadcrumb-titulo').textContent = subastaActual.titulo;
+            document.getElementById('subasta-titulo').textContent = subastaActual.titulo;
+            document.getElementById('empresa-nombre').textContent = subastaActual.empresaNombre;
+
+            // Tipo
+            const tipos = {
+                'subasta': { icono: 'gavel', texto: 'Subasta' },
+                'rifa': { icono: 'ticket-alt', texto: 'Rifa' },
+                'venta': { icono: 'shopping-cart', texto: 'Venta' }
+            };
+            const tipo = tipos[subastaActual.tipo] || tipos.subasta;
+            document.getElementById('tipo-badge').innerHTML = '<i class="fas fa-' + tipo.icono + '"></i> ' + tipo.texto;
+            document.getElementById('tipo-texto').textContent = tipo.texto;
+
+            // Imagen
+            const imagen = document.getElementById('subasta-imagen');
+            if (subastaActual.imagen) {
+                imagen.src = subastaActual.imagen;
+                imagen.style.background = 'none';
+            } else {
+                imagen.src = '';
+                imagen.alt = 'Sin imagen';
+            }
+
+            // Descripción
+            document.getElementById('subasta-descripcion').textContent = subastaActual.descripcion;
+
+            // Precios
+            document.getElementById('precio-actual').textContent = '$' + subastaActual.precioActual.toLocaleString();
+            document.getElementById('precio-inicial').textContent = '$' + subastaActual.precioInicial.toLocaleString();
+            document.getElementById('incremento-minimo').textContent = '1,000';
+
+            // Configurar input de puja con mínimo igual al precio actual + incremento
+            const inputPuja = document.getElementById('monto-puja');
+            const montoMinimo = subastaActual.precioActual + 1000;
+            inputPuja.min = montoMinimo;
+            inputPuja.value = montoMinimo;
+            inputPuja.step = '1000';
+
+            // Detalles
+            document.getElementById('fecha-inicio').textContent = new Date(subastaActual.fechaInicio).toLocaleString('es-CL');
+            document.getElementById('fecha-fin').textContent = new Date(subastaActual.fechaFin).toLocaleString('es-CL');
+            document.getElementById('total-pujas').textContent = (subastaActual.pujas || []).length;
+            document.getElementById('total-participantes').textContent = (subastaActual.participantes || []).length;
+            document.getElementById('estado-subasta').textContent = subastaActual.estado === 'activa' ? 'Activa' : 'Finalizada';
+
+            // Estado
+            const alertaEstado = document.getElementById('alerta-estado');
+            if (subastaActual.estado === 'activa') {
+                alertaEstado.innerHTML = '<div class="alerta-estado activa"><i class="fas fa-check-circle"></i> Subasta Activa - Puedes participar</div>';
+            } else {
+                alertaEstado.innerHTML = '<div class="alerta-estado finalizada"><i class="fas fa-times-circle"></i> Subasta Finalizada</div>';
+                document.getElementById('formulario-puja').style.display = 'none';
+            }
+
+            // Historial de pujas
+            mostrarHistorialPujas();
+
+            // Participantes
+            mostrarParticipantes();
+        }
+
+        function mostrarHistorialPujas() {
+            const container = document.getElementById('lista-pujas');
+            const pujas = subastaActual.pujas || [];
+
+            if (pujas.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">Aún no hay pujas</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            pujas.slice().reverse().forEach(function(puja, index) {
+                const div = document.createElement('div');
+                div.className = 'puja-item' + (index === 0 ? ' destacada' : '');
+                
+                const tiempoAtras = calcularTiempoAtras(puja.fecha);
+                
+                div.innerHTML = '<div class="puja-usuario">' +
+                    '<div class="puja-avatar">' + puja.iniciales + '</div>' +
+                    '<div class="puja-info">' +
+                    '<div class="puja-nombre">' + puja.usuario + (index === 0 ? ' <i class="fas fa-crown" style="color: #ffc107;"></i>' : '') + '</div>' +
+                    '<div class="puja-tiempo">' + tiempoAtras + '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="puja-monto">$' + puja.monto.toLocaleString() + '</div>';
+                
+                container.appendChild(div);
+            });
+        }
+
+        function mostrarParticipantes() {
+            const container = document.getElementById('lista-participantes');
+            const participantes = subastaActual.participantes || [];
+            
+            document.getElementById('num-participantes').textContent = participantes.length;
+
+            if (participantes.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">Sin participantes</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            participantes.forEach(function(nombre) {
+                const iniciales = nombre.split(' ').map(function(n) { return n[0]; }).join('');
+                const pujas = (subastaActual.pujas || []).filter(function(p) { return p.usuario === nombre; }).length;
+                
+                const div = document.createElement('div');
+                div.className = 'participante-item';
+                div.innerHTML = '<div class="participante-avatar">' + iniciales + '</div>' +
+                    '<div class="participante-nombre">' + nombre + '</div>' +
+                    '<div class="participante-pujas">' + pujas + ' puja' + (pujas !== 1 ? 's' : '') + '</div>';
+                
+                container.appendChild(div);
+            });
+        }
+
+        function actualizarContador() {
+            if (intervaloCuenta) clearInterval(intervaloCuenta);
+
+            intervaloCuenta = setInterval(function() {
+                const ahora = new Date().getTime();
+                const fin = new Date(subastaActual.fechaFin).getTime();
+                const diferencia = fin - ahora;
+
+                if (diferencia < 0) {
+                    document.getElementById('dias').textContent = '0';
+                    document.getElementById('horas').textContent = '0';
+                    document.getElementById('minutos').textContent = '0';
+                    document.getElementById('segundos').textContent = '0';
+                    clearInterval(intervaloCuenta);
+                    return;
+                }
+
+                const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+                const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+                const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
+
+                document.getElementById('dias').textContent = dias;
+                document.getElementById('horas').textContent = horas;
+                document.getElementById('minutos').textContent = minutos;
+                document.getElementById('segundos').textContent = segundos;
+            }, 1000);
+        }
+
+        function aplicarIncremento(incremento) {
+            const input = document.getElementById('monto-puja');
+            const actual = parseInt(input.value) || subastaActual.precioActual;
+            input.value = actual + incremento;
+        }
+
+        function realizarPuja() {
+            const session = auth.getSession();
+            if (!session) {
+                alert('Debes iniciar sesión para pujar');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const monto = parseInt(document.getElementById('monto-puja').value);
+            const minimoRequerido = subastaActual.precioActual + 1000;
+
+            if (monto < minimoRequerido) {
+                alert('La puja debe ser al menos $' + minimoRequerido.toLocaleString());
+                return;
+            }
+
+            // Obtener nombre del usuario
+            const cuenta = auth.getCurrentAccount();
+            const nombre = session.type === 'user' ? cuenta.nombre + ' ' + cuenta.apellido : cuenta.razonSocial;
+            const iniciales = nombre.split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2);
+
+            // Agregar puja
+            const nuevaPuja = {
+                usuario: nombre,
+                iniciales: iniciales,
+                monto: monto,
+                fecha: new Date().toISOString()
+            };
+
+            subastaActual.pujas.push(nuevaPuja);
+            subastaActual.precioActual = monto;
+
+            // Agregar a participantes si no está
+            if (!subastaActual.participantes.includes(nombre)) {
+                subastaActual.participantes.push(nombre);
+            }
+
+            // Guardar
+            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
+            const index = subastas.findIndex(function(s) { return s.id === subastaId; });
+            if (index !== -1) {
+                subastas[index] = subastaActual;
+                localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
+            }
+
+            alert('¡Puja realizada exitosamente!');
+            cargarSubasta();
+        }
+
+        function calcularTiempoAtras(fecha) {
+            const ahora = new Date().getTime();
+            const entonces = new Date(fecha).getTime();
+            const diferencia = ahora - entonces;
+
+            const minutos = Math.floor(diferencia / (1000 * 60));
+            const horas = Math.floor(diferencia / (1000 * 60 * 60));
+            const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+
+            if (minutos < 1) return 'Hace un momento';
+            if (minutos < 60) return 'Hace ' + minutos + ' minuto' + (minutos !== 1 ? 's' : '');
+            if (horas < 24) return 'Hace ' + horas + ' hora' + (horas !== 1 ? 's' : '');
+            return 'Hace ' + dias + ' día' + (dias !== 1 ? 's' : '');
+        }
+
+        // Funciones de accesibilidad
+        function toggleAccesibilidad() {
+            const menu = document.getElementById('accesibilidad-menu');
+            menu.classList.toggle('active');
+        }
+
+        function ajustarTexto(accion) {
+            const body = document.body;
+            const tamaños = ['text-small', 'text-normal', 'text-large'];
+            
+            tamaños.forEach(function(t) { body.classList.remove(t); });
+            
+            if (accion === 'aumentar') {
+                body.classList.add('text-large');
+            } else if (accion === 'reducir') {
+                body.classList.add('text-small');
+            } else {
+                body.classList.add('text-normal');
+            }
+        }
+
+        function toggleAltoContraste() {
+            document.body.classList.toggle('high-contrast');
+        }
+
+        function leerPrecioActual() {
+            if ('speechSynthesis' in window) {
+                const texto = 'El precio actual de la subasta es ' + subastaActual.precioActual + ' pesos';
+                const speech = new SpeechSynthesisUtterance(texto);
+                speech.lang = 'es-ES';
+                window.speechSynthesis.speak(speech);
+            } else {
+                alert('Precio actual: $' + subastaActual.precioActual.toLocaleString());
+            }
+        }
+
+        function notificarCambios() {
+            notificacionesActivas = !notificacionesActivas;
+            alert(notificacionesActivas ? 'Notificaciones activadas' : 'Notificaciones desactivadas');
+        }
+
+        function notificarCambioPrecio() {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('¡Nueva puja!', {
+                    body: 'El precio subió a $' + subastaActual.precioActual.toLocaleString(),
+                    icon: 'images/favicon.svg'
+                });
+            }
+        }
+
+        // Solicitar permisos de notificación
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Limpiar intervalos al salir
+        window.addEventListener('beforeunload', function() {
+            if (intervaloCuenta) clearInterval(intervaloCuenta);
+            if (intervaloActualizacion) clearInterval(intervaloActualizacion);
+        });
+
+        // Cerrar menú de accesibilidad al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('accesibilidad-menu');
+            const btn = document.querySelector('.btn-accesibilidad');
+            if (!menu.contains(e.target) && !btn.contains(e.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

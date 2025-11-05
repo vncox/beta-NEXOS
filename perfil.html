@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Nexos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="images/favicon.svg" type="image/svg+xml">
+    <style>
+        .user-menu {
+            position: relative;
+        }
+        .user-menu-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .user-menu-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            min-width: 200px;
+            z-index: 1000;
+        }
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: var(--dark);
+            text-decoration: none;
+            transition: background 0.3s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .user-dropdown a:last-child {
+            border-bottom: none;
+        }
+        .user-dropdown a:hover {
+            background: #f8f9fa;
+        }
+        .profile-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 5%;
+        }
+        .profile-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+        }
+        .profile-info h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        .profile-info p {
+            color: #666;
+            margin: 0.25rem 0;
+        }
+        .profile-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .btn-primary {
+            padding: 0.9rem 2rem;
+            font-size: 1rem;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        .setting-info h3 {
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+            font-size: 1.1rem;
+        }
+        .setting-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: var(--secondary);
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .wallet-summary {
+            text-align: center;
+            padding: 2rem;
+        }
+        .wallet-balance {
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
+        }
+        .balance-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .transactions-table th {
+            background: #f8f9fa;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .transactions-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .transactions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .tipo-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .tipo-badge.ingreso {
+            background: #d4edda;
+            color: #155724;
+        }
+        .tipo-badge.egreso {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .transactions-table td.ingreso {
+            color: #28a745;
+            font-weight: 600;
+        }
+        .transactions-table td.egreso {
+            color: #dc3545;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="causas.html">Causas</a></li>
+                <li><a href="empresas.html">Empresas</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+            </ul>
+            <button class="cta-button" onclick="window.location.href='login.html'">Iniciar Sesión</button>
+        </nav>
+    </header>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar" id="avatarInitials">U</div>
+            <div class="profile-info">
+                <h1 id="userName">Usuario</h1>
+                <p><i class="fas fa-envelope"></i> <span id="userEmail">usuario@nexos.com</span></p>
+                <p><i class="fas fa-phone"></i> <span id="userPhone">+56 9 1234 5678</span></p>
+                <p><i class="fas fa-calendar"></i> Miembro desde <span id="userDate">2025</span></p>
+            </div>
+        </div>
+
+        <div class="profile-tabs">
+            <button class="tab active" onclick="cambiarTab('datos', this)">
+                <i class="fas fa-user"></i> Datos Personales
+            </button>
+            <button class="tab" onclick="cambiarTab('finanzas', this)">
+                <i class="fas fa-wallet"></i> Mi Wallet
+            </button>
+            <button class="tab" onclick="cambiarTab('configuracion', this)">
+                <i class="fas fa-cog"></i> Configuración
+            </button>
+            <button class="tab" onclick="cambiarTab('seguridad', this)">
+                <i class="fas fa-lock"></i> Seguridad
+            </button>
+        </div>
+
+        <!-- Tab: Mis Datos -->
+        <div id="tab-datos" class="tab-content active">
+            <div class="card">
+                <h2><i class="fas fa-user-edit"></i> Información Personal</h2>
+                <div id="alertDatos" class="alert"></div>
+                <form id="formDatos" onsubmit="actualizarDatos(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" name="nombre" id="inputNombre" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Apellido</label>
+                            <input type="text" name="apellido" id="inputApellido" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" id="inputEmail" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" name="telefono" id="inputTelefono" class="form-input">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tab: Finanzas -->
+        <div id="tab-finanzas" class="tab-content">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2><i class="fas fa-wallet"></i> Mi Wallet</h2>
+                    <button onclick="refrescarWallet(event)" class="btn-secondary" style="padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-sync-alt"></i> Refrescar
+                    </button>
+                </div>
+                <div class="wallet-summary">
+                    <div class="wallet-balance">
+                        <p class="balance-label">Saldo Disponible</p>
+                        <p class="balance-amount" id="saldoActual">$0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-history"></i> Historial de Transacciones</h2>
+                <div id="alertFinanzas" class="alert"></div>
+                <div class="table-container">
+                    <table id="tablaTransacciones" class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th>Monto</th>
+                                <th>Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #999;">No hay transacciones registradas</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card" id="adminControls" style="display: none;">
+                <h2><i class="fas fa-tools"></i> Controles de Prueba (Admin)</h2>
+                <p style="color: #666; margin-bottom: 1rem;">Como administrador, puedes agregar o retirar saldo para pruebas.</p>
+                <form id="formModificarSaldo" onsubmit="modificarSaldoPropio(event)" style="max-width: 500px;">
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Operación</label>
+                        <select name="tipoOperacion" class="form-input" required>
+                            <option value="ingreso">Agregar Saldo</option>
+                            <option value="egreso">Retirar Saldo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Monto</label>
+                        <input type="number" name="monto" class="form-input" min="1000" step="1000" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Motivo</label>
+                        <input type="text" name="motivo" class="form-input" required placeholder="Ej: Prueba de sistema">
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-edit"></i> Modificar Saldo
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tab: Configuración -->
+        <div id="tab-configuracion" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-bell"></i> Notificaciones</h2>
+                <div id="alertConfig" class="alert"></div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Notificaciones Push</h3>
+                        <p>Recibe notificaciones sobre nuevas subastas</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notificaciones" onchange="actualizarConfig('notificaciones', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Notificaciones por Email</h3>
+                        <p>Recibe actualizaciones por correo electrónico</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="emailNotificaciones" onchange="actualizarConfig('emailNotificaciones', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-universal-access"></i> Accesibilidad</h2>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Alto Contraste</h3>
+                        <p>Mejora la visibilidad del contenido</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="altoContraste" onchange="actualizarAccesibilidad('altoContraste', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Tamaño de Texto</h3>
+                        <p>Ajusta el tamaño de la fuente</p>
+                    </div>
+                    <select id="tamañoTexto" class="form-input" style="width: auto;" onchange="actualizarAccesibilidad('tamañoTexto', this.value)">
+                        <option value="small">Pequeño</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="large">Grande</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Reducir Animaciones</h3>
+                        <p>Minimiza movimientos en pantalla</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="animacionesReducidas" onchange="actualizarAccesibilidad('animacionesReducidas', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-palette"></i> Apariencia</h2>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Tema</h3>
+                        <p>Selecciona el tema visual</p>
+                    </div>
+                    <select id="tema" class="form-input" style="width: auto;" onchange="actualizarConfig('tema', this.value)">
+                        <option value="light">Claro</option>
+                        <option value="dark">Oscuro</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Idioma</h3>
+                        <p>Idioma de la interfaz</p>
+                    </div>
+                    <select id="idioma" class="form-input" style="width: auto;" onchange="actualizarConfig('idioma', this.value)">
+                        <option value="es">Español</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Seguridad -->
+        <div id="tab-seguridad" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-key"></i> Cambiar Contraseña</h2>
+                <div id="alertSeguridad" class="alert"></div>
+                <form id="formPassword" onsubmit="cambiarPassword(event)">
+                    <div class="form-group">
+                        <label class="form-label">Contraseña Actual</label>
+                        <input type="password" name="currentPassword" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nueva Contraseña</label>
+                        <input type="password" name="newPassword" class="form-input" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirmar Nueva Contraseña</label>
+                        <input type="password" name="confirmPassword" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-key"></i> Cambiar Contraseña
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </div>
+            <p>Conectando empresas con causas que transforman vidas</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p class="copyright">© 2025 Nexos. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script src="config.js"></script>
+    <script>
+        // Verificar sesión
+        if (!auth.isLoggedIn()) {
+            window.location.href = 'login.html';
+        }
+
+        const session = auth.getSession();
+        if (session.type !== 'user') {
+            window.location.href = 'perfil-empresa.html';
+        }
+
+        // Cargar datos del usuario
+        const usuario = auth.getCurrentAccount();
+        if (usuario) {
+            document.getElementById('userName').textContent = `${usuario.nombre} ${usuario.apellido}`;
+            document.getElementById('userEmail').textContent = usuario.email;
+            document.getElementById('userPhone').textContent = usuario.telefono || 'No especificado';
+            document.getElementById('userDate').textContent = new Date(usuario.fechaRegistro).getFullYear();
+            
+            // Avatar con iniciales
+            const iniciales = usuario.nombre[0] + usuario.apellido[0];
+            document.getElementById('avatarInitials').textContent = iniciales.toUpperCase();
+
+            // Rellenar formulario
+            document.getElementById('inputNombre').value = usuario.nombre;
+            document.getElementById('inputApellido').value = usuario.apellido;
+            document.getElementById('inputEmail').value = usuario.email;
+            document.getElementById('inputTelefono').value = usuario.telefono || '';
+
+            // Configuraciones
+            if (usuario.configuraciones) {
+                document.getElementById('notificaciones').checked = usuario.configuraciones.notificaciones;
+                document.getElementById('emailNotificaciones').checked = usuario.configuraciones.emailNotificaciones;
+                document.getElementById('tema').value = usuario.configuraciones.tema;
+                document.getElementById('idioma').value = usuario.configuraciones.idioma;
+
+                if (usuario.configuraciones.accesibilidad) {
+                    document.getElementById('altoContraste').checked = usuario.configuraciones.accesibilidad.altoContraste;
+                    document.getElementById('tamañoTexto').value = usuario.configuraciones.accesibilidad.tamañoTexto;
+                    document.getElementById('animacionesReducidas').checked = usuario.configuraciones.accesibilidad.animacionesReducidas;
+                }
+            }
+
+            // Ocultar pestaña de finanzas si es admin
+            if (session.role === 'admin') {
+                const finanzasTab = document.querySelector('[onclick*="cambiarTab(\'finanzas\'"]');
+                const finanzasContent = document.getElementById('tab-finanzas');
+                if (finanzasTab) finanzasTab.style.display = 'none';
+                if (finanzasContent) finanzasContent.style.display = 'none';
+            }
+        }
+
+        function cambiarTab(tab, element) {
+            // Actualizar tabs
+            document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+            if (element) {
+                element.classList.add('active');
+            } else {
+                const button = document.querySelector('[onclick*="cambiarTab(\'' + tab + '\'"]');
+                if (button) button.classList.add('active');
+            }
+
+            // Actualizar contenido
+            document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+            document.getElementById('tab-' + tab).classList.add('active');
+
+            // Hash en URL
+            window.location.hash = tab;
+        }
+
+        // Restaurar tab desde hash
+        if (window.location.hash) {
+            const hash = window.location.hash.substring(1);
+            const tabButton = document.querySelector(`[onclick="cambiarTab('${hash}')"]`);
+            if (tabButton) {
+                tabButton.click();
+            }
+        }
+
+        function mostrarAlerta(tipo, mensaje, esError = false) {
+            const alert = document.getElementById('alert' + tipo);
+            alert.textContent = mensaje;
+            alert.className = 'alert ' + (esError ? 'error' : 'success');
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 5000);
+        }
+
+        function actualizarDatos(e) {
+            e.preventDefault();
+            const form = e.target;
+            
+            const result = auth.updateUser(usuario.id, {
+                nombre: form.nombre.value,
+                apellido: form.apellido.value,
+                email: form.email.value,
+                telefono: form.telefono.value
+            });
+
+            if (result.success) {
+                mostrarAlerta('Datos', result.message, false);
+                // Actualizar vista
+                location.reload();
+            } else {
+                mostrarAlerta('Datos', result.message, true);
+            }
+        }
+
+        function actualizarConfig(key, value) {
+            const updates = {};
+            updates[key] = value;
+            const result = auth.updateConfig(updates);
+            if (result.success) {
+                // Aplicar cambio visual inmediatamente
+                if (typeof actualizarConfiguracionVisual !== 'undefined') {
+                    actualizarConfiguracionVisual(key, value);
+                }
+                mostrarAlerta('Config', 'Configuración actualizada', false);
+            }
+        }
+
+        function actualizarAccesibilidad(key, value) {
+            const usuario = auth.getCurrentAccount();
+            const accesibilidad = Object.assign({}, usuario.configuraciones.accesibilidad);
+            accesibilidad[key] = value;
+            const result = auth.updateConfig({ accesibilidad: accesibilidad });
+            if (result.success) {
+                // Aplicar cambio visual inmediatamente
+                if (typeof actualizarConfiguracionVisual !== 'undefined') {
+                    actualizarConfiguracionVisual(key, value);
+                }
+                mostrarAlerta('Config', 'Accesibilidad actualizada', false);
+            }
+        }
+
+        function cambiarPassword(e) {
+            e.preventDefault();
+            const form = e.target;
+            
+            if (form.newPassword.value !== form.confirmPassword.value) {
+                mostrarAlerta('Seguridad', 'Las contraseñas no coinciden', true);
+                return;
+            }
+
+            const result = auth.changePassword(form.currentPassword.value, form.newPassword.value);
+            
+            if (result.success) {
+                mostrarAlerta('Seguridad', result.message, false);
+                form.reset();
+            } else {
+                mostrarAlerta('Seguridad', result.message, true);
+            }
+        }
+
+        // Funciones de Wallet
+        function cargarWallet() {
+            const session = auth.getSession();
+            const saldo = auth.getSaldo(session.id, 'user');
+            const transacciones = auth.getTransacciones(session.id, 'user');
+
+            // Mostrar saldo
+            const saldoFormateado = new Intl.NumberFormat('es-CL', {
+                style: 'currency',
+                currency: 'CLP',
+                minimumFractionDigits: 0
+            }).format(saldo);
+            document.getElementById('saldoActual').textContent = saldoFormateado;
+
+            // Mostrar controles de admin si es admin
+            if (session.role === 'admin') {
+                document.getElementById('adminControls').style.display = 'block';
+            }
+
+            // Cargar transacciones
+            const tbody = document.querySelector('#tablaTransacciones tbody');
+            if (transacciones.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">No hay transacciones registradas</td></tr>';
+                return;
+            }
+
+            // Ordenar por fecha descendente
+            transacciones.sort(function(a, b) {
+                return new Date(b.fecha) - new Date(a.fecha);
+            });
+
+            tbody.innerHTML = '';
+            transacciones.forEach(function(tx) {
+                const fecha = new Date(tx.fecha).toLocaleString('es-CL');
+                const monto = new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: 'CLP',
+                    minimumFractionDigits: 0
+                }).format(tx.monto);
+                const saldoFinal = new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: 'CLP',
+                    minimumFractionDigits: 0
+                }).format(tx.saldoNuevo);
+
+                const tipoClass = tx.tipo === 'ingreso' ? 'ingreso' : 'egreso';
+                const tipoIcon = tx.tipo === 'ingreso' ? '↑' : '↓';
+                const tipoLabel = tx.tipo === 'ingreso' ? 'Ingreso' : 'Egreso';
+
+                const row = document.createElement('tr');
+                row.innerHTML = '<td>' + fecha + '</td>' +
+                    '<td><span class="tipo-badge ' + tipoClass + '">' + tipoIcon + ' ' + tipoLabel + '</span></td>' +
+                    '<td>' + tx.descripcion + '</td>' +
+                    '<td class="' + tipoClass + '">' + (tx.tipo === 'ingreso' ? '+' : '-') + monto + '</td>' +
+                    '<td>' + saldoFinal + '</td>';
+                tbody.appendChild(row);
+            });
+        }
+
+        function refrescarWallet(e) {
+            console.log('Refrescando wallet...');
+            
+            // Animación del botón
+            const btn = e.target.closest('button');
+            const icon = btn.querySelector('i');
+            icon.classList.add('fa-spin');
+            
+            // Forzar recarga desde localStorage
+            const session = auth.getSession();
+            console.log('Session:', session);
+            
+            const saldo = auth.getSaldo(session.id, 'user');
+            console.log('Saldo obtenido:', saldo);
+            
+            const transacciones = auth.getTransacciones(session.id, 'user');
+            console.log('Transacciones:', transacciones.length);
+            
+            // Actualizar saldo directamente en el DOM
+            const saldoFormateado = new Intl.NumberFormat('es-CL', {
+                style: 'currency',
+                currency: 'CLP',
+                minimumFractionDigits: 0
+            }).format(saldo);
+            
+            const saldoElement = document.getElementById('saldoActual');
+            console.log('Elemento saldoActual:', saldoElement);
+            console.log('Actualizando saldo a:', saldoFormateado);
+            saldoElement.textContent = saldoFormateado;
+            
+            // Recargar toda la wallet (incluyendo transacciones)
+            cargarWallet();
+            
+            // Actualizar navbar también
+            updateNavbar();
+            
+            // Detener animación y mostrar mensaje
+            setTimeout(function() {
+                icon.classList.remove('fa-spin');
+                mostrarAlerta('Finanzas', 'Saldo actualizado: ' + saldoFormateado, false);
+                console.log('Refresh completado');
+            }, 500);
+        }
+
+        function modificarSaldoPropio(e) {
+            e.preventDefault();
+            const form = e.target;
+            const session = auth.getSession();
+
+            if (session.role !== 'admin') {
+                mostrarAlerta('Finanzas', 'No tienes permisos para esta operación', true);
+                return;
+            }
+
+            const tipoOperacion = form.tipoOperacion.value;
+            let monto = parseInt(form.monto.value);
+            const motivo = form.motivo.value;
+
+            if (tipoOperacion === 'egreso') {
+                monto = -monto;
+            }
+
+            const result = auth.modificarSaldo(session.id, monto, motivo, 'user');
+
+            if (result.success) {
+                mostrarAlerta('Finanzas', result.message, false);
+                form.reset();
+                cargarWallet();
+                updateNavbar(); // Actualizar saldo en navbar
+            } else {
+                mostrarAlerta('Finanzas', result.message, true);
+            }
+        }
+
+        // Cargar wallet cuando se abre la pestaña
+        const originalCambiarTab = cambiarTab;
+        cambiarTab = function(tab, element) {
+            originalCambiarTab(tab, element);
+            if (tab === 'finanzas') {
+                cargarWallet();
+            }
+        };
+
+        // Si la URL tiene #finanzas, cargar wallet
+        if (window.location.hash === '#finanzas') {
+            setTimeout(cargarWallet, 100);
+        }
+    </script>
+</body>
+</html>

@@ -6,8 +6,24 @@
     <title>Iniciar Sesión - Nexos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-        <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-        <link rel="shortcut icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="images/favicon.svg" type="image/svg+xml">
+    <style>
+        .form-group { margin-bottom: 1.5rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500; }
+        .form-input { width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s; }
+        .form-input:focus { outline: none; border-color: var(--primary); }
+        .btn-primary { width: 100%; padding: 1rem; font-size: 1.1rem; background: var(--secondary); color: white; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); }
+        .btn-type { padding: 1rem 2.5rem; border: 2px solid var(--primary); border-radius: 50px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; min-width: 200px; }
+        .btn-type.active { background: var(--primary); color: white; }
+        .btn-type:not(.active) { background: white; color: var(--primary); }
+        .tab-button { flex: 1; padding: 1rem; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .tab-button.active { border-bottom-color: var(--primary); color: var(--primary); }
+        .alert { padding: 1rem; border-radius: 10px; margin-bottom: 1rem; display: none; }
+        .alert.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
 </head>
 <body>
     <header>
@@ -31,224 +47,144 @@
         <h2 class="section-title">Bienvenido a Nexos</h2>
         <p style="text-align: center; color: #666; margin-bottom: 3rem; font-size: 1.1rem;">Selecciona tu tipo de cuenta para continuar</p>
 
-        <!-- Selector de Tipo de Usuario -->
         <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap;">
-            <button onclick="mostrarFormulario('usuario')" id="btnUsuario" style="padding: 1rem 2.5rem; border: 2px solid var(--primary); background: var(--primary); color: white; border-radius: 50px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; min-width: 200px;">
+            <button class="btn-type active" id="btnUsuario" onclick="cambiarTipo('usuario')">
                 <i class="fas fa-user" style="margin-right: 0.5rem;"></i>Usuario
             </button>
-            <button onclick="mostrarFormulario('empresa')" id="btnEmpresa" style="padding: 1rem 2.5rem; border: 2px solid var(--primary); background: white; color: var(--primary); border-radius: 50px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; min-width: 200px;">
-                <i class="fas fa-building" style="margin-right: 0.5rem;"></i>Empresa/Organización
+            <button class="btn-type" id="btnEmpresa" onclick="cambiarTipo('empresa')">
+                <i class="fas fa-building" style="margin-right: 0.5rem;"></i>Empresa
             </button>
         </div>
 
-        <!-- Contenedor Principal -->
         <div style="max-width: 500px; margin: 0 auto;">
-            
-            <!-- FORMULARIO DE USUARIO -->
             <div id="formUsuario" style="background: white; padding: 3rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
                 <h3 style="color: var(--primary); text-align: center; margin-bottom: 2rem; font-size: 1.8rem;">
-                    <i class="fas fa-user" style="margin-right: 0.5rem;"></i>Inicio de Sesión - Usuario
+                    <i class="fas fa-user" style="margin-right: 0.5rem;"></i>Cuenta de Usuario
                 </h3>
 
-                <!-- Tabs de Login/Registro -->
                 <div style="display: flex; margin-bottom: 2rem; border-bottom: 2px solid #e0e0e0;">
-                    <button onclick="cambiarTab('loginUsuario')" id="tabLoginUsuario" style="flex: 1; padding: 1rem; background: none; border: none; border-bottom: 3px solid var(--primary); color: var(--primary); font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                        Iniciar Sesión
-                    </button>
-                    <button onclick="cambiarTab('registroUsuario')" id="tabRegistroUsuario" style="flex: 1; padding: 1rem; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                        Registrarse
-                    </button>
+                    <button class="tab-button active" id="tabLoginUsuario" onclick="cambiarTab('usuario', 'login')">Iniciar Sesión</button>
+                    <button class="tab-button" id="tabRegistroUsuario" onclick="cambiarTab('usuario', 'registro')">Registrarse</button>
                 </div>
 
-                <!-- Login Usuario -->
-                <form id="loginUsuarioForm" onsubmit="iniciarSesionUsuario(event)">
-                    <div style="margin-bottom: 1.5rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">
-                            <i class="fas fa-envelope" style="margin-right: 0.5rem; color: var(--primary);"></i>Correo Electrónico
-                        </label>
-                        <input type="email" required style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
-                    </div>
+                <div id="alertUsuario" class="alert"></div>
 
-                    <div style="margin-bottom: 1.5rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">
-                            <i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Contraseña
-                        </label>
-                        <input type="password" required style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+                <form id="loginUsuarioForm" onsubmit="loginUsuario(event)">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-user" style="margin-right: 0.5rem; color: var(--primary);"></i>Usuario</label>
+                        <input type="text" name="username" class="form-input" required placeholder="Ingresa tu usuario">
                     </div>
-
-                    <div style="margin-bottom: 1.5rem; text-align: right;">
-                        <a href="#" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">¿Olvidaste tu contraseña?</a>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Contraseña</label>
+                        <input type="password" name="password" class="form-input" required placeholder="Ingresa tu contraseña">
                     </div>
-
-                    <button type="submit" class="cta-button" style="width: 100%; padding: 1rem; font-size: 1.1rem; border: none;">
-                        <i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i>Iniciar Sesión
-                    </button>
+                    <button type="submit" class="btn-primary"><i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i>Iniciar Sesión</button>
                 </form>
 
-                <!-- Registro Usuario -->
                 <form id="registroUsuarioForm" onsubmit="registrarUsuario(event)" style="display: none;">
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">
-                            <i class="fas fa-user" style="margin-right: 0.5rem; color: var(--primary);"></i>Nombre Completo *
-                        </label>
-                        <input type="text" name="nombre" required style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-user" style="margin-right: 0.5rem; color: var(--primary);"></i>Usuario *</label>
+                        <input type="text" name="username" class="form-input" required placeholder="Elige un nombre de usuario">
                     </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">
-                            <i class="fas fa-id-card" style="margin-right: 0.5rem; color: var(--primary);"></i>RUT/Cédula *
-                        </label>
-                        <input type="text" name="rut" required placeholder="12.345.678-9" style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-id-badge" style="margin-right: 0.5rem; color: var(--primary);"></i>Nombre *</label>
+                        <input type="text" name="nombre" class="form-input" required placeholder="Tu nombre">
                     </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">
-                            <i class="fas fa-envelope" style="margin-right: 0.5rem; color: var(--primary);"></i>Correo Electrónico *
-                        </label>
-                        <input type="email" name="email" required style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-id-badge" style="margin-right: 0.5rem; color: var(--primary);"></i>Apellido *</label>
+                        <input type="text" name="apellido" class="form-input" required placeholder="Tu apellido">
                     </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">
-                            <i class="fas fa-phone" style="margin-right: 0.5rem; color: var(--primary);"></i>Teléfono *
-                        </label>
-                        <input type="tel" name="telefono" required placeholder="+56 9 1234 5678" style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-envelope" style="margin-right: 0.5rem; color: var(--primary);"></i>Correo Electrónico *</label>
+                        <input type="email" name="email" class="form-input" required placeholder="tu@email.com">
                     </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">
-                            <i class="fas fa-map-marker-alt" style="margin-right: 0.5rem; color: var(--primary);"></i>Dirección
-                        </label>
-                        <input type="text" name="direccion" placeholder="Calle, número, ciudad" style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-phone" style="margin-right: 0.5rem; color: var(--primary);"></i>Teléfono</label>
+                        <input type="tel" name="telefono" class="form-input" placeholder="+56 9 1234 5678">
                     </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">
-                            <i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Contraseña *
-                        </label>
-                        <input type="password" name="password" required minlength="6" style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Contraseña *</label>
+                        <input type="password" name="password" class="form-input" required placeholder="Crea una contraseña">
                     </div>
-
-                    <div style="margin-bottom: 1.5rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">
-                            <i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Confirmar Contraseña *
-                        </label>
-                        <input type="password" name="confirmPassword" required minlength="6" style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Confirmar Contraseña *</label>
+                        <input type="password" name="password2" class="form-input" required placeholder="Confirma tu contraseña">
                     </div>
-
-                    <div style="margin-bottom: 1.5rem;">
-                        <label style="display: flex; align-items: start; gap: 0.5rem; cursor: pointer;">
-                            <input type="checkbox" name="terminos" required style="margin-top: 0.3rem;">
-                            <span style="color: #666; font-size: 0.9rem;">Acepto los términos y condiciones de Nexos</span>
-                        </label>
-                    </div>
-
-                    <button type="submit" class="cta-button" style="width: 100%; padding: 1rem; font-size: 1.1rem; border: none;">
-                        <i class="fas fa-user-plus" style="margin-right: 0.5rem;"></i>Crear Cuenta
-                    </button>
+                    <button type="submit" class="btn-primary"><i class="fas fa-user-plus" style="margin-right: 0.5rem;"></i>Registrarse</button>
                 </form>
             </div>
 
-            <!-- FORMULARIO DE EMPRESA -->
             <div id="formEmpresa" style="background: white; padding: 3rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); display: none;">
-                <h3 style="color: var(--secondary); text-align: center; margin-bottom: 2rem; font-size: 1.8rem;">
-                    <i class="fas fa-building" style="margin-right: 0.5rem;"></i>Inicio de Sesión - Empresa
+                <h3 style="color: var(--primary); text-align: center; margin-bottom: 2rem; font-size: 1.8rem;">
+                    <i class="fas fa-building" style="margin-right: 0.5rem;"></i>Cuenta de Empresa
                 </h3>
 
-                <!-- Tabs de Login/Registro -->
                 <div style="display: flex; margin-bottom: 2rem; border-bottom: 2px solid #e0e0e0;">
-                    <button onclick="cambiarTab('loginEmpresa')" id="tabLoginEmpresa" style="flex: 1; padding: 1rem; background: none; border: none; border-bottom: 3px solid var(--secondary); color: var(--secondary); font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                        Iniciar Sesión
-                    </button>
-                    <button onclick="cambiarTab('registroEmpresa')" id="tabRegistroEmpresa" style="flex: 1; padding: 1rem; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                        Registrarse
-                    </button>
+                    <button class="tab-button active" id="tabLoginEmpresa" onclick="cambiarTab('empresa', 'login')">Iniciar Sesión</button>
+                    <button class="tab-button" id="tabRegistroEmpresa" onclick="cambiarTab('empresa', 'registro')">Registrarse</button>
                 </div>
 
-                <!-- Login Empresa -->
-                <form id="loginEmpresaForm" onsubmit="iniciarSesionEmpresa(event)">
-                    <div style="margin-bottom: 1.5rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">
-                            <i class="fas fa-envelope" style="margin-right: 0.5rem; color: var(--secondary);"></i>Correo Corporativo
-                        </label>
-                        <input type="email" required style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--secondary)'" onblur="this.style.borderColor='#e0e0e0'">
-                    </div>
+                <div id="alertEmpresa" class="alert"></div>
 
-                    <div style="margin-bottom: 1.5rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">
-                            <i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--secondary);"></i>Contraseña
-                        </label>
-                        <input type="password" required style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--secondary)'" onblur="this.style.borderColor='#e0e0e0'">
+                <form id="loginEmpresaForm" onsubmit="loginEmpresa(event)">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-user" style="margin-right: 0.5rem; color: var(--primary);"></i>Usuario</label>
+                        <input type="text" name="username" class="form-input" required placeholder="Ingresa tu usuario">
                     </div>
-
-                    <div style="margin-bottom: 1.5rem; text-align: right;">
-                        <a href="#" style="color: var(--secondary); text-decoration: none; font-size: 0.9rem;">¿Olvidaste tu contraseña?</a>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Contraseña</label>
+                        <input type="password" name="password" class="form-input" required placeholder="Ingresa tu contraseña">
                     </div>
-
-                    <button type="submit" class="cta-button" style="width: 100%; padding: 1rem; font-size: 1.1rem; border: none; background: var(--secondary);">
-                        <i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i>Iniciar Sesión
-                    </button>
-
-                    <div style="margin-top: 1.5rem; text-align: center; padding-top: 1.5rem; border-top: 1px solid #e0e0e0;">
-                        <p style="color: #666; font-size: 0.95rem; margin-bottom: 1rem;">¿No tienes cuenta empresarial?</p>
-                        <a href="empresas.html" class="cta-button" style="display: inline-block; padding: 0.8rem 2rem; text-decoration: none; background: var(--accent);">
-                            <i class="fas fa-building" style="margin-right: 0.5rem;"></i>Solicitar Registro Empresarial
-                        </a>
-                    </div>
+                    <button type="submit" class="btn-primary"><i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i>Iniciar Sesión</button>
                 </form>
 
-                <!-- Registro Empresa (Redirección) -->
-                <div id="registroEmpresaForm" style="display: none; text-align: center; padding: 2rem 0;">
-                    <i class="fas fa-info-circle" style="font-size: 4rem; color: var(--secondary); margin-bottom: 1.5rem;"></i>
-                    <h4 style="color: var(--dark); margin-bottom: 1rem; font-size: 1.3rem;">Registro de Empresas</h4>
-                    <p style="color: #666; margin-bottom: 2rem; line-height: 1.6;">
-                        El registro de empresas y organizaciones requiere un proceso de verificación. Por favor, completa el formulario de solicitud en nuestra página de empresas.
-                    </p>
-                    <a href="empresas.html" class="cta-button" style="display: inline-block; padding: 1rem 2rem; text-decoration: none; background: var(--secondary);">
-                        <i class="fas fa-arrow-right" style="margin-right: 0.5rem;"></i>Ir a Registro de Empresas
-                    </a>
-                </div>
+                <form id="registroEmpresaForm" onsubmit="registrarEmpresa(event)" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-user" style="margin-right: 0.5rem; color: var(--primary);"></i>Usuario *</label>
+                        <input type="text" name="username" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-building" style="margin-right: 0.5rem; color: var(--primary);"></i>Razón Social *</label>
+                        <input type="text" name="razonSocial" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-id-card" style="margin-right: 0.5rem; color: var(--primary);"></i>RUT *</label>
+                        <input type="text" name="rut" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-envelope" style="margin-right: 0.5rem; color: var(--primary);"></i>Correo *</label>
+                        <input type="email" name="email" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-phone" style="margin-right: 0.5rem; color: var(--primary);"></i>Teléfono</label>
+                        <input type="tel" name="telefono" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-map-marker-alt" style="margin-right: 0.5rem; color: var(--primary);"></i>Dirección</label>
+                        <input type="text" name="direccion" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-globe" style="margin-right: 0.5rem; color: var(--primary);"></i>Sitio Web</label>
+                        <input type="url" name="sitioWeb" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Contraseña *</label>
+                        <input type="password" name="password" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Confirmar *</label>
+                        <input type="password" name="password2" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn-primary"><i class="fas fa-building" style="margin-right: 0.5rem;"></i>Registrar Empresa</button>
+                </form>
             </div>
-
         </div>
     </section>
 
-    <!-- Modal de Éxito -->
-    <div id="modalExito" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1001; align-items: center; justify-content: center;">
-        <div style="max-width: 450px; margin: 2rem; background: white; border-radius: 20px; padding: 3rem; text-align: center; animation: fadeInScale 0.3s ease-out;">
-            <div id="iconoExito" style="width: 80px; height: 80px; background: var(--secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
-                <i class="fas fa-check" style="font-size: 2.5rem; color: white;"></i>
-            </div>
-            <h2 id="tituloExito" style="color: var(--primary); margin-bottom: 1rem; font-size: 1.8rem;">¡Éxito!</h2>
-            <p id="mensajeExito" style="color: #666; line-height: 1.6; margin-bottom: 2rem; font-size: 1.05rem;">
-                Operación completada exitosamente.
-            </p>
-            <button onclick="cerrarModalExito()" class="cta-button" style="padding: 0.8rem 2rem; border: none;">
-                Continuar
-            </button>
-        </div>
-    </div>
-
-    <style>
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-    </style>
-
     <footer>
         <div class="footer-content">
-            <div class="logo">
-                <i class="fas fa-heart"></i>
-                <span>Nexos</span>
-            </div>
-            <p>Conectando corazones con causas que transforman vidas</p>
+            <div class="logo"><i class="fas fa-heart"></i><span>Nexos</span></div>
+            <p>Conectando empresas con causas que transforman vidas</p>
             <div class="social-links">
                 <a href="#"><i class="fab fa-facebook"></i></a>
                 <a href="#"><i class="fab fa-twitter"></i></a>
@@ -259,155 +195,108 @@
         </div>
     </footer>
 
+    <script src="auth.js"></script>
     <script>
-        // Mostrar formulario según tipo de usuario
-        function mostrarFormulario(tipo) {
-            const formUsuario = document.getElementById('formUsuario');
-            const formEmpresa = document.getElementById('formEmpresa');
-            const btnUsuario = document.getElementById('btnUsuario');
-            const btnEmpresa = document.getElementById('btnEmpresa');
+        if (auth.isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
 
-            if (tipo === 'usuario') {
-                formUsuario.style.display = 'block';
-                formEmpresa.style.display = 'none';
-                btnUsuario.style.background = 'var(--primary)';
-                btnUsuario.style.color = 'white';
-                btnEmpresa.style.background = 'white';
-                btnEmpresa.style.color = 'var(--primary)';
+        function cambiarTipo(tipo) {
+            document.getElementById('btnUsuario').classList.toggle('active', tipo === 'usuario');
+            document.getElementById('btnEmpresa').classList.toggle('active', tipo === 'empresa');
+            document.getElementById('formUsuario').style.display = tipo === 'usuario' ? 'block' : 'none';
+            document.getElementById('formEmpresa').style.display = tipo === 'empresa' ? 'block' : 'none';
+        }
+
+        function cambiarTab(tipo, modo) {
+            const prefix = tipo === 'usuario' ? 'Usuario' : 'Empresa';
+            document.getElementById('tabLogin' + prefix).classList.toggle('active', modo === 'login');
+            document.getElementById('tabRegistro' + prefix).classList.toggle('active', modo === 'registro');
+            document.getElementById('login' + prefix + 'Form').style.display = modo === 'login' ? 'block' : 'none';
+            document.getElementById('registro' + prefix + 'Form').style.display = modo === 'registro' ? 'block' : 'none';
+            document.getElementById('alert' + prefix).style.display = 'none';
+        }
+
+        function mostrarAlerta(tipo, mensaje, esError = false) {
+            const alert = document.getElementById('alert' + tipo);
+            alert.textContent = mensaje;
+            alert.className = 'alert ' + (esError ? 'error' : 'success');
+            alert.style.display = 'block';
+            setTimeout(function() { alert.style.display = 'none'; }, 5000);
+        }
+
+        function loginUsuario(e) {
+            e.preventDefault();
+            const form = e.target;
+            const result = auth.login(form.username.value, form.password.value, 'user');
+            if (result.success) {
+                mostrarAlerta('Usuario', result.message, false);
+                setTimeout(function() { window.location.href = 'index.html'; }, 1000);
             } else {
-                formUsuario.style.display = 'none';
-                formEmpresa.style.display = 'block';
-                btnEmpresa.style.background = 'var(--secondary)';
-                btnEmpresa.style.color = 'white';
-                btnUsuario.style.background = 'white';
-                btnUsuario.style.color = 'var(--primary)';
+                mostrarAlerta('Usuario', result.message, true);
             }
         }
 
-        // Cambiar entre tabs de login y registro
-        function cambiarTab(tab) {
-            if (tab === 'loginUsuario') {
-                document.getElementById('loginUsuarioForm').style.display = 'block';
-                document.getElementById('registroUsuarioForm').style.display = 'none';
-                document.getElementById('tabLoginUsuario').style.borderBottomColor = 'var(--primary)';
-                document.getElementById('tabLoginUsuario').style.color = 'var(--primary)';
-                document.getElementById('tabRegistroUsuario').style.borderBottomColor = 'transparent';
-                document.getElementById('tabRegistroUsuario').style.color = '#666';
-            } else if (tab === 'registroUsuario') {
-                document.getElementById('loginUsuarioForm').style.display = 'none';
-                document.getElementById('registroUsuarioForm').style.display = 'block';
-                document.getElementById('tabRegistroUsuario').style.borderBottomColor = 'var(--primary)';
-                document.getElementById('tabRegistroUsuario').style.color = 'var(--primary)';
-                document.getElementById('tabLoginUsuario').style.borderBottomColor = 'transparent';
-                document.getElementById('tabLoginUsuario').style.color = '#666';
-            } else if (tab === 'loginEmpresa') {
-                document.getElementById('loginEmpresaForm').style.display = 'block';
-                document.getElementById('registroEmpresaForm').style.display = 'none';
-                document.getElementById('tabLoginEmpresa').style.borderBottomColor = 'var(--secondary)';
-                document.getElementById('tabLoginEmpresa').style.color = 'var(--secondary)';
-                document.getElementById('tabRegistroEmpresa').style.borderBottomColor = 'transparent';
-                document.getElementById('tabRegistroEmpresa').style.color = '#666';
-            } else if (tab === 'registroEmpresa') {
-                document.getElementById('loginEmpresaForm').style.display = 'none';
-                document.getElementById('registroEmpresaForm').style.display = 'block';
-                document.getElementById('tabRegistroEmpresa').style.borderBottomColor = 'var(--secondary)';
-                document.getElementById('tabRegistroEmpresa').style.color = 'var(--secondary)';
-                document.getElementById('tabLoginEmpresa').style.borderBottomColor = 'transparent';
-                document.getElementById('tabLoginEmpresa').style.color = '#666';
+        function loginEmpresa(e) {
+            e.preventDefault();
+            const form = e.target;
+            const result = auth.login(form.username.value, form.password.value, 'empresa');
+            if (result.success) {
+                mostrarAlerta('Empresa', result.message, false);
+                setTimeout(function() { window.location.href = 'index.html'; }, 1000);
+            } else {
+                mostrarAlerta('Empresa', result.message, true);
             }
         }
 
-        // Iniciar sesión usuario
-        function iniciarSesionUsuario(event) {
-            event.preventDefault();
-            // Aquí iría la lógica de autenticación con el backend
-            console.log('Login usuario');
-            
-            // Mostrar modal de éxito
-            mostrarModalExito(
-                '¡Inicio de Sesión Exitoso!',
-                'Bienvenido de nuevo. Serás redirigido a tu panel en un momento.',
-                'var(--primary)'
-            );
-            
-            // Redirigir después de 2 segundos
-            setTimeout(() => {
-                // window.location.href = 'index.html';
-            }, 2000);
-        }
-
-        // Iniciar sesión empresa
-        function iniciarSesionEmpresa(event) {
-            event.preventDefault();
-            // Aquí iría la lógica de autenticación con el backend
-            console.log('Login empresa');
-            
-            // Mostrar modal de éxito
-            mostrarModalExito(
-                '¡Inicio de Sesión Exitoso!',
-                'Bienvenido. Accediendo al panel empresarial...',
-                'var(--secondary)'
-            );
-            
-            // Redirigir después de 2 segundos
-            setTimeout(() => {
-                // window.location.href = 'dashboard-empresa.html';
-            }, 2000);
-        }
-
-        // Registrar usuario
-        function registrarUsuario(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            
-            // Validar que las contraseñas coincidan
-            const password = formData.get('password');
-            const confirmPassword = formData.get('confirmPassword');
-            
-            if (password !== confirmPassword) {
-                alert('Las contraseñas no coinciden');
+        function registrarUsuario(e) {
+            e.preventDefault();
+            const form = e.target;
+            if (form.password.value !== form.password2.value) {
+                mostrarAlerta('Usuario', 'Las contraseñas no coinciden', true);
                 return;
             }
-
-            // Aquí iría la lógica para enviar los datos al backend
-            console.log('Registro usuario:', Object.fromEntries(formData));
-            
-            // Mostrar modal de éxito
-            mostrarModalExito(
-                '¡Registrado Correctamente!',
-                'Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión.',
-                'var(--primary)'
-            );
-            
-            // Cambiar a la pestaña de login y limpiar formulario después de 2 segundos
-            setTimeout(() => {
-                cerrarModalExito();
-                cambiarTab('loginUsuario');
-                event.target.reset();
-            }, 2500);
+            const result = auth.registerUser({
+                username: form.username.value,
+                nombre: form.nombre.value,
+                apellido: form.apellido.value,
+                email: form.email.value,
+                telefono: form.telefono.value,
+                password: form.password.value
+            });
+            if (result.success) {
+                mostrarAlerta('Usuario', result.message, false);
+                form.reset();
+                setTimeout(function() { cambiarTab('usuario', 'login'); }, 2000);
+            } else {
+                mostrarAlerta('Usuario', result.message, true);
+            }
         }
 
-        // Función para mostrar modal de éxito
-        function mostrarModalExito(titulo, mensaje, color) {
-            const modal = document.getElementById('modalExito');
-            const icono = document.getElementById('iconoExito');
-            const tituloElement = document.getElementById('tituloExito');
-            const mensajeElement = document.getElementById('mensajeExito');
-            
-            // Actualizar contenido
-            tituloElement.textContent = titulo;
-            mensajeElement.textContent = mensaje;
-            icono.style.background = color;
-            
-            // Mostrar modal
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Función para cerrar modal de éxito
-        function cerrarModalExito() {
-            document.getElementById('modalExito').style.display = 'none';
-            document.body.style.overflow = 'auto';
+        function registrarEmpresa(e) {
+            e.preventDefault();
+            const form = e.target;
+            if (form.password.value !== form.password2.value) {
+                mostrarAlerta('Empresa', 'Las contraseñas no coinciden', true);
+                return;
+            }
+            const result = auth.registerEmpresa({
+                username: form.username.value,
+                razonSocial: form.razonSocial.value,
+                rut: form.rut.value,
+                email: form.email.value,
+                telefono: form.telefono.value,
+                direccion: form.direccion.value,
+                sitioWeb: form.sitioWeb.value,
+                password: form.password.value
+            });
+            if (result.success) {
+                mostrarAlerta('Empresa', result.message, false);
+                form.reset();
+                setTimeout(function() { cambiarTab('empresa', 'login'); }, 2000);
+            } else {
+                mostrarAlerta('Empresa', result.message, true);
+            }
         }
     </script>
 </body>

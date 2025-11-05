@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Nexos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 100px auto 50px;
+            padding: 0 20px;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 50%, #50c878 100%);
+            padding: 3rem 3rem;
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            box-shadow: 0 15px 40px rgba(74, 144, 226, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(255,255,255,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .admin-header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .admin-header-left h1 {
+            margin: 0 0 0.8rem 0;
+            color: white;
+            font-size: 2.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .admin-header-left h1 i {
+            font-size: 3.2rem;
+        }
+
+        .admin-header-left p {
+            margin: 0;
+            color: rgba(255,255,255,0.95);
+            font-size: 1.15rem;
+            font-weight: 500;
+        }
+
+        .admin-session-card {
+            background: rgba(255,255,255,0.25);
+            padding: 1.2rem 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .admin-session-card p:first-child {
+            margin: 0;
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .admin-session-card p:last-child {
+            margin: 0.5rem 0 0 0;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .admin-session-card i {
+            color: #ffd700;
+            font-size: 1.4rem;
+        }
+
+        @media (max-width: 768px) {
+            .admin-header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .admin-header-left h1 {
+                font-size: 2rem;
+                justify-content: center;
+            }
+
+            .admin-session-card {
+                width: 100%;
+            }
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .admin-tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .admin-tab.active {
+            color: white;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .admin-tab:hover {
+            color: var(--primary);
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        .admin-tab.active:hover {
+            color: white;
+            background: linear-gradient(135deg, #357abd 0%, #2868a8 100%);
+        }
+
+        .admin-tab i {
+            font-size: 1.1rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card.pending i { color: #f39c12; }
+        .stat-card.approved i { color: #27ae60; }
+        .stat-card.rejected i { color: #e74c3c; }
+        .stat-card.users i { color: #3498db; }
+
+        .stat-card h3 {
+            font-size: 2.5rem;
+            margin: 0.5rem 0;
+            color: var(--dark);
+        }
+
+        .stat-card p {
+            color: #666;
+            margin: 0;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .badge.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge.approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge.admin {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge.user {
+            background: #e7e7e7;
+            color: #333;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-action {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-approve {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .btn-reject {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-view {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-edit {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #999;
+            cursor: pointer;
+        }
+
+        .detail-row {
+            display: flex;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            width: 150px;
+            color: #666;
+        }
+
+        .detail-value {
+            flex: 1;
+            color: var(--dark);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="causas.html">Causas</a></li>
+                <li><a href="empresas.html">Empresas</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+            </ul>
+            <button class="cta-button" onclick="window.location.href='login.html'">Iniciar Sesión</button>
+        </nav>
+    </header>
+
+    <div class="admin-container">
+        <!-- Header Mejorado -->
+        <div class="admin-header">
+            <div class="admin-header-content">
+                <div class="admin-header-left">
+                    <h1>
+                        <i class="fas fa-user-shield"></i>
+                        Panel de Administración
+                    </h1>
+                    <p>
+                        Gestiona usuarios, empresas y solicitudes del sistema
+                    </p>
+                </div>
+                <div class="admin-session-card">
+                    <p>Sesión activa como</p>
+                    <p>
+                        <i class="fas fa-crown"></i> Administrador
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+            <div class="stat-card pending">
+                <i class="fas fa-clock"></i>
+                <h3 id="stat-pending">0</h3>
+                <p>Solicitudes Pendientes</p>
+            </div>
+            <div class="stat-card approved">
+                <i class="fas fa-check-circle"></i>
+                <h3 id="stat-approved">0</h3>
+                <p>Empresas Aprobadas</p>
+            </div>
+            <div class="stat-card rejected">
+                <i class="fas fa-times-circle"></i>
+                <h3 id="stat-rejected">0</h3>
+                <p>Solicitudes Rechazadas</p>
+            </div>
+            <div class="stat-card users">
+                <i class="fas fa-users"></i>
+                <h3 id="stat-users">0</h3>
+                <p>Usuarios Totales</p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="cambiarTab('pendientes', this)">
+                <i class="fas fa-clock"></i> Solicitudes Pendientes
+            </button>
+            <button class="admin-tab" onclick="cambiarTab('empresas', this)">
+                <i class="fas fa-building"></i> Todas las Empresas
+            </button>
+            <button class="admin-tab" onclick="cambiarTab('usuarios', this)">
+                <i class="fas fa-users"></i> Todos los Usuarios
+            </button>
+            <button class="admin-tab" onclick="cambiarTab('finanzas', this)">
+                <i class="fas fa-wallet"></i> Gestión Financiera
+            </button>
+            <button class="admin-tab" onclick="cambiarTab('rechazadas', this)">
+                <i class="fas fa-ban"></i> Rechazadas
+            </button>
+        </div>
+
+        <!-- Tab: Solicitudes Pendientes -->
+        <div id="tab-pendientes" class="tab-content active">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Razón Social</th>
+                            <th>RUT</th>
+                            <th>Email</th>
+                            <th>Fecha Registro</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-pendientes">
+                        <!-- Se llena con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Todas las Empresas -->
+        <div id="tab-empresas" class="tab-content">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Razón Social</th>
+                            <th>RUT</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-empresas">
+                        <!-- Se llena con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Todos los Usuarios -->
+        <div id="tab-usuarios" class="tab-content">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Fecha Registro</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-usuarios">
+                        <!-- Se llena con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Gestión Financiera -->
+        <div id="tab-finanzas" class="tab-content">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+                <div class="admin-card">
+                    <h3 style="color: var(--primary); margin-bottom: 1rem;"><i class="fas fa-users"></i> Gestionar Usuarios</h3>
+                    <p style="color: #666; margin-bottom: 1.5rem;">Modifica el saldo de cualquier usuario registrado</p>
+                    <button class="btn-primary" onclick="abrirModalGestionFinanzas('user')">
+                        <i class="fas fa-edit"></i> Gestionar Saldos de Usuarios
+                    </button>
+                </div>
+                <div class="admin-card">
+                    <h3 style="color: var(--secondary); margin-bottom: 1rem;"><i class="fas fa-building"></i> Gestionar Empresas</h3>
+                    <p style="color: #666; margin-bottom: 1.5rem;">Modifica el saldo de cualquier empresa registrada</p>
+                    <button class="btn-primary" onclick="abrirModalGestionFinanzas('empresa')" style="background: var(--secondary);">
+                        <i class="fas fa-edit"></i> Gestionar Saldos de Empresas
+                    </button>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <h3 style="color: var(--primary); margin-bottom: 1.5rem;"><i class="fas fa-chart-bar"></i> Resumen Financiero General</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <div style="background: linear-gradient(135deg, #4a90e2, #357abd); padding: 1.5rem; border-radius: 10px; color: white;">
+                        <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">Total en Usuarios</p>
+                        <h3 style="margin: 0.5rem 0 0 0; font-size: 1.8rem;" id="total-usuarios-saldo">$0</h3>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #50c878, #3da85e); padding: 1.5rem; border-radius: 10px; color: white;">
+                        <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">Total en Empresas</p>
+                        <h3 style="margin: 0.5rem 0 0 0; font-size: 1.8rem;" id="total-empresas-saldo">$0</h3>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #f39c12, #e67e22); padding: 1.5rem; border-radius: 10px; color: white;">
+                        <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">Circulación Total</p>
+                        <h3 style="margin: 0.5rem 0 0 0; font-size: 1.8rem;" id="total-circulacion">$0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Rechazadas -->
+        <div id="tab-rechazadas" class="tab-content">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Razón Social</th>
+                            <th>RUT</th>
+                            <th>Email</th>
+                            <th>Fecha Rechazo</th>
+                            <th>Motivo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-rechazadas">
+                        <!-- Se llena con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalles -->
+    <div id="modal-detalles" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-info-circle"></i> Detalles de la Cuenta</h2>
+                <button class="btn-close" onclick="cerrarModal()">&times;</button>
+            </div>
+            <div id="modal-body">
+                <!-- Se llena con JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Cambio de Contraseña -->
+    <div id="modal-password" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-key"></i> Cambiar Contraseña</h2>
+                <button class="btn-close" onclick="cerrarModalPassword()">&times;</button>
+            </div>
+            <div id="modal-password-body">
+                <p style="margin-bottom: 1.5rem; color: #666;">
+                    <strong id="password-cuenta-nombre"></strong>
+                </p>
+                <form id="form-cambiar-password" onsubmit="cambiarPassword(event)">
+                    <div style="margin-bottom: 1rem;">
+                        <label for="nueva-password" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                            Nueva Contraseña:
+                        </label>
+                        <input 
+                            type="password" 
+                            id="nueva-password" 
+                            name="nueva-password"
+                            required
+                            minlength="4"
+                            style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                            placeholder="Mínimo 4 caracteres"
+                        >
+                    </div>
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="confirmar-password" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                            Confirmar Contraseña:
+                        </label>
+                        <input 
+                            type="password" 
+                            id="confirmar-password" 
+                            name="confirmar-password"
+                            required
+                            minlength="4"
+                            style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                            placeholder="Repetir contraseña"
+                        >
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button type="button" class="btn-action btn-delete" onclick="cerrarModalPassword()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn-action btn-approve">
+                            <i class="fas fa-check"></i> Cambiar Contraseña
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Gestión Financiera -->
+    <div id="modal-gestion-finanzas" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-wallet"></i> Gestión Financiera - <span id="tipo-cuentas-titulo">Usuarios</span></h2>
+                <button class="btn-close" onclick="cerrarModalGestionFinanzas()">&times;</button>
+            </div>
+            <div id="modal-gestion-finanzas-body" style="padding: 2rem;">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre/Razón Social</th>
+                                <th>Email</th>
+                                <th>Saldo Actual</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-cuentas-finanzas">
+                            <!-- Se llena con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Modificar Saldo -->
+    <div id="modal-modificar-saldo" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Modificar Saldo</h2>
+                <button class="btn-close" onclick="cerrarModalModificarSaldo()">&times;</button>
+            </div>
+            <div style="padding: 2rem;">
+                <p style="margin-bottom: 1.5rem; color: #666;">
+                    <strong id="saldo-cuenta-nombre"></strong>
+                </p>
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem;">
+                    <p style="margin: 0; color: #666; font-size: 0.9rem;">Saldo Actual</p>
+                    <h3 style="margin: 0.5rem 0 0 0; color: var(--primary); font-size: 1.8rem;" id="saldo-actual-display">$0</h3>
+                </div>
+                <form id="form-modificar-saldo" onsubmit="modificarSaldoCuenta(event)">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                            Tipo de Operación:
+                        </label>
+                        <select 
+                            id="tipo-operacion" 
+                            name="tipo-operacion"
+                            required
+                            style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                        >
+                            <option value="ingreso">Agregar Saldo (+)</option>
+                            <option value="egreso">Retirar Saldo (-)</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                            Monto:
+                        </label>
+                        <input 
+                            type="number" 
+                            id="monto-operacion" 
+                            name="monto-operacion"
+                            required
+                            min="1000"
+                            step="1000"
+                            style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                            placeholder="Ej: 100000"
+                        >
+                    </div>
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                            Motivo/Descripción:
+                        </label>
+                        <input 
+                            type="text" 
+                            id="motivo-operacion" 
+                            name="motivo-operacion"
+                            required
+                            style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                            placeholder="Ej: Ajuste por pruebas del sistema"
+                        >
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button type="button" class="btn-secondary" onclick="cerrarModalModificarSaldo()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-check"></i> Modificar Saldo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Nexos. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script src="config.js"></script>
+    <script>
+        // Verificar que sea admin
+        if (!auth.isLoggedIn()) {
+            window.location.href = 'login.html';
+        }
+
+        const session = auth.getSession();
+        if (session.role !== 'admin') {
+            alert('Acceso denegado. Solo administradores pueden acceder a esta página.');
+            window.location.href = 'index.html';
+        }
+
+        // Cargar datos iniciales
+        cargarEstadisticas();
+        cargarPendientes();
+        cargarEmpresas();
+        cargarUsuarios();
+        cargarRechazadas();
+
+        function cargarEstadisticas() {
+            const pendientes = auth.getEmpresasPendientes();
+            const empresas = auth.getEmpresas();
+            const rechazadas = auth.getEmpresasRechazadas();
+            const usuarios = auth.getUsers();
+
+            document.getElementById('stat-pending').textContent = pendientes.length;
+            document.getElementById('stat-approved').textContent = empresas.filter(function(e) { return e.estado === 'aprobada'; }).length;
+            document.getElementById('stat-rejected').textContent = rechazadas.length;
+            document.getElementById('stat-users').textContent = usuarios.length;
+        }
+
+        function cambiarTab(tab, element) {
+            // Ocultar todos los tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(function(t) { t.classList.remove('active'); });
+
+            const buttons = document.querySelectorAll('.admin-tab');
+            buttons.forEach(function(b) { b.classList.remove('active'); });
+
+            // Mostrar tab seleccionado
+            document.getElementById('tab-' + tab).classList.add('active');
+            
+            // Activar botón correspondiente
+            const targetButton = element || document.querySelector('[onclick*="' + tab + '"]');
+            if (targetButton) {
+                targetButton.classList.add('active');
+            }
+        }
+
+        function cargarPendientes() {
+            const pendientes = auth.getEmpresasPendientes();
+            const tbody = document.getElementById('tabla-pendientes');
+
+            if (pendientes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i class="fas fa-inbox"></i><p>No hay solicitudes pendientes</p></div></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            pendientes.forEach(function(empresa) {
+                const fecha = new Date(empresa.fechaRegistro).toLocaleDateString();
+                const row = document.createElement('tr');
+                row.innerHTML = '<td>' + empresa.razonSocial + '</td>' +
+                    '<td>' + empresa.rut + '</td>' +
+                    '<td>' + empresa.email + '</td>' +
+                    '<td>' + fecha + '</td>' +
+                    '<td><div class="action-buttons">' +
+                    '<button class="btn-action btn-view" onclick="verDetalles(\'' + empresa.id + '\', \'pendiente\')">' +
+                    '<i class="fas fa-eye"></i> Ver</button>' +
+                    '<button class="btn-action btn-approve" onclick="aprobar(\'' + empresa.id + '\')">' +
+                    '<i class="fas fa-check"></i> Aprobar</button>' +
+                    '<button class="btn-action btn-reject" onclick="rechazar(\'' + empresa.id + '\')">' +
+                    '<i class="fas fa-times"></i> Rechazar</button>' +
+                    '</div></td>';
+                tbody.appendChild(row);
+            });
+        }
+
+        function cargarEmpresas() {
+            const empresas = auth.getEmpresas();
+            const tbody = document.getElementById('tabla-empresas');
+
+            if (empresas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>No hay empresas registradas</p></div></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            empresas.forEach(function(empresa) {
+                const rolBadge = empresa.role === 'admin' ? 'admin' : 'user';
+                const estadoBadge = empresa.estado || 'aprobada';
+                const isAdmin = empresa.role === 'admin';
+                const row = document.createElement('tr');
+                row.innerHTML = '<td>' + empresa.razonSocial + '</td>' +
+                    '<td>' + empresa.rut + '</td>' +
+                    '<td>' + empresa.email + '</td>' +
+                    '<td><span class="badge ' + rolBadge + '">' + empresa.role + '</span></td>' +
+                    '<td><span class="badge ' + estadoBadge + '">' + (empresa.estado || 'aprobada') + '</span></td>' +
+                    '<td><div class="action-buttons">' +
+                    '<button class="btn-action btn-view" onclick="verDetalles(\'' + empresa.id + '\', \'empresa\')" title="Ver detalles">' +
+                    '<i class="fas fa-eye"></i></button>' +
+                    '<button class="btn-action btn-edit" onclick="abrirModalPassword(\'' + empresa.id + '\', \'empresa\')" title="Cambiar contraseña">' +
+                    '<i class="fas fa-key"></i></button>' +
+                    (isAdmin ? '' : '<button class="btn-action btn-delete" onclick="eliminarCuenta(\'' + empresa.id + '\', \'empresa\')" title="Eliminar empresa">' +
+                    '<i class="fas fa-trash"></i></button>') +
+                    '</div></td>';
+                tbody.appendChild(row);
+            });
+        }
+
+        function cargarUsuarios() {
+            const usuarios = auth.getUsers();
+            const tbody = document.getElementById('tabla-usuarios');
+
+            if (usuarios.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>No hay usuarios registrados</p></div></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            usuarios.forEach(function(usuario) {
+                const fecha = new Date(usuario.fechaRegistro).toLocaleDateString();
+                const rolBadge = usuario.role === 'admin' ? 'admin' : 'user';
+                const isAdmin = usuario.role === 'admin';
+                const row = document.createElement('tr');
+                row.innerHTML = '<td>' + usuario.nombre + ' ' + usuario.apellido + '</td>' +
+                    '<td>' + usuario.username + '</td>' +
+                    '<td>' + usuario.email + '</td>' +
+                    '<td><span class="badge ' + rolBadge + '">' + usuario.role + '</span></td>' +
+                    '<td>' + fecha + '</td>' +
+                    '<td><div class="action-buttons">' +
+                    '<button class="btn-action btn-view" onclick="verDetalles(\'' + usuario.id + '\', \'usuario\')" title="Ver detalles">' +
+                    '<i class="fas fa-eye"></i></button>' +
+                    '<button class="btn-action btn-edit" onclick="abrirModalPassword(\'' + usuario.id + '\', \'usuario\')" title="Cambiar contraseña">' +
+                    '<i class="fas fa-key"></i></button>' +
+                    (isAdmin ? '' : '<button class="btn-action btn-delete" onclick="eliminarCuenta(\'' + usuario.id + '\', \'usuario\')" title="Eliminar usuario">' +
+                    '<i class="fas fa-trash"></i></button>') +
+                    '</div></td>';
+                tbody.appendChild(row);
+            });
+        }
+
+        function cargarRechazadas() {
+            const rechazadas = auth.getEmpresasRechazadas();
+            const tbody = document.getElementById('tabla-rechazadas');
+
+            if (rechazadas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>No hay solicitudes rechazadas</p></div></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            rechazadas.forEach(function(empresa) {
+                const fecha = new Date(empresa.fechaRechazo).toLocaleDateString();
+                const row = document.createElement('tr');
+                row.innerHTML = '<td>' + empresa.razonSocial + '</td>' +
+                    '<td>' + empresa.rut + '</td>' +
+                    '<td>' + empresa.email + '</td>' +
+                    '<td>' + fecha + '</td>' +
+                    '<td>' + (empresa.motivoRechazo || 'Sin motivo especificado') + '</td>' +
+                    '<td><div class="action-buttons">' +
+                    '<button class="btn-action btn-view" onclick="verDetalles(\'' + empresa.id + '\', \'rechazada\')">' +
+                    '<i class="fas fa-eye"></i> Ver</button>' +
+                    '</div></td>';
+                tbody.appendChild(row);
+            });
+        }
+
+        function aprobar(empresaId) {
+            if (confirm('¿Estás seguro de que deseas aprobar esta empresa?')) {
+                const result = auth.aprobarEmpresa(empresaId);
+                if (result.success) {
+                    alert(result.message);
+                    cargarEstadisticas();
+                    cargarPendientes();
+                    cargarEmpresas();
+                } else {
+                    alert(result.message);
+                }
+            }
+        }
+
+        function rechazar(empresaId) {
+            const motivo = prompt('Motivo del rechazo (opcional):');
+            if (motivo !== null) {
+                const result = auth.rechazarEmpresa(empresaId, motivo);
+                if (result.success) {
+                    alert(result.message);
+                    cargarEstadisticas();
+                    cargarPendientes();
+                    cargarRechazadas();
+                } else {
+                    alert(result.message);
+                }
+            }
+        }
+
+        function verDetalles(id, tipo) {
+            let cuenta = null;
+            
+            if (tipo === 'pendiente') {
+                cuenta = auth.getEmpresasPendientes().find(function(e) { return e.id === id; });
+            } else if (tipo === 'rechazada') {
+                cuenta = auth.getEmpresasRechazadas().find(function(e) { return e.id === id; });
+            } else if (tipo === 'empresa') {
+                cuenta = auth.getEmpresas().find(function(e) { return e.id === id; });
+            } else if (tipo === 'usuario') {
+                cuenta = auth.getUsers().find(function(u) { return u.id === id; });
+            }
+
+            if (!cuenta) return;
+
+            let html = '';
+            
+            if (tipo === 'usuario') {
+                html = '<div class="detail-row"><div class="detail-label">Nombre:</div><div class="detail-value">' + cuenta.nombre + ' ' + cuenta.apellido + '</div></div>' +
+                    '<div class="detail-row"><div class="detail-label">Username:</div><div class="detail-value">' + cuenta.username + '</div></div>' +
+                    '<div class="detail-row"><div class="detail-label">Email:</div><div class="detail-value">' + cuenta.email + '</div></div>' +
+                    '<div class="detail-row"><div class="detail-label">Teléfono:</div><div class="detail-value">' + (cuenta.telefono || 'No especificado') + '</div></div>' +
+                    '<div class="detail-row"><div class="detail-label">Rol:</div><div class="detail-value">' + cuenta.role + '</div></div>' +
+                    '<div class="detail-row"><div class="detail-label">Fecha Registro:</div><div class="detail-value">' + new Date(cuenta.fechaRegistro).toLocaleString() + '</div></div>';
+            } else {
+                html = '<div class="detail-row"><div class="detail-label">Razón Social:</div><div class="detail-value">' + cuenta.razonSocial + '</div></div>' +
+                    '<div class="detail-row"><div class="detail-label">RUT:</div><div class="detail-value">' + cuenta.rut + '</div></div>' +
+                    '<div class="detail-row"><div class="detail-label">Username:</div><div class="detail-value">' + cuenta.username + '</div></div>' +
+                    '<div class="detail-row"><div class="detail-label">Email:</div><div class="detail-value">' + cuenta.email + '</div></div>' +
+                    '<div class="detail-row"><div class="detail-label">Teléfono:</div><div class="detail-value">' + (cuenta.telefono || 'No especificado') + '</div></div>' +
+                    '<div class="detail-row"><div class="detail-label">Dirección:</div><div class="detail-value">' + (cuenta.direccion || 'No especificada') + '</div></div>' +
+                    '<div class="detail-row"><div class="detail-label">Sitio Web:</div><div class="detail-value">' + (cuenta.sitioWeb || 'No especificado') + '</div></div>' +
+                    '<div class="detail-row"><div class="detail-label">Estado:</div><div class="detail-value"><span class="badge ' + (cuenta.estado || 'approved') + '">' + (cuenta.estado || 'aprobada') + '</span></div></div>' +
+                    '<div class="detail-row"><div class="detail-label">Fecha Registro:</div><div class="detail-value">' + new Date(cuenta.fechaRegistro).toLocaleString() + '</div></div>';
+                
+                if (cuenta.fechaAprobacion) {
+                    html += '<div class="detail-row"><div class="detail-label">Fecha Aprobación:</div><div class="detail-value">' + new Date(cuenta.fechaAprobacion).toLocaleString() + '</div></div>';
+                }
+                
+                if (cuenta.fechaRechazo) {
+                    html += '<div class="detail-row"><div class="detail-label">Fecha Rechazo:</div><div class="detail-value">' + new Date(cuenta.fechaRechazo).toLocaleString() + '</div></div>';
+                    html += '<div class="detail-row"><div class="detail-label">Motivo Rechazo:</div><div class="detail-value">' + (cuenta.motivoRechazo || 'No especificado') + '</div></div>';
+                }
+            }
+
+            document.getElementById('modal-body').innerHTML = html;
+            document.getElementById('modal-detalles').classList.add('active');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-detalles').classList.remove('active');
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modal-detalles').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
+
+        // Variables globales para el modal de contraseña
+        let passwordCuentaId = null;
+        let passwordCuentaTipo = null;
+
+        function abrirModalPassword(id, tipo) {
+            passwordCuentaId = id;
+            passwordCuentaTipo = tipo;
+
+            let cuenta = null;
+            if (tipo === 'usuario') {
+                cuenta = auth.getUsers().find(function(u) { return u.id === id; });
+                if (cuenta) {
+                    document.getElementById('password-cuenta-nombre').textContent = 
+                        'Cambiar contraseña de: ' + cuenta.nombre + ' ' + cuenta.apellido + ' (' + cuenta.username + ')';
+                }
+            } else {
+                cuenta = auth.getEmpresas().find(function(e) { return e.id === id; });
+                if (cuenta) {
+                    document.getElementById('password-cuenta-nombre').textContent = 
+                        'Cambiar contraseña de: ' + cuenta.razonSocial + ' (' + cuenta.username + ')';
+                }
+            }
+
+            document.getElementById('nueva-password').value = '';
+            document.getElementById('confirmar-password').value = '';
+            document.getElementById('modal-password').classList.add('active');
+        }
+
+        function cerrarModalPassword() {
+            document.getElementById('modal-password').classList.remove('active');
+            passwordCuentaId = null;
+            passwordCuentaTipo = null;
+        }
+
+        function cambiarPassword(event) {
+            event.preventDefault();
+
+            const nuevaPassword = document.getElementById('nueva-password').value;
+            const confirmarPassword = document.getElementById('confirmar-password').value;
+
+            if (nuevaPassword !== confirmarPassword) {
+                alert('Las contraseñas no coinciden');
+                return;
+            }
+
+            if (nuevaPassword.length < 4) {
+                alert('La contraseña debe tener al menos 4 caracteres');
+                return;
+            }
+
+            let result;
+            if (passwordCuentaTipo === 'usuario') {
+                result = auth.cambiarPasswordUsuario(passwordCuentaId, nuevaPassword);
+            } else {
+                result = auth.cambiarPasswordEmpresa(passwordCuentaId, nuevaPassword);
+            }
+
+            if (result.success) {
+                alert(result.message);
+                cerrarModalPassword();
+            } else {
+                alert(result.message);
+            }
+        }
+
+        function eliminarCuenta(id, tipo) {
+            const confirmMsg = tipo === 'usuario' 
+                ? '¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.'
+                : '¿Estás seguro de que deseas eliminar esta empresa? También se eliminarán todas sus subastas. Esta acción no se puede deshacer.';
+
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            let result;
+            if (tipo === 'usuario') {
+                result = auth.eliminarUsuario(id);
+            } else {
+                result = auth.eliminarEmpresa(id);
+            }
+
+            if (result.success) {
+                alert(result.message);
+                cargarEstadisticas();
+                if (tipo === 'usuario') {
+                    cargarUsuarios();
+                } else {
+                    cargarEmpresas();
+                }
+            } else {
+                alert(result.message);
+            }
+        }
+
+        // Cerrar modal de password al hacer clic fuera
+        document.getElementById('modal-password').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModalPassword();
+            }
+        });
+
+        // ===== FUNCIONES DE GESTIÓN FINANCIERA =====
+        
+        let tipoCuentasActual = 'user';
+        let cuentaSeleccionada = null;
+
+        function abrirModalGestionFinanzas(tipo) {
+            tipoCuentasActual = tipo;
+            document.getElementById('tipo-cuentas-titulo').textContent = tipo === 'user' ? 'Usuarios' : 'Empresas';
+            cargarCuentasFinanzas(tipo);
+            actualizarResumenFinanciero();
+            document.getElementById('modal-gestion-finanzas').style.display = 'flex';
+        }
+
+        function cerrarModalGestionFinanzas() {
+            document.getElementById('modal-gestion-finanzas').style.display = 'none';
+        }
+
+        function cargarCuentasFinanzas(tipo) {
+            const tbody = document.getElementById('tabla-cuentas-finanzas');
+            let cuentas = [];
+
+            if (tipo === 'user') {
+                cuentas = auth.getUsers().filter(function(u) { return u.role !== 'admin'; }); // Excluir admin
+            } else {
+                cuentas = auth.getEmpresas();
+            }
+
+            if (cuentas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: #999;">No hay cuentas registradas</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            cuentas.forEach(function(cuenta) {
+                const nombre = tipo === 'user' 
+                    ? cuenta.nombre + ' ' + cuenta.apellido 
+                    : cuenta.razonSocial;
+                const saldo = cuenta.saldo || 0;
+                const saldoFormateado = new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: 'CLP',
+                    minimumFractionDigits: 0
+                }).format(saldo);
+
+                const row = document.createElement('tr');
+                row.innerHTML = '<td>' + nombre + '</td>' +
+                    '<td>' + cuenta.email + '</td>' +
+                    '<td><strong style="color: var(--primary); font-size: 1.1rem;">' + saldoFormateado + '</strong></td>' +
+                    '<td>' +
+                    '<button class="btn-action btn-edit" onclick=\'abrirModalModificarSaldo(' + JSON.stringify(cuenta).replace(/'/g, "\\'") + ', "' + tipo + '")\'>' +
+                    '<i class="fas fa-edit"></i> Modificar' +
+                    '</button>' +
+                    '</td>';
+                tbody.appendChild(row);
+            });
+        }
+
+        function abrirModalModificarSaldo(cuenta, tipo) {
+            cuentaSeleccionada = { ...cuenta, tipo: tipo };
+            
+            const nombre = tipo === 'user' 
+                ? cuenta.nombre + ' ' + cuenta.apellido 
+                : cuenta.razonSocial;
+            
+            const saldo = cuenta.saldo || 0;
+            const saldoFormateado = new Intl.NumberFormat('es-CL', {
+                style: 'currency',
+                currency: 'CLP',
+                minimumFractionDigits: 0
+            }).format(saldo);
+
+            document.getElementById('saldo-cuenta-nombre').textContent = nombre;
+            document.getElementById('saldo-actual-display').textContent = saldoFormateado;
+            document.getElementById('form-modificar-saldo').reset();
+            
+            document.getElementById('modal-modificar-saldo').style.display = 'flex';
+        }
+
+        function cerrarModalModificarSaldo() {
+            document.getElementById('modal-modificar-saldo').style.display = 'none';
+            cuentaSeleccionada = null;
+        }
+
+        function modificarSaldoCuenta(event) {
+            event.preventDefault();
+
+            if (!cuentaSeleccionada) {
+                alert('Error: No hay cuenta seleccionada');
+                return;
+            }
+
+            const form = event.target;
+            const tipoOperacion = form['tipo-operacion'].value;
+            let monto = parseInt(form['monto-operacion'].value);
+            const motivo = form['motivo-operacion'].value;
+
+            // Si es egreso, hacer el monto negativo
+            if (tipoOperacion === 'egreso') {
+                monto = -monto;
+            }
+
+            const result = auth.modificarSaldo(cuentaSeleccionada.id, monto, motivo, cuentaSeleccionada.tipo);
+
+            if (result.success) {
+                alert(result.message + '\nNuevo saldo: ' + new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: 'CLP',
+                    minimumFractionDigits: 0
+                }).format(result.nuevoSaldo));
+                
+                cerrarModalModificarSaldo();
+                cargarCuentasFinanzas(tipoCuentasActual);
+                actualizarResumenFinanciero();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        }
+
+        function actualizarResumenFinanciero() {
+            const usuarios = auth.getUsers().filter(function(u) { return u.role !== 'admin'; });
+            const empresas = auth.getEmpresas();
+
+            let totalUsuarios = 0;
+            usuarios.forEach(function(u) {
+                totalUsuarios += (u.saldo || 0);
+            });
+
+            let totalEmpresas = 0;
+            empresas.forEach(function(e) {
+                totalEmpresas += (e.saldo || 0);
+            });
+
+            const totalCirculacion = totalUsuarios + totalEmpresas;
+
+            const formatear = function(monto) {
+                return new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: 'CLP',
+                    minimumFractionDigits: 0
+                }).format(monto);
+            };
+
+            document.getElementById('total-usuarios-saldo').textContent = formatear(totalUsuarios);
+            document.getElementById('total-empresas-saldo').textContent = formatear(totalEmpresas);
+            document.getElementById('total-circulacion').textContent = formatear(totalCirculacion);
+        }
+
+        // Cargar resumen financiero al cargar la página
+        actualizarResumenFinanciero();
+
+        // Actualizar cuando se cambia a la pestaña de finanzas
+        const originalCambiarTab = cambiarTab;
+        cambiarTab = function(tab, element) {
+            originalCambiarTab(tab, element);
+            if (tab === 'finanzas') {
+                actualizarResumenFinanciero();
+            }
+        };
+
+        // Cerrar modales al hacer clic fuera
+        document.getElementById('modal-gestion-finanzas').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModalGestionFinanzas();
+            }
+        });
+
+        document.getElementById('modal-modificar-saldo').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModalModificarSaldo();
+            }
+        });
+    </script>
+</body>
+</html>
