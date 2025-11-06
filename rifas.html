@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifas - Nexos</title>
+    <link rel="icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="shortcut icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="rifas.html" class="active">Rifas</a></li>
+                <li><a href="ventas.html">Ventas</a></li>
+                <li><a href="causas.html">Causas</a></li>
+                <li><a href="empresas.html">Empresas</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+            </ul>
+            <button class="cta-button" onclick="window.location.href='login.html'">Iniciar Sesión</button>
+        </nav>
+    </header>
+
+    <section class="hero" style="padding: 3rem 5%; min-height: 300px;">
+        <div class="hero-content">
+            <h1>Todas las Rifas</h1>
+            <p>Compra boletos y participa por increíbles premios mientras apoyas causas benéficas</p>
+        </div>
+    </section>
+
+    <main>
+        <section class="trending-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 0 2rem;">
+                <h2 class="section-title" style="margin: 0;">Rifas Activas 🎲</h2>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <input type="text" id="searchInput" placeholder="🔍 Buscar rifas..." 
+                        style="padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 25px; width: 300px; font-size: 0.95rem;">
+                    <select id="filterEstado" style="padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 25px; font-size: 0.95rem; cursor: pointer;">
+                        <option value="todas">Todas las rifas</option>
+                        <option value="activa">Activas</option>
+                        <option value="proxima">Próximas</option>
+                        <option value="finalizada">Finalizadas</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="auctions-grid" id="rifasContainer">
+                <!-- Las rifas se cargan dinámicamente con JavaScript -->
+            </div>
+
+            <div id="emptyState" style="display: none; text-align: center; padding: 4rem 2rem;">
+                <i class="fas fa-ticket-alt" style="font-size: 5rem; color: #ddd; margin-bottom: 1rem;"></i>
+                <h3 style="color: #999; margin-bottom: 0.5rem;">No hay rifas disponibles</h3>
+                <p style="color: #bbb;">Vuelve pronto para ver nuevas rifas</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="auth.js"></script>
+    <script src="notify.js"></script>
+    <script>
+        // Cargar navbar dinámico
+        if (auth.isLoggedIn()) {
+            const session = auth.getSession();
+            const navbar = document.querySelector('.navbar');
+            const ctaButton = navbar.querySelector('.cta-button');
+            
+            if (session.role === 'admin') {
+                ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'admin.html\'">Panel Admin</button>';
+            } else if (session.role === 'empresa') {
+                ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil-empresa.html\'">Mi Perfil</button>';
+            } else {
+                ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil.html\'">Mi Perfil</button>';
+            }
+        }
+
+        // Cargar rifas
+        function cargarRifas() {
+            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
+            const container = document.getElementById('rifasContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (rifas.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+            container.innerHTML = '';
+            
+            rifas.forEach(rifa => {
+                const fechaSorteo = new Date(rifa.fechaSorteo);
+                const ahora = new Date();
+                const diasRestantes = Math.ceil((fechaSorteo - ahora) / (1000 * 60 * 60 * 24));
+                
+                let estadoBadge = '';
+                if (rifa.estado === 'activa' && diasRestantes > 0) {
+                    estadoBadge = '<span style="background: #27ae60; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.85rem; font-weight: 600;">🎯 ACTIVA</span>';
+                } else if (rifa.estado === 'finalizada' || diasRestantes <= 0) {
+                    estadoBadge = '<span style="background: #e74c3c; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.85rem; font-weight: 600;">🏁 FINALIZADA</span>';
+                } else {
+                    estadoBadge = '<span style="background: #3498db; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.85rem; font-weight: 600;">📅 PRÓXIMA</span>';
+                }
+                
+                const boletosVendidos = rifa.boletos ? rifa.boletos.filter(b => b.comprado).length : 0;
+                const porcentajeVendido = ((boletosVendidos / rifa.totalBoletos) * 100).toFixed(1);
+                
+                const card = document.createElement('div');
+                card.className = 'auction-card';
+                card.style.cursor = 'pointer';
+                card.onclick = () => window.location.href = 'detalle-rifa.html?id=' + rifa.id;
+                
+                card.innerHTML = `
+                    <div style="position: relative;">
+                        <img src="${rifa.imagen || 'images/placeholder-rifa.jpg'}" alt="${rifa.titulo}" style="width: 100%; height: 250px; object-fit: cover; border-radius: 15px 15px 0 0;">
+                        <div style="position: absolute; top: 10px; right: 10px;">
+                            ${estadoBadge}
+                        </div>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.3rem; color: #333;">${rifa.titulo}</h3>
+                        <p style="color: #666; margin: 0 0 1rem 0; font-size: 0.95rem; line-height: 1.5;">
+                            ${rifa.descripcion.substring(0, 100)}...
+                        </p>
+                        
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+                                <span style="color: #666; font-size: 0.9rem;"><i class="fas fa-ticket-alt"></i> Boletos vendidos</span>
+                                <span style="font-weight: 700; color: var(--primary);">${boletosVendidos} / ${rifa.totalBoletos}</span>
+                            </div>
+                            <div style="background: #e0e0e0; height: 8px; border-radius: 10px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, var(--primary), var(--secondary)); height: 100%; width: ${porcentajeVendido}%; transition: width 0.3s;"></div>
+                            </div>
+                            <div style="text-align: right; margin-top: 0.3rem; font-size: 0.85rem; color: #666;">${porcentajeVendido}% vendidos</div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-top: 2px solid #f0f0f0; border-bottom: 2px solid #f0f0f0;">
+                            <div>
+                                <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.3rem;">Precio por boleto</div>
+                                <div style="font-size: 1.8rem; font-weight: 700; color: var(--primary);">
+                                    $${rifa.precioBoleto.toLocaleString('es-CL')}
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.3rem;">Sorteo</div>
+                                <div style="font-size: 1rem; font-weight: 600; color: #333;">
+                                    ${diasRestantes > 0 ? diasRestantes + ' días' : 'Hoy'}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1rem;">
+                            <button style="width: 100%; padding: 0.8rem; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(74, 144, 226, 0.3)'"
+                                onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                <i class="fas fa-shopping-cart"></i> Comprar Boletos
+                            </button>
+                        </div>
+                        
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0; display: flex; align-items: center; gap: 0.5rem; color: #666; font-size: 0.9rem;">
+                            <i class="fas fa-building"></i>
+                            <span>${rifa.empresaNombre || 'Empresa'}</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Filtros y búsqueda
+        document.getElementById('searchInput').addEventListener('input', filtrarRifas);
+        document.getElementById('filterEstado').addEventListener('change', filtrarRifas);
+
+        function filtrarRifas() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filterEstado = document.getElementById('filterEstado').value;
+            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
+            
+            let rifasFiltradas = rifas.filter(rifa => {
+                const matchSearch = rifa.titulo.toLowerCase().includes(searchTerm) || 
+                                  rifa.descripcion.toLowerCase().includes(searchTerm);
+                const matchEstado = filterEstado === 'todas' || rifa.estado === filterEstado;
+                
+                return matchSearch && matchEstado;
+            });
+            
+            const container = document.getElementById('rifasContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (rifasFiltradas.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+            container.innerHTML = '';
+            
+            // Redibujar solo las rifas filtradas (código similar al anterior)
+            cargarRifas();
+        }
+
+        // Cargar rifas al iniciar
+        cargarRifas();
+    </script>
+
+    <footer>
+        <div class="footer-content">
+            <div class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </div>
+            <p>Conectando empresas con causas que transforman vidas</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p class="copyright">© 2025 Nexos. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html>

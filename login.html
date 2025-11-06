@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Nexos</title>
+    <title>Nexos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-    <link rel="shortcut icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="shortcut icon" href="images/favicon.svg?v=2" type="image/svg+xml">
     <style>
         .form-group { margin-bottom: 1.5rem; }
         .form-label { display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500; }
@@ -23,6 +23,15 @@
         .alert { padding: 1rem; border-radius: 10px; margin-bottom: 1rem; display: none; }
         .alert.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        /* Modal de recuperación */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 10000; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: white; padding: 2.5rem; border-radius: 20px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); position: relative; }
+        .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; color: #999; cursor: pointer; transition: color 0.3s; }
+        .modal-close:hover { color: #333; }
+        .forgot-link { color: var(--primary); text-decoration: none; font-size: 0.9rem; transition: color 0.3s; }
+        .forgot-link:hover { color: var(--secondary); text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -80,6 +89,12 @@
                     </div>
                     <button type="submit" class="btn-primary"><i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i>Iniciar Sesión</button>
                 </form>
+                
+                <p style="text-align: right; margin-top: 1rem;">
+                    <a href="#" class="forgot-link" onclick="abrirModalRecuperacion('user'); return false;">
+                        <i class="fas fa-key"></i> ¿Olvidaste tu contraseña?
+                    </a>
+                </p>
 
                 <form id="registroUsuarioForm" onsubmit="registrarUsuario(event)" style="display: none;">
                     <div class="form-group">
@@ -95,6 +110,10 @@
                         <input type="text" name="apellido" class="form-input" required placeholder="Tu apellido">
                     </div>
                     <div class="form-group">
+                        <label class="form-label"><i class="fas fa-id-card" style="margin-right: 0.5rem; color: var(--primary);"></i>RUT *</label>
+                        <input type="text" name="rut" class="form-input" required placeholder="12.345.678-9" pattern="^[0-9]{1,2}\.[0-9]{3}\.[0-9]{3}-[0-9kK]{1}$|^[0-9]{7,8}-[0-9kK]{1}$" title="Formato: 12.345.678-9 o 12345678-9">
+                    </div>
+                    <div class="form-group">
                         <label class="form-label"><i class="fas fa-envelope" style="margin-right: 0.5rem; color: var(--primary);"></i>Correo Electrónico *</label>
                         <input type="email" name="email" class="form-input" required placeholder="tu@email.com">
                     </div>
@@ -104,7 +123,25 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label"><i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Contraseña *</label>
-                        <input type="password" name="password" class="form-input" required placeholder="Crea una contraseña">
+                        <input type="password" id="passwordUsuario" name="password" class="form-input" required placeholder="Crea una contraseña segura">
+                        <div id="passwordStrengthUsuario" style="margin-top: 0.5rem; padding: 0.8rem; background: #f8f9fa; border-radius: 8px; display: none;">
+                            <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;">Requisitos de seguridad:</div>
+                            <div id="req-length-usuario" style="font-size: 0.8rem; color: #999; margin-bottom: 0.3rem;">
+                                <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.5rem;"></i> Mínimo 8 caracteres
+                            </div>
+                            <div id="req-upper-usuario" style="font-size: 0.8rem; color: #999; margin-bottom: 0.3rem;">
+                                <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.5rem;"></i> Al menos una mayúscula (A-Z)
+                            </div>
+                            <div id="req-lower-usuario" style="font-size: 0.8rem; color: #999; margin-bottom: 0.3rem;">
+                                <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.5rem;"></i> Al menos una minúscula (a-z)
+                            </div>
+                            <div id="req-number-usuario" style="font-size: 0.8rem; color: #999; margin-bottom: 0.3rem;">
+                                <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.5rem;"></i> Al menos un número (0-9)
+                            </div>
+                            <div id="req-special-usuario" style="font-size: 0.8rem; color: #999;">
+                                <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.5rem;"></i> Al menos un carácter especial (!@#$%...)
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label"><i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Confirmar Contraseña *</label>
@@ -137,6 +174,12 @@
                     </div>
                     <button type="submit" class="btn-primary"><i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i>Iniciar Sesión</button>
                 </form>
+                
+                <p style="text-align: right; margin-top: 1rem;">
+                    <a href="#" class="forgot-link" onclick="abrirModalRecuperacion('empresa'); return false;">
+                        <i class="fas fa-key"></i> ¿Olvidaste tu contraseña?
+                    </a>
+                </p>
 
                 <form id="registroEmpresaForm" onsubmit="registrarEmpresa(event)" style="display: none;">
                     <div class="form-group">
@@ -165,21 +208,128 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label"><i class="fas fa-globe" style="margin-right: 0.5rem; color: var(--primary);"></i>Sitio Web</label>
-                        <input type="url" name="sitioWeb" class="form-input">
+                        <input type="text" name="sitioWeb" class="form-input" placeholder="ejemplo.cl o www.ejemplo.cl">
+                        <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 0.3rem;">
+                            <i class="fas fa-info-circle"></i> Se agregará automáticamente "https://" si no lo incluyes
+                        </small>
                     </div>
                     <div class="form-group">
                         <label class="form-label"><i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Contraseña *</label>
-                        <input type="password" name="password" class="form-input" required>
+                        <input type="password" id="passwordEmpresa" name="password" class="form-input" required placeholder="Crea una contraseña segura">
+                        <div id="passwordStrengthEmpresa" style="margin-top: 0.5rem; padding: 0.8rem; background: #f8f9fa; border-radius: 8px; display: none;">
+                            <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;">Requisitos de seguridad:</div>
+                            <div id="req-length-empresa" style="font-size: 0.8rem; color: #999; margin-bottom: 0.3rem;">
+                                <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.5rem;"></i> Mínimo 8 caracteres
+                            </div>
+                            <div id="req-upper-empresa" style="font-size: 0.8rem; color: #999; margin-bottom: 0.3rem;">
+                                <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.5rem;"></i> Al menos una mayúscula (A-Z)
+                            </div>
+                            <div id="req-lower-empresa" style="font-size: 0.8rem; color: #999; margin-bottom: 0.3rem;">
+                                <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.5rem;"></i> Al menos una minúscula (a-z)
+                            </div>
+                            <div id="req-number-empresa" style="font-size: 0.8rem; color: #999; margin-bottom: 0.3rem;">
+                                <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.5rem;"></i> Al menos un número (0-9)
+                            </div>
+                            <div id="req-special-empresa" style="font-size: 0.8rem; color: #999;">
+                                <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.5rem;"></i> Al menos un carácter especial (!@#$%...)
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label"><i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Confirmar *</label>
-                        <input type="password" name="password2" class="form-input" required>
+                        <label class="form-label"><i class="fas fa-lock" style="margin-right: 0.5rem; color: var(--primary);"></i>Confirmar Contraseña *</label>
+                        <input type="password" name="password2" class="form-input" required placeholder="Confirma tu contraseña">
                     </div>
+                    
+                    <!-- Sección de Documentos Legales -->
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin: 1.5rem 0; border-left: 4px solid var(--primary);">
+                        <h4 style="margin: 0 0 1rem 0; color: var(--primary); font-size: 1.1rem;">
+                            <i class="fas fa-file-contract"></i> Documentos Legales de Verificación
+                        </h4>
+                        <p style="margin: 0 0 1rem 0; color: #666; font-size: 0.9rem;">
+                            Para verificar la autenticidad de tu empresa, por favor adjunta los siguientes documentos:
+                        </p>
+                        
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label class="form-label">
+                                <i class="fas fa-file-pdf" style="margin-right: 0.5rem; color: #e74c3c;"></i>
+                                Certificado de Inicio de Actividades (SII) *
+                            </label>
+                            <input type="file" id="docInicioActividades" name="docInicioActividades" 
+                                accept=".pdf,.jpg,.jpeg,.png" class="form-input" required
+                                style="padding: 0.5rem; border: 2px dashed #ddd;">
+                            <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 0.3rem;">
+                                Formato: PDF, JPG o PNG (máx. 5MB)
+                            </small>
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label class="form-label">
+                                <i class="fas fa-file-pdf" style="margin-right: 0.5rem; color: #e74c3c;"></i>
+                                Certificado de Vigencia (Conservador de Bienes Raíces) *
+                            </label>
+                            <input type="file" id="docCertificadoVigencia" name="docCertificadoVigencia" 
+                                accept=".pdf,.jpg,.jpeg,.png" class="form-input" required
+                                style="padding: 0.5rem; border: 2px dashed #ddd;">
+                            <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 0.3rem;">
+                                Formato: PDF, JPG o PNG (máx. 5MB)
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-file-pdf" style="margin-right: 0.5rem; color: #3498db;"></i>
+                                Estatutos de la Empresa (Opcional)
+                            </label>
+                            <input type="file" id="docEstatutos" name="docEstatutos" 
+                                accept=".pdf,.jpg,.jpeg,.png" class="form-input"
+                                style="padding: 0.5rem; border: 2px dashed #ddd;">
+                            <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 0.3rem;">
+                                Formato: PDF, JPG o PNG (máx. 5MB)
+                            </small>
+                        </div>
+                        
+                        <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                            <p style="margin: 0; color: #856404; font-size: 0.9rem;">
+                                <i class="fas fa-info-circle" style="margin-right: 0.5rem;"></i>
+                                <strong>Importante:</strong> Tu solicitud será revisada por nuestro equipo. 
+                                Recibirás una respuesta en un plazo máximo de 48 horas.
+                            </p>
+                        </div>
+                    </div>
+                    
                     <button type="submit" class="btn-primary"><i class="fas fa-building" style="margin-right: 0.5rem;"></i>Registrar Empresa</button>
                 </form>
             </div>
         </div>
     </section>
+
+    <!-- Modal de Recuperación de Contraseña -->
+    <div id="modalRecuperacion" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="cerrarModalRecuperacion()">&times;</button>
+            <h3 style="color: var(--primary); margin-bottom: 1.5rem; text-align: center;">
+                <i class="fas fa-key" style="margin-right: 0.5rem;"></i>Recuperar Contraseña
+            </h3>
+            <p style="color: #666; margin-bottom: 1.5rem; text-align: center;">
+                Ingresa tu correo electrónico para recuperar tu contraseña
+            </p>
+            
+            <div id="alertModal" class="alert"></div>
+            
+            <form id="formRecuperacion" onsubmit="solicitarRecuperacion(event)">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-envelope" style="margin-right: 0.5rem; color: var(--primary);"></i>
+                        Correo Electrónico
+                    </label>
+                    <input type="email" id="emailRecuperacion" class="form-input" required placeholder="tu@email.com">
+                </div>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane" style="margin-right: 0.5rem;"></i>Solicitar Recuperación
+                </button>
+            </form>
+        </div>
+    </div>
 
     <footer>
         <div class="footer-content">
@@ -195,6 +345,7 @@
         </div>
     </footer>
 
+    <script src="notifications.js"></script>
     <script src="auth.js"></script>
     <script>
         if (auth.isLoggedIn()) {
@@ -249,17 +400,50 @@
             }
         }
 
+        // Función para validar contraseña segura
+        function validarContraseñaSegura(password) {
+            const requisitos = {
+                minLength: password.length >= 8,
+                hasUpperCase: /[A-Z]/.test(password),
+                hasLowerCase: /[a-z]/.test(password),
+                hasNumber: /[0-9]/.test(password),
+                hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+            };
+            
+            const mensajes = [];
+            if (!requisitos.minLength) mensajes.push('- Mínimo 8 caracteres');
+            if (!requisitos.hasUpperCase) mensajes.push('- Al menos una letra mayúscula');
+            if (!requisitos.hasLowerCase) mensajes.push('- Al menos una letra minúscula');
+            if (!requisitos.hasNumber) mensajes.push('- Al menos un número');
+            if (!requisitos.hasSpecialChar) mensajes.push('- Al menos un carácter especial (!@#$%^&*...)');
+            
+            return {
+                valida: Object.values(requisitos).every(r => r === true),
+                mensajes: mensajes
+            };
+        }
+
         function registrarUsuario(e) {
             e.preventDefault();
             const form = e.target;
+            
             if (form.password.value !== form.password2.value) {
                 mostrarAlerta('Usuario', 'Las contraseñas no coinciden', true);
+                return;
+            }
+            
+            // Validar contraseña segura
+            const validacion = validarContraseñaSegura(form.password.value);
+            if (!validacion.valida) {
+                const mensaje = 'La contraseña no cumple con los requisitos de seguridad:\n\n' + validacion.mensajes.join('\n');
+                mostrarAlerta('Usuario', mensaje, true);
                 return;
             }
             const result = auth.registerUser({
                 username: form.username.value,
                 nombre: form.nombre.value,
                 apellido: form.apellido.value,
+                rut: form.rut.value,
                 email: form.email.value,
                 telefono: form.telefono.value,
                 password: form.password.value
@@ -273,13 +457,91 @@
             }
         }
 
-        function registrarEmpresa(e) {
+        async function registrarEmpresa(e) {
             e.preventDefault();
             const form = e.target;
+            
             if (form.password.value !== form.password2.value) {
                 mostrarAlerta('Empresa', 'Las contraseñas no coinciden', true);
                 return;
             }
+            
+            // Validar contraseña segura
+            const validacion = validarContraseñaSegura(form.password.value);
+            if (!validacion.valida) {
+                const mensaje = 'La contraseña no cumple con los requisitos de seguridad:\n\n' + validacion.mensajes.join('\n');
+                mostrarAlerta('Empresa', mensaje, true);
+                return;
+            }
+            
+            // Validar archivos requeridos
+            const docInicioActividades = document.getElementById('docInicioActividades');
+            const docCertificadoVigencia = document.getElementById('docCertificadoVigencia');
+            const docEstatutos = document.getElementById('docEstatutos');
+            
+            if (!docInicioActividades.files[0]) {
+                mostrarAlerta('Empresa', 'Debe adjuntar el Certificado de Inicio de Actividades', true);
+                return;
+            }
+            
+            if (!docCertificadoVigencia.files[0]) {
+                mostrarAlerta('Empresa', 'Debe adjuntar el Certificado de Vigencia', true);
+                return;
+            }
+            
+            // Validar tamaño de archivos (máx 5MB)
+            const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+            
+            if (docInicioActividades.files[0].size > maxSize) {
+                mostrarAlerta('Empresa', 'El Certificado de Inicio de Actividades no debe superar los 5MB', true);
+                return;
+            }
+            
+            if (docCertificadoVigencia.files[0].size > maxSize) {
+                mostrarAlerta('Empresa', 'El Certificado de Vigencia no debe superar los 5MB', true);
+                return;
+            }
+            
+            if (docEstatutos.files[0] && docEstatutos.files[0].size > maxSize) {
+                mostrarAlerta('Empresa', 'Los Estatutos no deben superar los 5MB', true);
+                return;
+            }
+            
+            // Convertir archivos a Base64
+            const documentosLegales = {
+                inicioActividades: {
+                    nombre: docInicioActividades.files[0].name,
+                    tipo: docInicioActividades.files[0].type,
+                    tamaño: docInicioActividades.files[0].size,
+                    fechaSubida: new Date().toISOString(),
+                    contenido: await convertirArchivoABase64(docInicioActividades.files[0])
+                },
+                certificadoVigencia: {
+                    nombre: docCertificadoVigencia.files[0].name,
+                    tipo: docCertificadoVigencia.files[0].type,
+                    tamaño: docCertificadoVigencia.files[0].size,
+                    fechaSubida: new Date().toISOString(),
+                    contenido: await convertirArchivoABase64(docCertificadoVigencia.files[0])
+                }
+            };
+            
+            // Si hay estatutos opcionales
+            if (docEstatutos.files[0]) {
+                documentosLegales.estatutos = {
+                    nombre: docEstatutos.files[0].name,
+                    tipo: docEstatutos.files[0].type,
+                    tamaño: docEstatutos.files[0].size,
+                    fechaSubida: new Date().toISOString(),
+                    contenido: await convertirArchivoABase64(docEstatutos.files[0])
+                };
+            }
+            
+            // Normalizar sitio web (agregar https:// si no tiene protocolo)
+            let sitioWeb = form.sitioWeb.value.trim();
+            if (sitioWeb && !sitioWeb.startsWith('http://') && !sitioWeb.startsWith('https://')) {
+                sitioWeb = 'https://' + sitioWeb;
+            }
+            
             const result = auth.registerEmpresa({
                 username: form.username.value,
                 razonSocial: form.razonSocial.value,
@@ -287,9 +549,11 @@
                 email: form.email.value,
                 telefono: form.telefono.value,
                 direccion: form.direccion.value,
-                sitioWeb: form.sitioWeb.value,
-                password: form.password.value
+                sitioWeb: sitioWeb,
+                password: form.password.value,
+                documentosLegales: documentosLegales
             });
+            
             if (result.success) {
                 mostrarAlerta('Empresa', result.message, false);
                 form.reset();
@@ -297,6 +561,130 @@
             } else {
                 mostrarAlerta('Empresa', result.message, true);
             }
+        }
+        
+        // Función para convertir archivo a Base64
+        function convertirArchivoABase64(archivo) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(archivo);
+            });
+        }
+
+        // ===== FUNCIONES DE RECUPERACIÓN DE CONTRASEÑA =====
+        
+        let tipoRecuperacion = 'user';
+
+        function abrirModalRecuperacion(tipo) {
+            tipoRecuperacion = tipo;
+            document.getElementById('modalRecuperacion').classList.add('active');
+            document.getElementById('formRecuperacion').reset();
+            document.getElementById('alertModal').style.display = 'none';
+        }
+
+        function cerrarModalRecuperacion() {
+            document.getElementById('modalRecuperacion').classList.remove('active');
+        }
+
+        function mostrarAlertaModal(mensaje, esError = false) {
+            const alert = document.getElementById('alertModal');
+            alert.textContent = mensaje;
+            alert.className = 'alert ' + (esError ? 'error' : 'success');
+            alert.style.display = 'block';
+            setTimeout(function() { 
+                alert.style.display = 'none'; 
+            }, 5000);
+        }
+
+        function solicitarRecuperacion(e) {
+            e.preventDefault();
+            const email = document.getElementById('emailRecuperacion').value;
+            
+            const result = auth.requestPasswordReset(email);
+            
+            if (result.success) {
+                mostrarAlertaModal(result.message, false);
+                
+                // Si es usuario, mostrar la contraseña temporal en el modal
+                if (result.request && result.request.type === 'user' && result.request.tempPassword) {
+                    setTimeout(async function() {
+                        cerrarModalRecuperacion();
+                        await alert('Solicitud procesada.\n\nTu nueva contraseña temporal es:\n\n' + result.request.tempPassword + '\n\nPuedes usarla para iniciar sesión ahora.');
+                    }, 1500);
+                } else {
+                    // Para empresas
+                    setTimeout(function() {
+                        cerrarModalRecuperacion();
+                    }, 2000);
+                }
+            } else {
+                mostrarAlertaModal(result.message, true);
+            }
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modalRecuperacion').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModalRecuperacion();
+            }
+        });
+
+        // ===== VALIDACIÓN EN TIEMPO REAL DE CONTRASEÑAS =====
+        
+        function actualizarIndicadoresContraseña(passwordInput, containerId, prefijo) {
+            const password = passwordInput.value;
+            const container = document.getElementById(containerId);
+            
+            if (password.length > 0) {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+                return;
+            }
+            
+            const requisitos = {
+                length: password.length >= 8,
+                upper: /[A-Z]/.test(password),
+                lower: /[a-z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+            };
+            
+            // Actualizar cada requisito
+            Object.keys(requisitos).forEach(key => {
+                const elemento = document.getElementById('req-' + key + '-' + prefijo);
+                if (requisitos[key]) {
+                    elemento.style.color = '#27ae60';
+                    elemento.querySelector('i').className = 'fas fa-check-circle';
+                } else {
+                    elemento.style.color = '#999';
+                    elemento.querySelector('i').className = 'fas fa-circle';
+                }
+            });
+        }
+        
+        // Eventos para usuario
+        const passwordUsuario = document.getElementById('passwordUsuario');
+        if (passwordUsuario) {
+            passwordUsuario.addEventListener('input', function() {
+                actualizarIndicadoresContraseña(this, 'passwordStrengthUsuario', 'usuario');
+            });
+            passwordUsuario.addEventListener('focus', function() {
+                document.getElementById('passwordStrengthUsuario').style.display = 'block';
+            });
+        }
+        
+        // Eventos para empresa
+        const passwordEmpresa = document.getElementById('passwordEmpresa');
+        if (passwordEmpresa) {
+            passwordEmpresa.addEventListener('input', function() {
+                actualizarIndicadoresContraseña(this, 'passwordStrengthEmpresa', 'empresa');
+            });
+            passwordEmpresa.addEventListener('focus', function() {
+                document.getElementById('passwordStrengthEmpresa').style.display = 'block';
+            });
         }
     </script>
 </body>

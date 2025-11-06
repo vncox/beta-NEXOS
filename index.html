@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexos - Donaciones para Causas Específicas</title>
+    <title>Nexos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-        <link rel="shortcut icon" href="images/favicon.svg" type="image/svg+xml">
+        <link rel="icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+        <link rel="shortcut icon" href="images/favicon.svg?v=2" type="image/svg+xml">
         <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,6 +19,8 @@
             <ul class="nav-links">
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="rifas.html">Rifas</a></li>
+                <li><a href="ventas.html">Ventas</a></li>
                 <li><a href="causas.html">Causas</a></li>
                 <li><a href="empresas.html">Empresas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
@@ -103,6 +105,29 @@
                     </div>
                 </div>
 
+                <div class="auction-card" onclick="window.location.href='detalle-subasta.html?id=prueba_8'" style="cursor: pointer;">
+                    <div class="card-image" style="background-image: url('images/bici.png');"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Bicicleta de Montaña Profesional</h3>
+                        <p class="card-description">Bicicleta de alta gama para rutas extremas, apoyando vivienda social.</p>
+                        <div class="beneficiary">
+                            <i class="fas fa-home"></i>
+                            <span>Hogar de Cristo</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; padding: 0.5rem; background: #f8f9fa; border-radius: 8px;">
+                            <i class="fas fa-trophy" style="color: #ffc107;"></i>
+                            <div style="flex: 1;">
+                                <div style="font-size: 0.85rem; color: #666;">Ganador</div>
+                                <div style="font-weight: 600; color: #333;">Daniela Vega - $450.000</div>
+                            </div>
+                        </div>
+                        <div class="trending-badge" style="background: #6c757d;">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Finalizada</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Duplicado para efecto infinito -->
                 <div class="auction-card" onclick="window.location.href='detalle-subasta.html?id=prueba_1'" style="cursor: pointer;">
                     <div class="card-image" style="background-image: url('images/polera.png');"></div>
@@ -167,6 +192,29 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="auction-card" onclick="window.location.href='detalle-subasta.html?id=prueba_8'" style="cursor: pointer;">
+                    <div class="card-image" style="background-image: url('images/bici.png');"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Bicicleta de Montaña Profesional</h3>
+                        <p class="card-description">Bicicleta de alta gama para rutas extremas, apoyando vivienda social.</p>
+                        <div class="beneficiary">
+                            <i class="fas fa-home"></i>
+                            <span>Hogar de Cristo</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; padding: 0.5rem; background: #f8f9fa; border-radius: 8px;">
+                            <i class="fas fa-trophy" style="color: #ffc107;"></i>
+                            <div style="flex: 1;">
+                                <div style="font-size: 0.85rem; color: #666;">Ganador</div>
+                                <div style="font-weight: 600; color: #333;">Daniela Vega - $450.000</div>
+                            </div>
+                        </div>
+                        <div class="trending-badge" style="background: #6c757d;">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Finalizada</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -211,7 +259,7 @@
     <section class="trending-section">
         <h2 class="section-title">Otras Subastas</h2>
         <div class="auctions-grid">
-            <div class="grid-card">
+            <div class="grid-card" onclick="window.location.href='detalle-subasta.html?id=prueba_5'" style="cursor: pointer;">
                 <div class="grid-image" style="background-image: url('images/colocolo.png');"></div>
                 <div class="grid-content">
                     <h3 class="card-title">Polera de Jugador Profesional</h3>
@@ -223,7 +271,7 @@
                 </div>
             </div>
 
-            <div class="grid-card">
+            <div class="grid-card" onclick="window.location.href='detalle-subasta.html?id=prueba_2'" style="cursor: pointer;">
                 <div class="grid-image" style="background-image: url('images/coleccionable.png');"></div>
                 <div class="grid-content">
                     <h3 class="card-title">Figura Coleccionable Limitada</h3>
@@ -235,7 +283,7 @@
                 </div>
             </div>
 
-            <div class="grid-card">
+            <div class="grid-card" onclick="window.location.href='detalle-subasta.html?id=prueba_3'" style="cursor: pointer;">
                 <div class="grid-image" style="background-image: url('images/evento.png');"></div>
                 <div class="grid-content">
                     <h3 class="card-title">Experiencia VIP en Evento</h3>
@@ -247,7 +295,7 @@
                 </div>
             </div>
 
-            <div class="grid-card">
+            <div class="grid-card" onclick="window.location.href='detalle-subasta.html?id=prueba_6'" style="cursor: pointer;">
                 <div class="grid-image" style="background-image: url('images/laptop.png');"></div>
                 <div class="grid-content">
                     <h3 class="card-title">Equipo Tecnológico Última Generación</h3>
@@ -259,7 +307,7 @@
                 </div>
             </div>
 
-            <div class="grid-card">
+            <div class="grid-card" onclick="window.location.href='detalle-subasta.html?id=prueba_7'" style="cursor: pointer;">
                 <div class="grid-image" style="background-image: url('images/pintura.png');"></div>
                 <div class="grid-content">
                     <h3 class="card-title">Obra de Arte Original</h3>
@@ -271,7 +319,7 @@
                 </div>
             </div>
 
-            <div class="grid-card">
+            <div class="grid-card" onclick="window.location.href='detalle-subasta.html?id=prueba_1'" style="cursor: pointer;">
                 <div class="grid-image" style="background-image: url('images/bunkers.png');"></div>
                 <div class="grid-content">
                     <h3 class="card-title">Clase de Música con Músico Nacional</h3>
@@ -326,7 +374,122 @@
             carousel.style.setProperty('--scroll-distance', `-${totalWidth}px`);
         });
     </script>
+    <script src="notifications.js"></script>
     <script src="auth.js"></script>
     <script src="config.js"></script>
+    <script>
+        // Función para inicializar subastas de ejemplo si no existen
+        function inicializarSubastasEjemplo() {
+            console.log('=== INICIALIZANDO SUBASTAS DE EJEMPLO (INDEX) ===');
+            let subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
+            console.log('Subastas actuales en localStorage:', subastas.length);
+            
+            // IDs de las subastas de ejemplo que se muestran en index
+            const idsEjemplo = ['prueba_2', 'prueba_3', 'prueba_6', 'prueba_7'];
+            console.log('Buscando IDs:', idsEjemplo);
+            
+            // Verificar cuáles faltan
+            const idsFaltantes = idsEjemplo.filter(function(id) {
+                return !subastas.find(function(s) { return s.id === id; });
+            });
+            
+            console.log('IDs faltantes:', idsFaltantes);
+            
+            if (idsFaltantes.length === 0) {
+                console.log('Todas las subastas de ejemplo ya existen');
+                return;
+            } // Ya existen todas
+            
+            const fechaInicio = new Date();
+            const fechaFin = new Date();
+            fechaFin.setDate(fechaFin.getDate() + 7);
+            
+            const subastasEjemplo = {
+                'prueba_2': {
+                    id: 'prueba_2',
+                    tipo: 'subasta',
+                    titulo: 'Figura Coleccionable Limitada',
+                    descripcion: 'Pieza única de colección, edición limitada para apoyar a niños con enfermedades raras. Esta figura representa esperanza y solidaridad.',
+                    imagen: 'images/coleccionable.png',
+                    precioInicial: 80000,
+                    precioActual: 80000,
+                    fechaInicio: fechaInicio.toISOString(),
+                    fechaFin: fechaFin.toISOString(),
+                    estado: 'activa',
+                    empresaId: '76543210-9',
+                    empresaNombre: 'Asociación Duchenne',
+                    pujas: [],
+                    participantes: []
+                },
+                'prueba_3': {
+                    id: 'prueba_3',
+                    tipo: 'subasta',
+                    titulo: 'Experiencia VIP en Evento',
+                    descripcion: 'Acceso exclusivo a evento deportivo con meet & greet, entradas preferenciales y experiencia inolvidable. Todo lo recaudado va para Coaniquem.',
+                    imagen: 'images/evento.png',
+                    precioInicial: 150000,
+                    precioActual: 150000,
+                    fechaInicio: fechaInicio.toISOString(),
+                    fechaFin: fechaFin.toISOString(),
+                    estado: 'activa',
+                    empresaId: '87654321-0',
+                    empresaNombre: 'Coaniquem',
+                    pujas: [],
+                    participantes: []
+                },
+                'prueba_6': {
+                    id: 'prueba_6',
+                    tipo: 'subasta',
+                    titulo: 'Equipo Tecnológico Última Generación',
+                    descripcion: 'Laptop gaming de alta gama, perfecta para estudios y entretenimiento. Apoya la educación de niños en situación vulnerable.',
+                    imagen: 'images/laptop.png',
+                    precioInicial: 500000,
+                    precioActual: 500000,
+                    fechaInicio: fechaInicio.toISOString(),
+                    fechaFin: fechaFin.toISOString(),
+                    estado: 'activa',
+                    empresaId: '98765432-1',
+                    empresaNombre: 'Techo para Chile',
+                    pujas: [],
+                    participantes: []
+                },
+                'prueba_7': {
+                    id: 'prueba_7',
+                    tipo: 'subasta',
+                    titulo: 'Clase de Música con Músico Nacional',
+                    descripcion: 'Experiencia única de aprender música con reconocido artista nacional. Sesión privada de 2 horas incluyendo técnicas y consejos profesionales.',
+                    imagen: 'images/pintura.png',
+                    precioInicial: 120000,
+                    precioActual: 120000,
+                    fechaInicio: fechaInicio.toISOString(),
+                    fechaFin: fechaFin.toISOString(),
+                    estado: 'activa',
+                    empresaId: '11223344-5',
+                    empresaNombre: 'Fundación Musical',
+                    pujas: [],
+                    participantes: []
+                }
+            };
+            
+            // Agregar solo las que faltan
+            idsFaltantes.forEach(function(id) {
+                if (subastasEjemplo[id]) {
+                    console.log('Agregando subasta:', id, subastasEjemplo[id].titulo);
+                    subastas.push(subastasEjemplo[id]);
+                }
+            });
+            
+            localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
+            console.log('✅ Subastas de ejemplo guardadas en localStorage:', idsFaltantes);
+            console.log('Total de subastas ahora:', subastas.length);
+        }
+        
+        // Inicializar al cargar la página
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', inicializarSubastasEjemplo);
+        } else {
+            inicializarSubastasEjemplo();
+        }
+    </script>
 </body>
 </html>

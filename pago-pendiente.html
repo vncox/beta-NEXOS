@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Pendiente - Nexos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .pending-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+        }
+
+        .pending-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .pending-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        .pending-icon i {
+            font-size: 3rem;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        h1 {
+            color: #f39c12;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+
+        .btn-volver {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 2rem;
+        }
+
+        .btn-volver:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="pending-container">
+        <div class="pending-card">
+            <div class="pending-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+
+            <h1>Pago Pendiente</h1>
+            <p style="color: #666; margin-bottom: 2rem;">
+                Tu pago está siendo procesado. Te notificaremos cuando se complete.
+            </p>
+
+            <a href="perfil.html" class="btn-volver">
+                <i class="fas fa-home"></i> Volver a Mi Perfil
+            </a>
+        </div>
+    </div>
+</body>
+</html>

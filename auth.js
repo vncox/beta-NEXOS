@@ -30,6 +30,9 @@ class AuthSystem {
         if (!localStorage.getItem('nexos_session')) {
             localStorage.setItem('nexos_session', JSON.stringify(null));
         }
+        if (!localStorage.getItem('nexos_password_reset_requests')) {
+            localStorage.setItem('nexos_password_reset_requests', JSON.stringify([]));
+        }
     }
 
     // Crear cuentas admin y de prueba por defecto
@@ -46,6 +49,7 @@ class AuthSystem {
                 email: 'admin@nexos.com',
                 nombre: 'Administrador',
                 apellido: 'Sistema',
+                rut: '11.111.111-1',
                 telefono: '',
                 role: 'admin',
                 saldo: 1000000,
@@ -65,6 +69,7 @@ class AuthSystem {
                 email: 'usuario1@nexos.com',
                 nombre: 'Usuario',
                 apellido: 'Prueba',
+                rut: '12.345.678-9',
                 telefono: '123456789',
                 role: 'user',
                 saldo: 500000,
@@ -75,7 +80,7 @@ class AuthSystem {
             localStorage.setItem('nexos_users', JSON.stringify(users));
         }
 
-        // Inicializar saldo en usuarios existentes
+        // Inicializar saldo y RUT en usuarios existentes
         let cambios = false;
         users.forEach(function(user) {
             if (user.saldo === undefined) {
@@ -88,6 +93,17 @@ class AuthSystem {
                     user.saldo = 0;
                 }
                 user.transacciones = [];
+                cambios = true;
+            }
+            // Inicializar RUT si no existe
+            if (!user.rut) {
+                if (user.username === 'admin') {
+                    user.rut = '11.111.111-1';
+                } else if (user.username === 'usuario1') {
+                    user.rut = '12.345.678-9';
+                } else {
+                    user.rut = '00.000.000-0'; // RUT por defecto para usuarios antiguos
+                }
                 cambios = true;
             }
         });
@@ -222,6 +238,16 @@ class AuthSystem {
             return { success: false, message: 'El correo electrónico ya está registrado' };
         }
 
+        // Validar que el RUT sea obligatorio
+        if (!userData.rut || userData.rut.trim() === '') {
+            return { success: false, message: 'El RUT es obligatorio' };
+        }
+
+        // Validar que no exista el RUT
+        if (users.find(u => u.rut === userData.rut)) {
+            return { success: false, message: 'El RUT ya está registrado' };
+        }
+
         // Crear nuevo usuario
         const newUser = {
             id: this.generateId(),
@@ -230,6 +256,7 @@ class AuthSystem {
             email: userData.email,
             nombre: userData.nombre,
             apellido: userData.apellido,
+            rut: userData.rut,
             telefono: userData.telefono || '',
             role: userData.role || 'user', // Por defecto es 'user', nunca 'admin'
             configuraciones: this.getDefaultUserConfig(),
@@ -438,6 +465,35 @@ class AuthSystem {
         } else {
             return this.updateEmpresa(session.id, { password: newPassword });
         }
+    }
+
+    // Actualizar sesión con datos actualizados de la cuenta
+    updateSession(updatedAccount) {
+        const session = this.getSession();
+        if (!session) return { success: false, message: 'No hay sesión activa' };
+
+        // Actualizar el localStorage con los datos actualizados
+        if (session.type === 'user') {
+            const users = this.getUsers();
+            const index = users.findIndex(u => u.id === updatedAccount.id);
+            if (index !== -1) {
+                users[index] = updatedAccount;
+                localStorage.setItem('nexos_users', JSON.stringify(users));
+            }
+        } else if (session.type === 'empresa') {
+            const empresas = this.getEmpresas();
+            const index = empresas.findIndex(e => e.id === updatedAccount.id);
+            if (index !== -1) {
+                empresas[index] = updatedAccount;
+                localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
+            }
+        }
+
+        // Actualizar la sesión para reflejar cambios como username
+        session.username = updatedAccount.username;
+        localStorage.setItem('nexos_session', JSON.stringify(session));
+
+        return { success: true, message: 'Sesión actualizada' };
     }
 
     // Obtener empresas pendientes
@@ -932,6 +988,222 @@ class AuthSystem {
         }
         return [];
     }
+
+    // ===== GESTIÓN DE RESTABLECIMIENTO DE CONTRASEÑAS =====
+
+    // Obtener solicitudes de restablecimiento
+    getPasswordResetRequests() {
+        return JSON.parse(localStorage.getItem('nexos_password_reset_requests') || '[]');
+    }
+
+    // Solicitar restablecimiento por email
+    requestPasswordReset(email) {
+        if (!email) return { success: false, message: 'Debe proporcionar un correo electrónico' };
+        
+        const users = this.getUsers();
+        const empresas = this.getEmpresas();
+        const requests = this.getPasswordResetRequests();
+
+        // Buscar en usuarios
+        let account = users.find(u => u.email === email);
+        let tipo = 'user';
+        
+        if (!account) {
+            account = empresas.find(e => e.email === email);
+            tipo = 'empresa';
+        }
+
+        if (!account) {
+            return { success: false, message: 'No se encontró una cuenta con ese correo electrónico' };
+        }
+
+        const req = {
+            id: this.generateId(),
+            accountId: account.id,
+            username: account.username,
+            email: account.email,
+            displayName: tipo === 'user' ? `${account.nombre} ${account.apellido}` : account.razonSocial,
+            type: tipo,
+            status: tipo === 'empresa' ? 'pendiente' : 'aprobada',
+            createdAt: new Date().toISOString(),
+            tempPassword: null,
+            motivoRechazo: null,
+            adminId: null,
+            adminDecisionAt: null
+        };
+
+        // Si es usuario, generar contraseña temporal y aplicar de inmediato
+        if (tipo === 'user') {
+            const temp = Math.random().toString(36).slice(-8);
+            const idx = users.findIndex(u => u.id === account.id);
+            if (idx !== -1) {
+                users[idx].password = temp;
+                localStorage.setItem('nexos_users', JSON.stringify(users));
+                req.tempPassword = temp;
+                req.adminDecisionAt = new Date().toISOString();
+            }
+        }
+
+        requests.push(req);
+        localStorage.setItem('nexos_password_reset_requests', JSON.stringify(requests));
+
+        const message = tipo === 'empresa'
+            ? 'Solicitud enviada. El administrador debe aprobarla o rechazarla.'
+            : 'Solicitud procesada. Tu contraseña temporal es: ' + (req.tempPassword || 'N/A');
+
+        return { success: true, message: message, request: req };
+    }
+
+    // Aprobar solicitud de restablecimiento (solo admin)
+    approvePasswordReset(requestId, newPassword) {
+        const session = this.getSession();
+        if (!session || session.role !== 'admin') {
+            return { success: false, message: 'No tienes permisos para realizar esta acción' };
+        }
+
+        const requests = this.getPasswordResetRequests();
+        const idx = requests.findIndex(r => r.id === requestId);
+        if (idx === -1) return { success: false, message: 'Solicitud no encontrada' };
+
+        const req = requests[idx];
+
+        if (!newPassword || newPassword.length < 4) {
+            return { success: false, message: 'La contraseña debe tener al menos 4 caracteres' };
+        }
+
+        // Actualizar contraseña según tipo
+        if (req.type === 'empresa') {
+            const empresas = this.getEmpresas();
+            const eidx = empresas.findIndex(e => e.id === req.accountId);
+            if (eidx === -1) return { success: false, message: 'Empresa no encontrada' };
+            empresas[eidx].password = newPassword;
+            localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
+        } else {
+            const users = this.getUsers();
+            const uidx = users.findIndex(u => u.id === req.accountId);
+            if (uidx === -1) return { success: false, message: 'Usuario no encontrado' };
+            users[uidx].password = newPassword;
+            localStorage.setItem('nexos_users', JSON.stringify(users));
+        }
+
+        req.status = 'aprobada';
+        req.tempPassword = newPassword;
+        req.adminId = session.id;
+        req.adminDecisionAt = new Date().toISOString();
+
+        requests[idx] = req;
+        localStorage.setItem('nexos_password_reset_requests', JSON.stringify(requests));
+
+        return { success: true, message: 'Solicitud aprobada y contraseña actualizada correctamente' };
+    }
+
+    // Rechazar solicitud de restablecimiento (solo admin)
+    rejectPasswordReset(requestId, motivo) {
+        const session = this.getSession();
+        if (!session || session.role !== 'admin') {
+            return { success: false, message: 'No tienes permisos para realizar esta acción' };
+        }
+
+        const requests = this.getPasswordResetRequests();
+        const idx = requests.findIndex(r => r.id === requestId);
+        if (idx === -1) return { success: false, message: 'Solicitud no encontrada' };
+
+        const req = requests[idx];
+        req.status = 'rechazada';
+        req.motivoRechazo = motivo || 'Sin motivo especificado';
+        req.adminId = session.id;
+        req.adminDecisionAt = new Date().toISOString();
+
+        requests[idx] = req;
+        localStorage.setItem('nexos_password_reset_requests', JSON.stringify(requests));
+
+        return { success: true, message: 'Solicitud rechazada correctamente' };
+    }
+
+    // Actualizar foto de perfil
+    updateProfilePhoto(photoBase64, accountType = 'user') {
+        const session = this.getSession();
+        if (!session) {
+            return { success: false, message: 'No hay sesión activa' };
+        }
+
+        // Validar que sea una imagen base64 válida
+        if (!photoBase64 || !photoBase64.startsWith('data:image/')) {
+            return { success: false, message: 'Formato de imagen inválido' };
+        }
+
+        if (accountType === 'empresa' || session.type === 'empresa') {
+            const empresas = this.getEmpresas();
+            const idx = empresas.findIndex(e => e.id === session.id);
+            if (idx === -1) return { success: false, message: 'Empresa no encontrada' };
+            
+            empresas[idx].profilePhoto = photoBase64;
+            localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
+            
+            // Actualizar sesión
+            session.profilePhoto = photoBase64;
+            localStorage.setItem('nexos_session', JSON.stringify(session));
+            
+            return { success: true, message: 'Foto de perfil actualizada correctamente' };
+        } else {
+            const users = this.getUsers();
+            const idx = users.findIndex(u => u.id === session.id);
+            if (idx === -1) return { success: false, message: 'Usuario no encontrado' };
+            
+            users[idx].profilePhoto = photoBase64;
+            localStorage.setItem('nexos_users', JSON.stringify(users));
+            
+            // Actualizar sesión
+            session.profilePhoto = photoBase64;
+            localStorage.setItem('nexos_session', JSON.stringify(session));
+            
+            return { success: true, message: 'Foto de perfil actualizada correctamente' };
+        }
+    }
+
+    // Obtener foto de perfil del usuario actual
+    getProfilePhoto() {
+        const session = this.getSession();
+        if (!session) return null;
+        
+        return session.profilePhoto || null;
+    }
+
+    // Eliminar foto de perfil
+    removeProfilePhoto(accountType = 'user') {
+        const session = this.getSession();
+        if (!session) {
+            return { success: false, message: 'No hay sesión activa' };
+        }
+
+        if (accountType === 'empresa' || session.type === 'empresa') {
+            const empresas = this.getEmpresas();
+            const idx = empresas.findIndex(e => e.id === session.id);
+            if (idx === -1) return { success: false, message: 'Empresa no encontrada' };
+            
+            delete empresas[idx].profilePhoto;
+            localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
+            
+            // Actualizar sesión
+            delete session.profilePhoto;
+            localStorage.setItem('nexos_session', JSON.stringify(session));
+            
+            return { success: true, message: 'Foto de perfil eliminada correctamente' };
+        } else {
+            const users = this.getUsers();
+            const idx = users.findIndex(u => u.id === session.id);
+            if (idx === -1) return { success: false, message: 'Usuario no encontrado' };
+            
+            delete users[idx].profilePhoto;
+            localStorage.setItem('nexos_users', JSON.stringify(users));
+            
+            // Actualizar sesión
+            delete session.profilePhoto;
+            localStorage.setItem('nexos_session', JSON.stringify(session));
+            
+            return { success: true, message: 'Foto de perfil eliminada correctamente' };
+        }
+    }
 }
 
 // Crear instancia global
@@ -949,8 +1221,8 @@ function updateNavbar() {
         if (!account) return;
 
         const displayName = session.type === 'user' 
-            ? `${account.nombre} ${account.apellido}` 
-            : account.razonSocial;
+            ? account.username 
+            : account.nombreEmpresa || account.razonSocial;
 
         // Reemplazar botón de login con menú de usuario
         ctaButton.style.display = 'none';
@@ -991,10 +1263,25 @@ function updateNavbar() {
                     '<span>Crear Subasta</span>' +
                     '</a>';
             }
+
+            // Botón Panel Admin visible en navbar
+            let adminButtonHTML = '';
+            if (session.role === 'admin') {
+                adminButtonHTML = '<a href="admin.html" class="admin-panel-link" title="Panel de Administración">' +
+                    '<i class="fas fa-user-shield"></i>' +
+                    '<span>Admin</span>' +
+                    '</a>';
+            }
             
-            userMenu.innerHTML = walletHTML + crearSubastaHTML +
+            // Icono de usuario: foto de perfil o ícono por defecto
+            let userIcon = '<i class="fas fa-user-circle"></i>';
+            if (session.profilePhoto) {
+                userIcon = '<img src="' + session.profilePhoto + '" alt="Perfil" class="user-menu-photo">';
+            }
+            
+            userMenu.innerHTML = walletHTML + crearSubastaHTML + adminButtonHTML +
                 '<button class="user-menu-button" onclick="toggleUserMenu()">' +
-                '<i class="fas fa-user-circle"></i>' +
+                userIcon +
                 '<span>' + displayName + '</span>' +
                 '<i class="fas fa-chevron-down"></i>' +
                 '</button>' +
@@ -1052,8 +1339,9 @@ document.addEventListener('click', function(event) {
 });
 
 // Función de logout
-function logoutUser() {
-    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+async function logoutUser() {
+    const confirmed = await confirm('¿Estás seguro de que deseas cerrar sesión?');
+    if (confirmed) {
         auth.logout();
         window.location.href = 'index.html';
     }

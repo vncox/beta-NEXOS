@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subastas - Nexos</title>
-    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-    <link rel="shortcut icon" href="images/favicon.svg" type="image/svg+xml">
+    <title>Nexos</title>
+    <link rel="icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="shortcut icon" href="images/favicon.svg?v=2" type="image/svg+xml">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -21,9 +21,9 @@
             </a>
             <ul class="nav-links">
                 <li><a href="index.html">Inicio</a></li>
-                
                 <li><a href="subastas.html" class="active">Subastas</a></li>
-                
+                <li><a href="rifas.html">Rifas</a></li>
+                <li><a href="ventas.html">Ventas</a></li>
                 <li><a href="causas.html">Causas</a></li>
                 <li><a href="empresas.html">Empresas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
@@ -65,6 +65,7 @@
             <p class="copyright">© 2025 Nexos. Todos los derechos reservados.</p>
         </div>
     </footer>
+    <script src="notifications.js"></script>
     <script src="auth.js"></script>
     <script src="config.js"></script>
     <script>
@@ -213,7 +214,7 @@
                         tipo: 'subasta',
                         titulo: 'Bicicleta de Montaña Profesional',
                         descripcion: 'Bicicleta de montaña de alta gama, ideal para competencias y rutas extremas. Incluye sistema de suspensión dual, frenos de disco hidráulicos y cambios Shimano de 21 velocidades. Los fondos recaudados apoyan programas de vivienda social del Hogar de Cristo.',
-                        imagen: 'images/setup.png',
+                        imagen: 'images/bici.png',
                         precioInicial: 300000,
                         precioActual: 450000,
                         precioFinal: 450000,
@@ -383,6 +384,122 @@
 
                 grid.appendChild(card);
             });
+        }
+
+        // Función para inicializar subastas de ejemplo si no existen
+        function inicializarSubastasEjemplo() {
+            console.log('=== INICIALIZANDO SUBASTAS DE EJEMPLO ===');
+            let subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
+            console.log('Subastas actuales en localStorage:', subastas.length);
+            
+            // IDs de las subastas de ejemplo
+            const idsEjemplo = ['prueba_2', 'prueba_3', 'prueba_6', 'prueba_7'];
+            console.log('Buscando IDs:', idsEjemplo);
+            
+            // Verificar cuáles faltan
+            const idsFaltantes = idsEjemplo.filter(function(id) {
+                return !subastas.find(function(s) { return s.id === id; });
+            });
+            
+            console.log('IDs faltantes:', idsFaltantes);
+            
+            if (idsFaltantes.length === 0) {
+                console.log('Todas las subastas de ejemplo ya existen');
+                return; // Ya existen todas
+            }
+            
+            const fechaInicio = new Date();
+            const fechaFin = new Date();
+            fechaFin.setDate(fechaFin.getDate() + 7);
+            
+            const subastasEjemplo = {
+                'prueba_2': {
+                    id: 'prueba_2',
+                    tipo: 'subasta',
+                    titulo: 'Figura Coleccionable Limitada',
+                    descripcion: 'Pieza única de colección, edición limitada para apoyar a niños con enfermedades raras. Esta figura representa esperanza y solidaridad.',
+                    imagen: 'images/coleccionable.png',
+                    precioInicial: 80000,
+                    precioActual: 80000,
+                    fechaInicio: fechaInicio.toISOString(),
+                    fechaFin: fechaFin.toISOString(),
+                    estado: 'activa',
+                    empresaId: '76543210-9',
+                    empresaNombre: 'Asociación Duchenne',
+                    pujas: [],
+                    participantes: []
+                },
+                'prueba_3': {
+                    id: 'prueba_3',
+                    tipo: 'subasta',
+                    titulo: 'Experiencia VIP en Evento',
+                    descripcion: 'Acceso exclusivo a evento deportivo con meet & greet, entradas preferenciales y experiencia inolvidable. Todo lo recaudado va para Coaniquem.',
+                    imagen: 'images/evento.png',
+                    precioInicial: 150000,
+                    precioActual: 150000,
+                    fechaInicio: fechaInicio.toISOString(),
+                    fechaFin: fechaFin.toISOString(),
+                    estado: 'activa',
+                    empresaId: '87654321-0',
+                    empresaNombre: 'Coaniquem',
+                    pujas: [],
+                    participantes: []
+                },
+                'prueba_6': {
+                    id: 'prueba_6',
+                    tipo: 'subasta',
+                    titulo: 'Equipo Tecnológico Última Generación',
+                    descripcion: 'Laptop gaming de alta gama, perfecta para estudios y entretenimiento. Apoya la educación de niños en situación vulnerable.',
+                    imagen: 'images/laptop.png',
+                    precioInicial: 500000,
+                    precioActual: 500000,
+                    fechaInicio: fechaInicio.toISOString(),
+                    fechaFin: fechaFin.toISOString(),
+                    estado: 'activa',
+                    empresaId: '98765432-1',
+                    empresaNombre: 'Techo para Chile',
+                    pujas: [],
+                    participantes: []
+                },
+                'prueba_7': {
+                    id: 'prueba_7',
+                    tipo: 'subasta',
+                    titulo: 'Clase de Música con Músico Nacional',
+                    descripcion: 'Experiencia única de aprender música con reconocido artista nacional. Sesión privada de 2 horas incluyendo técnicas y consejos profesionales.',
+                    imagen: 'images/pintura.png',
+                    precioInicial: 120000,
+                    precioActual: 120000,
+                    fechaInicio: fechaInicio.toISOString(),
+                    fechaFin: fechaFin.toISOString(),
+                    estado: 'activa',
+                    empresaId: '11223344-5',
+                    empresaNombre: 'Fundación Musical',
+                    pujas: [],
+                    participantes: []
+                }
+            };
+            
+            // Agregar solo las que faltan
+            idsFaltantes.forEach(function(id) {
+                if (subastasEjemplo[id]) {
+                    console.log('Agregando subasta:', id, subastasEjemplo[id].titulo);
+                    subastas.push(subastasEjemplo[id]);
+                }
+            });
+            
+            localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
+            console.log('✅ Subastas de ejemplo guardadas en localStorage:', idsFaltantes);
+            console.log('Total de subastas ahora:', subastas.length);
+            
+            // Recargar las subastas en la página
+            cargarSubastas();
+        }
+        
+        // Inicializar al cargar la página
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', inicializarSubastasEjemplo);
+        } else {
+            inicializarSubastasEjemplo();
         }
     </script>
 </body>

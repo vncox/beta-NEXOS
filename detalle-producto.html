@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle Producto - Nexos</title>
+    <link rel="icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="shortcut icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="mercadopago.js"></script>
+    <style>
+        .detalle-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 3rem;
+        }
+
+        .producto-galeria {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .imagen-principal {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+        }
+
+        .imagenes-thumbnails {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .thumbnail:hover,
+        .thumbnail.activa {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .info-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .producto-header {
+            margin-bottom: 2rem;
+        }
+
+        .categoria-badge {
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .producto-titulo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 1rem 0;
+            line-height: 1.2;
+        }
+
+        .producto-empresa {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .precio-section {
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
+
+        .precio-original {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .precio-actual {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .descuento-badge {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-left: 1rem;
+        }
+
+        .stock-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        .stock-indicator {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .cantidad-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .cantidad-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cantidad-btn:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+        }
+
+        .cantidad-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .cantidad-input {
+            width: 100px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+        }
+
+        .btn-comprar {
+            width: 100%;
+            padding: 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .btn-comprar:hover:not(:disabled) {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-comprar:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .caracteristicas-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .caracteristica {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .caracteristica-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .caracteristica-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.3rem;
+        }
+
+        .caracteristica-valor {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .tabs-container {
+            margin-top: 3rem;
+        }
+
+        .tabs-header {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 3px solid #e0e0e0;
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: -3px;
+        }
+
+        .tab-btn.activo {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.activo {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-info {
+            padding: 1.5rem;
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .alert-info i {
+            color: #1976d2;
+            margin-right: 0.8rem;
+        }
+
+        .resumen-compra {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+        }
+
+        .resumen-linea {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .resumen-linea:last-child {
+            border-bottom: none;
+            padding-top: 1rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 968px) {
+            .detalle-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .producto-titulo {
+                font-size: 2rem;
+            }
+            
+            .caracteristicas-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="rifas.html">Rifas</a></li>
+                <li><a href="ventas.html" class="active">Ventas</a></li>
+                <li><a href="causas.html">Causas</a></li>
+                <li><a href="empresas.html">Empresas</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+            </ul>
+            <button class="cta-button" onclick="window.location.href='login.html'">Iniciar Sesión</button>
+        </nav>
+    </header>
+
+    <div class="detalle-container">
+        <!-- Columna principal -->
+        <div>
+            <button onclick="window.location.href='ventas.html'" style="background: none; border: none; color: var(--primary); font-size: 1rem; cursor: pointer; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-arrow-left"></i> Volver a la tienda
+            </button>
+
+            <div class="producto-galeria">
+                <img id="imagenPrincipal" class="imagen-principal" src="" alt="Producto">
+                <div class="imagenes-thumbnails" id="thumbnailsContainer">
+                    <!-- Se llenan con JavaScript -->
+                </div>
+            </div>
+
+            <!-- Tabs de información -->
+            <div class="tabs-container">
+                <div class="tabs-header">
+                    <button class="tab-btn activo" onclick="cambiarTab('descripcion')">
+                        <i class="fas fa-align-left"></i> Descripción
+                    </button>
+                    <button class="tab-btn" onclick="cambiarTab('especificaciones')">
+                        <i class="fas fa-list"></i> Especificaciones
+                    </button>
+                    <button class="tab-btn" onclick="cambiarTab('envio')">
+                        <i class="fas fa-truck"></i> Envío
+                    </button>
+                </div>
+
+                <div class="info-card">
+                    <div id="tab-descripcion" class="tab-content activo">
+                        <h3 style="margin-top: 0;">Descripción del Producto</h3>
+                        <p id="productoDescripcionCompleta" style="line-height: 1.8; color: #666; font-size: 1.05rem;"></p>
+                    </div>
+
+                    <div id="tab-especificaciones" class="tab-content">
+                        <h3 style="margin-top: 0;">Especificaciones Técnicas</h3>
+                        <div id="especificacionesContainer"></div>
+                    </div>
+
+                    <div id="tab-envio" class="tab-content">
+                        <h3 style="margin-top: 0;">Información de Envío</h3>
+                        <div style="line-height: 2; color: #666;">
+                            <p><i class="fas fa-check-circle" style="color: #27ae60;"></i> Envío a todo Chile</p>
+                            <p><i class="fas fa-check-circle" style="color: #27ae60;"></i> Despacho en 24-48 horas hábiles</p>
+                            <p><i class="fas fa-check-circle" style="color: #27ae60;"></i> Seguimiento en línea de tu pedido</p>
+                            <p><i class="fas fa-check-circle" style="color: #27ae60;"></i> Garantía de satisfacción</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna lateral - Compra -->
+        <div>
+            <div class="info-card">
+                <div class="producto-header">
+                    <div class="categoria-badge" id="productoCategoria">
+                        <!-- Se llena con JavaScript -->
+                    </div>
+                    <h1 class="producto-titulo" id="productoTitulo"></h1>
+                    <div class="producto-empresa">
+                        <i class="fas fa-store"></i>
+                        <span id="productoEmpresa"></span>
+                    </div>
+                </div>
+
+                <div class="precio-section">
+                    <div id="precioOriginalContainer" style="display: none;">
+                        <div class="precio-original" id="precioOriginal"></div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div class="precio-actual" id="precioActual"></div>
+                        <div id="descuentoBadge" style="display: none;" class="descuento-badge"></div>
+                    </div>
+                    
+                    <div class="stock-info">
+                        <div class="stock-indicator" id="stockIndicator">
+                            <!-- Se llena con JavaScript -->
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 700; font-size: 1.1rem; color: #333;" id="stockTexto"></div>
+                            <div style="color: #666; font-size: 0.9rem;" id="stockMensaje"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="caracteristicas-grid">
+                    <div class="caracteristica">
+                        <div class="caracteristica-icon">📦</div>
+                        <div class="caracteristica-label">Disponibles</div>
+                        <div class="caracteristica-valor" id="stockDisponible">0</div>
+                    </div>
+                    <div class="caracteristica">
+                        <div class="caracteristica-icon">🚚</div>
+                        <div class="caracteristica-label">Envío</div>
+                        <div class="caracteristica-valor">Gratis</div>
+                    </div>
+                    <div class="caracteristica">
+                        <div class="caracteristica-icon">✅</div>
+                        <div class="caracteristica-label">Garantía</div>
+                        <div class="caracteristica-valor">30 días</div>
+                    </div>
+                    <div class="caracteristica">
+                        <div class="caracteristica-icon">⭐</div>
+                        <div class="caracteristica-label">Calidad</div>
+                        <div class="caracteristica-valor">Premium</div>
+                    </div>
+                </div>
+
+                <div class="cantidad-selector">
+                    <label style="font-weight: 600; color: #333; font-size: 1.1rem;">Cantidad:</label>
+                    <button class="cantidad-btn" onclick="cambiarCantidad(-1)">-</button>
+                    <input type="number" id="cantidadInput" class="cantidad-input" value="1" min="1" readonly>
+                    <button class="cantidad-btn" onclick="cambiarCantidad(1)">+</button>
+                </div>
+
+                <div class="resumen-compra">
+                    <div class="resumen-linea">
+                        <span>Precio unitario:</span>
+                        <span id="resumenPrecioUnitario">$0</span>
+                    </div>
+                    <div class="resumen-linea">
+                        <span>Cantidad:</span>
+                        <span id="resumenCantidad">1</span>
+                    </div>
+                    <div class="resumen-linea">
+                        <span>Envío:</span>
+                        <span style="color: #27ae60; font-weight: 600;">GRATIS</span>
+                    </div>
+                    <div class="resumen-linea">
+                        <span>Total:</span>
+                        <span style="color: var(--primary);" id="resumenTotal">$0</span>
+                    </div>
+                </div>
+
+                <button id="btnComprar" class="btn-comprar" onclick="comprarProducto()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Comprar Ahora</span>
+                </button>
+
+                <div class="alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Compra solidaria:</strong> Al comprar este producto, estás apoyando causas sociales importantes.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-heart"></i> Nexos</h3>
+                <p>Conectando empresas con causas que transforman vidas</p>
+            </div>
+            <div class="footer-section">
+                <h4>Enlaces</h4>
+                <a href="index.html">Inicio</a>
+                <a href="subastas.html">Subastas</a>
+                <a href="rifas.html">Rifas</a>
+                <a href="ventas.html">Ventas</a>
+            </div>
+            <div class="footer-section">
+                <h4>Contacto</h4>
+                <p><i class="fas fa-envelope"></i> info@nexos.cl</p>
+                <p><i class="fas fa-phone"></i> +56 9 1234 5678</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Nexos. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script src="notify.js"></script>
+    <script>
+        let productoActual = null;
+        let cantidadSeleccionada = 1;
+        const urlParams = new URLSearchParams(window.location.search);
+        const productoId = urlParams.get('id');
+
+        // Cargar navbar dinámico
+        if (auth.isLoggedIn()) {
+            const session = auth.getSession();
+            const navbar = document.querySelector('.navbar');
+            const ctaButton = navbar.querySelector('.cta-button');
+            
+            if (session.role === 'admin') {
+                ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'admin.html\'">Panel Admin</button>';
+            } else if (session.role === 'empresa') {
+                ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil-empresa.html\'">Mi Perfil</button>';
+            } else {
+                ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil.html\'">Mi Perfil</button>';
+            }
+        }
+
+        function cargarProducto() {
+            if (!productoId) {
+                notify.error('Producto no encontrado');
+                setTimeout(() => window.location.href = 'ventas.html', 2000);
+                return;
+            }
+
+            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
+            productoActual = productos.find(p => p.id === productoId);
+
+            if (!productoActual) {
+                notify.error('Producto no encontrado');
+                setTimeout(() => window.location.href = 'ventas.html', 2000);
+                return;
+            }
+
+            // Información básica
+            document.getElementById('productoTitulo').textContent = productoActual.nombre;
+            document.getElementById('productoEmpresa').textContent = productoActual.empresaNombre || 'Empresa';
+            document.getElementById('productoCategoria').innerHTML = getCategoriaIcon(productoActual.categoria) + ' ' + (productoActual.categoria || 'General');
+            
+            // Imágenes
+            const imagenPrincipal = document.getElementById('imagenPrincipal');
+            imagenPrincipal.src = productoActual.imagen || 'images/placeholder-producto.jpg';
+            imagenPrincipal.onerror = () => imagenPrincipal.src = 'images/placeholder-producto.jpg';
+
+            // Thumbnails (si hay imágenes adicionales)
+            const thumbnailsContainer = document.getElementById('thumbnailsContainer');
+            if (productoActual.imagenes && productoActual.imagenes.length > 0) {
+                thumbnailsContainer.innerHTML = productoActual.imagenes.map((img, index) => `
+                    <img src="${img}" class="thumbnail ${index === 0 ? 'activa' : ''}" 
+                         onclick="cambiarImagenPrincipal('${img}', this)"
+                         onerror="this.src='images/placeholder-producto.jpg'">
+                `).join('');
+            } else {
+                thumbnailsContainer.style.display = 'none';
+            }
+
+            // Precios
+            const precioActualEl = document.getElementById('precioActual');
+            precioActualEl.textContent = '$' + productoActual.precio.toLocaleString('es-CL');
+            
+            if (productoActual.precioOriginal && productoActual.precioOriginal > productoActual.precio) {
+                const descuento = Math.round(((productoActual.precioOriginal - productoActual.precio) / productoActual.precioOriginal) * 100);
+                document.getElementById('precioOriginalContainer').style.display = 'block';
+                document.getElementById('precioOriginal').textContent = '$' + productoActual.precioOriginal.toLocaleString('es-CL');
+                document.getElementById('descuentoBadge').style.display = 'inline-block';
+                document.getElementById('descuentoBadge').textContent = '-' + descuento + '%';
+            }
+
+            // Stock
+            actualizarStock();
+
+            // Descripción
+            document.getElementById('productoDescripcionCompleta').textContent = productoActual.descripcion || 'Sin descripción disponible.';
+
+            // Especificaciones
+            const especContainer = document.getElementById('especificacionesContainer');
+            if (productoActual.especificaciones) {
+                especContainer.innerHTML = Object.entries(productoActual.especificaciones).map(([key, value]) => `
+                    <div style="padding: 1rem; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between;">
+                        <strong>${key}:</strong>
+                        <span style="color: #666;">${value}</span>
+                    </div>
+                `).join('');
+            } else {
+                especContainer.innerHTML = '<p style="color: #999;">No hay especificaciones disponibles.</p>';
+            }
+
+            actualizarResumen();
+        }
+
+        function actualizarStock() {
+            const stock = productoActual.stock || 0;
+            const stockIndicator = document.getElementById('stockIndicator');
+            const stockTexto = document.getElementById('stockTexto');
+            const stockMensaje = document.getElementById('stockMensaje');
+            const stockDisponible = document.getElementById('stockDisponible');
+            const btnComprar = document.getElementById('btnComprar');
+            const cantidadInput = document.getElementById('cantidadInput');
+
+            stockDisponible.textContent = stock;
+
+            if (stock === 0) {
+                stockIndicator.style.background = '#95a5a6';
+                stockIndicator.textContent = '✕';
+                stockTexto.textContent = 'Agotado';
+                stockMensaje.textContent = 'No disponible actualmente';
+                btnComprar.disabled = true;
+                btnComprar.innerHTML = '<i class="fas fa-times-circle"></i> <span>Producto Agotado</span>';
+                cantidadInput.disabled = true;
+            } else if (stock <= 5) {
+                stockIndicator.style.background = '#e74c3c';
+                stockIndicator.textContent = '!';
+                stockTexto.textContent = 'Stock Bajo';
+                stockMensaje.textContent = `Solo ${stock} unidades disponibles`;
+                btnComprar.disabled = false;
+                cantidadInput.max = stock;
+            } else if (stock <= 20) {
+                stockIndicator.style.background = '#f39c12';
+                stockIndicator.textContent = '●';
+                stockTexto.textContent = 'Stock Limitado';
+                stockMensaje.textContent = `${stock} unidades disponibles`;
+                btnComprar.disabled = false;
+                cantidadInput.max = stock;
+            } else {
+                stockIndicator.style.background = '#27ae60';
+                stockIndicator.textContent = '✓';
+                stockTexto.textContent = 'Disponible';
+                stockMensaje.textContent = 'En stock';
+                btnComprar.disabled = false;
+                cantidadInput.max = stock;
+            }
+        }
+
+        function cambiarImagenPrincipal(src, thumbnail) {
+            document.getElementById('imagenPrincipal').src = src;
+            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('activa'));
+            thumbnail.classList.add('activa');
+        }
+
+        function cambiarCantidad(delta) {
+            const input = document.getElementById('cantidadInput');
+            const stock = productoActual.stock || 0;
+            let nuevaCantidad = cantidadSeleccionada + delta;
+
+            if (nuevaCantidad < 1) nuevaCantidad = 1;
+            if (nuevaCantidad > stock) nuevaCantidad = stock;
+
+            cantidadSeleccionada = nuevaCantidad;
+            input.value = nuevaCantidad;
+            actualizarResumen();
+        }
+
+        function actualizarResumen() {
+            const precioUnitario = productoActual.precio;
+            const total = precioUnitario * cantidadSeleccionada;
+
+            document.getElementById('resumenPrecioUnitario').textContent = '$' + precioUnitario.toLocaleString('es-CL');
+            document.getElementById('resumenCantidad').textContent = cantidadSeleccionada;
+            document.getElementById('resumenTotal').textContent = '$' + total.toLocaleString('es-CL');
+        }
+
+        async function comprarProducto() {
+            if (!auth.isLoggedIn()) {
+                notify.error('Debes iniciar sesión para comprar');
+                setTimeout(() => window.location.href = 'login.html', 1500);
+                return;
+            }
+
+            const session = auth.getSession();
+            if (session.role === 'admin') {
+                notify.error('Los administradores no pueden comprar productos');
+                return;
+            }
+
+            if (productoActual.stock < cantidadSeleccionada) {
+                notify.error('Stock insuficiente');
+                return;
+            }
+
+            // Procesar pago con Mercado Pago
+            const resultado = await MercadoPagoPayment.procesarPagoProducto(
+                productoActual.id,
+                cantidadSeleccionada
+            );
+
+            if (!resultado || !resultado.success) {
+                notify.error('Pago cancelado o rechazado');
+                return;
+            }
+
+            // Pago exitoso
+            notify.success(`¡Pago aprobado! Has adquirido ${cantidadSeleccionada} unidad(es) 🎉`);
+            
+            // Resetear cantidad y actualizar vista
+            cantidadSeleccionada = 1;
+            document.getElementById('cantidadInput').value = 1;
+            
+            // Recargar producto para mostrar cambios
+            cargarProducto();
+        }
+
+        function cambiarTab(tab) {
+            // Actualizar botones
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('activo'));
+            event.target.closest('.tab-btn').classList.add('activo');
+
+            // Actualizar contenido
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('activo'));
+            document.getElementById('tab-' + tab).classList.add('activo');
+        }
+
+        function getCategoriaIcon(categoria) {
+            const iconos = {
+                'Electrónica': '💻',
+                'Ropa': '👕',
+                'Hogar': '🏠',
+                'Alimentos': '🍕',
+                'Libros': '📚',
+                'Artesanías': '🎨',
+                'Otros': '📦'
+            };
+            return iconos[categoria] || '📦';
+        }
+
+        // Cargar producto al iniciar
+        cargarProducto();
+    </script>
+</body>
+</html>

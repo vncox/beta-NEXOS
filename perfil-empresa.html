@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de Empresa - Nexos</title>
+    <title>Nexos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-    <link rel="shortcut icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="shortcut icon" href="images/favicon.svg?v=2" type="image/svg+xml">
     <style>
         .user-menu {
             position: relative;
@@ -82,6 +84,47 @@
             font-size: 3rem;
             color: white;
             font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        .profile-avatar::after {
+            content: '\f030';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .profile-avatar:hover::after {
+            opacity: 1;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .profile-avatar-text {
+            position: relative;
+            z-index: 1;
+        }
+        #photoInputEmpresa {
+            display: none;
         }
         .profile-info h1 {
             color: var(--primary);
@@ -152,10 +195,14 @@
             border-radius: 10px;
             font-size: 1rem;
             transition: border-color 0.3s;
+            font-family: inherit;
         }
         .form-input:focus {
             outline: none;
             border-color: var(--primary);
+        }
+        select.form-input {
+            cursor: pointer;
         }
         .btn-primary {
             padding: 0.9rem 2rem;
@@ -297,6 +344,89 @@
             color: #dc3545;
             font-weight: 600;
         }
+        
+        /* Estilos del Modal de Retiro */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Estilos para seguridad */
+        .text-success { color: #28a745 !important; }
+        .text-danger { color: #dc3545 !important; }
+        #password-requirements-empresa li { transition: all 0.3s ease; }
+        #password-requirements-empresa li i { width: 16px; display: inline-block; }
+        
+        /* Toggle Switch para 2FA */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider-switch {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+        }
+        .slider-switch:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+        }
+        input:checked + .slider-switch {
+            background-color: var(--primary);
+        }
+        input:checked + .slider-switch:before {
+            transform: translateX(26px);
+        }
+        .slider-switch.round {
+            border-radius: 34px;
+        }
+        .slider-switch.round:before {
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body>
@@ -309,6 +439,8 @@
             <ul class="nav-links">
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="rifas.html">Rifas</a></li>
+                <li><a href="ventas.html">Ventas</a></li>
                 <li><a href="causas.html">Causas</a></li>
                 <li><a href="empresas.html">Empresas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
@@ -319,7 +451,10 @@
 
     <div class="profile-container">
         <div class="profile-header">
-            <div class="profile-avatar" id="avatarInitials">E</div>
+            <div class="profile-avatar" id="avatarInitials" onclick="document.getElementById('photoInputEmpresa').click()" title="Haz clic para cambiar tu foto de perfil">
+                <span class="profile-avatar-text">E</span>
+            </div>
+            <input type="file" id="photoInputEmpresa" accept="image/*" onchange="cambiarFotoPerfil(event)">
             <div class="profile-info">
                 <h1 id="empresaName">Empresa</h1>
                 <p><i class="fas fa-id-card"></i> RUT: <span id="empresaRut">12.345.678-9</span></p>
@@ -349,38 +484,130 @@
 
         <!-- Tab: Datos de la Empresa -->
         <div id="tab-datos" class="tab-content active">
+            <!-- Información de la Empresa -->
             <div class="card">
                 <h2><i class="fas fa-building"></i> Información de la Empresa</h2>
                 <div id="alertDatos" class="alert"></div>
-                <form id="formDatos" onsubmit="actualizarDatos(event)">
+                <form id="formDatos" onsubmit="actualizarDatosEmpresa(event)">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label">Razón Social</label>
-                            <input type="text" name="razonSocial" id="inputRazonSocial" class="form-input" required>
+                            <label class="form-label">Razón Social / Nombre de Fantasía *</label>
+                            <input type="text" name="nombreEmpresa" id="inputNombreEmpresa" class="form-input" required placeholder="Ej: Empresa ABC S.A.">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">RUT</label>
-                            <input type="text" name="rut" id="inputRut" class="form-input" required readonly>
+                            <label class="form-label">RUT Empresa *</label>
+                            <input type="text" name="rut" id="inputRut" class="form-input" required readonly style="background: #f8f9fa; cursor: not-allowed;" placeholder="76.123.456-7">
+                            <small style="color: #666; font-size: 0.875rem;">El RUT no se puede modificar</small>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Email Corporativo</label>
-                            <input type="email" name="email" id="inputEmail" class="form-input" required>
+                            <label class="form-label">Email Corporativo *</label>
+                            <input type="email" name="email" id="inputEmail" class="form-input" required placeholder="contacto@empresa.cl">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Teléfono</label>
-                            <input type="tel" name="telefono" id="inputTelefono" class="form-input">
+                            <label class="form-label">Teléfono Corporativo *</label>
+                            <input type="tel" name="telefono" id="inputTelefono" class="form-input" required placeholder="+56 2 1234 5678" pattern="[+]?[0-9\s]{8,15}">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Dirección</label>
-                            <input type="text" name="direccion" id="inputDireccion" class="form-input">
+                            <label class="form-label">Giro / Rubro *</label>
+                            <input type="text" name="giro" id="inputGiro" class="form-input" required placeholder="Ej: Tecnología, Retail, Alimentos">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Sitio Web</label>
-                            <input type="url" name="sitioWeb" id="inputSitioWeb" class="form-input">
+                            <input type="url" name="sitioWeb" id="inputSitioWeb" class="form-input" placeholder="https://www.empresa.cl">
                         </div>
                     </div>
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </form>
+            </div>
+
+            <!-- Dirección Corporativa -->
+            <div class="card">
+                <h2><i class="fas fa-map-marker-alt"></i> Dirección Corporativa</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">
+                    <i class="fas fa-info-circle"></i> Dirección principal de la empresa para facturación y comunicaciones.
+                </p>
+                <div id="alertDireccionEmpresa" class="alert"></div>
+                <form id="formDireccionEmpresa" onsubmit="actualizarDireccionEmpresa(event)">
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label">Dirección *</label>
+                            <input type="text" name="direccion" id="inputDireccionEmpresa" class="form-input" required placeholder="Calle, número, oficina/piso">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Comuna *</label>
+                            <input type="text" name="comuna" id="inputComunaEmpresa" class="form-input" required placeholder="Ej: Las Condes">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Ciudad *</label>
+                            <input type="text" name="ciudad" id="inputCiudadEmpresa" class="form-input" required placeholder="Ej: Santiago">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Región *</label>
+                            <select name="region" id="inputRegionEmpresa" class="form-input" required>
+                                <option value="">Selecciona una región</option>
+                                <option value="Región de Arica y Parinacota">Región de Arica y Parinacota</option>
+                                <option value="Región de Tarapacá">Región de Tarapacá</option>
+                                <option value="Región de Antofagasta">Región de Antofagasta</option>
+                                <option value="Región de Atacama">Región de Atacama</option>
+                                <option value="Región de Coquimbo">Región de Coquimbo</option>
+                                <option value="Región de Valparaíso">Región de Valparaíso</option>
+                                <option value="Región Metropolitana">Región Metropolitana</option>
+                                <option value="Región del Libertador General Bernardo O'Higgins">Región del Libertador Gral. B. O'Higgins</option>
+                                <option value="Región del Maule">Región del Maule</option>
+                                <option value="Región de Ñuble">Región de Ñuble</option>
+                                <option value="Región del Biobío">Región del Biobío</option>
+                                <option value="Región de La Araucanía">Región de La Araucanía</option>
+                                <option value="Región de Los Ríos">Región de Los Ríos</option>
+                                <option value="Región de Los Lagos">Región de Los Lagos</option>
+                                <option value="Región de Aysén">Región de Aysén</option>
+                                <option value="Región de Magallanes">Región de Magallanes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Código Postal</label>
+                            <input type="text" name="codigoPostal" id="inputCodigoPostalEmpresa" class="form-input" placeholder="Ej: 7550000" pattern="[0-9]{7}">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Guardar Dirección
+                    </button>
+                </form>
+            </div>
+
+            <!-- Representante Legal -->
+            <div class="card">
+                <h2><i class="fas fa-user-tie"></i> Representante Legal</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">
+                    <i class="fas fa-info-circle"></i> Información del representante legal de la empresa.
+                </p>
+                <div id="alertRepresentante" class="alert"></div>
+                <form id="formRepresentante" onsubmit="actualizarRepresentante(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nombre Completo *</label>
+                            <input type="text" name="nombreRepresentante" id="inputNombreRepresentante" class="form-input" required placeholder="Ej: Juan Pérez González">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">RUT Representante *</label>
+                            <input type="text" name="rutRepresentante" id="inputRutRepresentante" class="form-input" required placeholder="12.345.678-9">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email *</label>
+                            <input type="email" name="emailRepresentante" id="inputEmailRepresentante" class="form-input" required placeholder="representante@empresa.cl">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Teléfono *</label>
+                            <input type="tel" name="telefonoRepresentante" id="inputTelefonoRepresentante" class="form-input" required placeholder="+56 9 1234 5678">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cargo</label>
+                            <input type="text" name="cargoRepresentante" id="inputCargoRepresentante" class="form-input" placeholder="Ej: Gerente General, CEO">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Guardar Representante
                     </button>
                 </form>
             </div>
@@ -401,8 +628,11 @@
                         <p class="balance-amount" id="saldoActual">$0</p>
                     </div>
                 </div>
-                <div style="text-align: center; margin-top: 1.5rem;">
-                    <a href="#" onclick="cambiarTab('subastas', null); return false;" class="btn-primary" style="display: inline-block; text-decoration: none;">
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                    <button onclick="mostrarModalRetiro()" class="btn-secondary" style="flex: 1; min-width: 200px;">
+                        <i class="fas fa-money-bill-wave"></i> Retirar Dinero
+                    </button>
+                    <a href="#" onclick="cambiarTab('subastas', null); return false;" class="btn-primary" style="flex: 1; min-width: 200px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
                         <i class="fas fa-plus-circle"></i> Crear Nueva Subasta/Rifa
                     </a>
                 </div>
@@ -480,58 +710,357 @@
             </div>
         </div>
 
-        <!-- Tab: Subastas/Rifas -->
-        <div id="tab-subastas" class="tab-content">
-            <div class="card">
-                <h2><i class="fas fa-plus-circle"></i> Crear Nueva Subasta/Rifa/Producto</h2>
-                <div id="alertSubasta" class="alert"></div>
-                <form id="formSubasta" onsubmit="crearSubasta(event)">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">Tipo</label>
-                            <select name="tipo" class="form-input" required>
-                                <option value="subasta">Subasta</option>
-                                <option value="rifa">Rifa</option>
-                                <option value="venta">Venta de Producto</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Título</label>
-                            <input type="text" name="titulo" class="form-input" required placeholder="Ej: iPhone 14 Pro Max">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Precio Inicial ($)</label>
-                            <input type="number" name="precioInicial" class="form-input" required min="0" placeholder="10000">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Fecha de Fin</label>
-                            <input type="datetime-local" name="fechaFin" class="form-input" required>
-                        </div>
-                    </div>
+        <!-- Modal de Retiro -->
+        <div id="modalRetiro" class="modal-overlay" style="display: none;">
+            <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="margin: 0;"><i class="fas fa-university"></i> Solicitar Retiro</h2>
+                    <button onclick="cerrarModalRetiro()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <p style="margin: 0; color: #666;">
+                        <strong>Saldo disponible:</strong> <span id="saldoDisponibleRetiro" style="color: #4a90e2; font-size: 1.2rem; font-weight: 700;">$0</span>
+                    </p>
+                </div>
+
+                <form id="formRetiro" onsubmit="procesarRetiro(event)">
+                    <!-- Monto a retirar -->
                     <div class="form-group">
-                        <label class="form-label">Descripción</label>
-                        <textarea name="descripcion" class="form-input" rows="4" required placeholder="Describe el producto o servicio..."></textarea>
+                        <label class="form-label"><i class="fas fa-dollar-sign"></i> Monto a Retirar *</label>
+                        <input type="number" id="montoRetiro" name="monto" class="form-input" min="1000" step="1000" required placeholder="Ej: 50000">
+                        <small style="color: #666;">Monto mínimo: $1,000</small>
                     </div>
+
+                    <!-- Banco -->
                     <div class="form-group">
-                        <label class="form-label">URL de Imagen (opcional)</label>
-                        <input type="url" name="imagen" class="form-input" placeholder="https://ejemplo.com/imagen.jpg">
+                        <label class="form-label"><i class="fas fa-university"></i> Banco *</label>
+                        <select name="banco" class="form-input" required>
+                            <option value="">Seleccione un banco</option>
+                            <option value="Banco de Chile">Banco de Chile</option>
+                            <option value="Banco Estado">Banco Estado</option>
+                            <option value="Banco Santander">Banco Santander</option>
+                            <option value="Banco BCI">Banco BCI</option>
+                            <option value="Banco Scotiabank">Banco Scotiabank</option>
+                            <option value="Banco Itaú">Banco Itaú</option>
+                            <option value="Banco Security">Banco Security</option>
+                            <option value="Banco Falabella">Banco Falabella</option>
+                            <option value="Banco Ripley">Banco Ripley</option>
+                            <option value="Banco Consorcio">Banco Consorcio</option>
+                            <option value="Banco BICE">Banco BICE</option>
+                            <option value="Banco Internacional">Banco Internacional</option>
+                            <option value="Banco BTG Pactual">Banco BTG Pactual</option>
+                            <option value="Coopeuch">Coopeuch</option>
+                            <option value="Prepago Los Héroes">Prepago Los Héroes</option>
+                            <option value="Tenpo">Tenpo</option>
+                            <option value="Mercado Pago">Mercado Pago</option>
+                        </select>
                     </div>
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-plus"></i> Crear Subasta
-                    </button>
+
+                    <!-- Tipo de Cuenta -->
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-wallet"></i> Tipo de Cuenta *</label>
+                        <select name="tipoCuenta" class="form-input" required>
+                            <option value="">Seleccione tipo de cuenta</option>
+                            <option value="Cuenta Corriente">Cuenta Corriente</option>
+                            <option value="Cuenta Vista">Cuenta Vista</option>
+                            <option value="Cuenta de Ahorro">Cuenta de Ahorro</option>
+                            <option value="Cuenta RUT">Cuenta RUT</option>
+                        </select>
+                    </div>
+
+                    <!-- Número de Cuenta -->
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-hashtag"></i> Número de Cuenta *</label>
+                        <input type="text" name="numeroCuenta" class="form-input" required placeholder="Ej: 12345678" pattern="[0-9]{8,20}" title="Solo números, mínimo 8 dígitos">
+                    </div>
+
+                    <!-- RUT del Titular -->
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-id-card"></i> RUT de la Empresa/Titular *</label>
+                        <input type="text" name="rutTitular" class="form-input" required placeholder="Ej: 12.345.678-9" pattern="[0-9]{1,2}\.[0-9]{3}\.[0-9]{3}-[0-9Kk]{1}">
+                        <small style="color: #666;">Formato: 12.345.678-9</small>
+                    </div>
+
+                    <!-- Nombre del Titular -->
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-user"></i> Nombre del Titular/Razón Social *</label>
+                        <input type="text" name="nombreTitular" class="form-input" required placeholder="Ej: Fundación Ejemplo SpA">
+                    </div>
+
+                    <!-- Email de Confirmación -->
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-envelope"></i> Email de Confirmación *</label>
+                        <input type="email" name="emailConfirmacion" class="form-input" required placeholder="ejemplo@correo.com">
+                        <small style="color: #666;">Enviaremos el comprobante a este correo</small>
+                    </div>
+
+                    <!-- Nota adicional -->
+                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin: 1.5rem 0; border-radius: 4px;">
+                        <p style="margin: 0; color: #856404; font-size: 0.9rem;">
+                            <i class="fas fa-info-circle"></i> <strong>Importante:</strong> El retiro será procesado en 1-2 días hábiles. Recibirás una confirmación por email.
+                        </p>
+                    </div>
+
+                    <!-- Botones -->
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                        <button type="button" onclick="cerrarModalRetiro()" class="btn-secondary" style="flex: 1;">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn-primary" style="flex: 1;">
+                            <i class="fas fa-check"></i> Confirmar Retiro
+                        </button>
+                    </div>
                 </form>
             </div>
+        </div>
 
-            <div class="card" style="margin-top: 2rem;">
-                <h2><i class="fas fa-list"></i> Mis Publicaciones</h2>
-                <div id="listaSubastas">
-                    <!-- Se llena con JavaScript -->
+        <!-- Tab: Subastas/Rifas -->
+        <div id="tab-subastas" class="tab-content">
+            <!-- Sub-tabs para Subastas, Rifas y Productos -->
+            <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 3px solid #e0e0e0; padding-bottom: 0;">
+                <button class="subtab-btn active" onclick="cambiarSubTab('subastas-tab', this)" style="padding: 1rem 2rem; background: none; border: none; border-bottom: 3px solid var(--primary); margin-bottom: -3px; font-weight: 600; color: var(--primary); cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-gavel"></i> Subastas
+                </button>
+                <button class="subtab-btn" onclick="cambiarSubTab('rifas-tab', this)" style="padding: 1rem 2rem; background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -3px; font-weight: 600; color: #666; cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-ticket-alt"></i> Rifas
+                </button>
+                <button class="subtab-btn" onclick="cambiarSubTab('productos-tab', this)" style="padding: 1rem 2rem; background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -3px; font-weight: 600; color: #666; cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-shopping-bag"></i> Productos
+                </button>
+            </div>
+
+            <!-- SUBASTAS TAB -->
+            <div id="subastas-tab" class="subtab-content">
+                <div class="card">
+                    <h2><i class="fas fa-plus-circle"></i> Crear Nueva Subasta</h2>
+                    <div id="alertSubasta" class="alert"></div>
+                    <form id="formSubasta" onsubmit="crearSubasta(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Título</label>
+                                <input type="text" name="titulo" class="form-input" required placeholder="Ej: iPhone 14 Pro Max">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Precio Inicial ($)</label>
+                                <input type="number" name="precioInicial" class="form-input" required min="0" placeholder="10000">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-alt"></i> Fecha y Hora de Finalización
+                                </label>
+                                <div class="datetime-input-wrapper">
+                                    <input type="text" id="fechaFinPicker" name="fechaFin" class="form-input datetime-input" placeholder="Selecciona fecha y hora..." required readonly>
+                                    <i class="fas fa-clock datetime-icon"></i>
+                                </div>
+                                <small class="form-hint">Haz clic para abrir el calendario</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Descripción</label>
+                            <textarea name="descripcion" class="form-input" rows="4" required placeholder="Describe el producto o servicio..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Imagen del Producto</label>
+                            <div class="imagen-upload-container">
+                                <input type="file" id="imagenSubasta" name="imagen" accept="image/*" class="imagen-input-hidden" onchange="previsualizarImagenSubasta(event)">
+                                <div class="imagen-preview-box" onclick="document.getElementById('imagenSubasta').click()">
+                                    <div id="imagenPreview" class="imagen-preview-content">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Haz clic para subir una imagen</p>
+                                        <span class="imagen-preview-hint">JPG, PNG o GIF (Máx. 5MB)</span>
+                                    </div>
+                                </div>
+                                <button type="button" id="btnEliminarImagen" class="btn-eliminar-imagen" onclick="eliminarImagenSubasta()" style="display: none;">
+                                    <i class="fas fa-trash"></i> Eliminar Imagen
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-plus"></i> Crear Subasta
+                        </button>
+                    </form>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <h2><i class="fas fa-list"></i> Mis Subastas</h2>
+                    <div id="listaSubastas">
+                        <!-- Se llena con JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIFAS TAB -->
+            <div id="rifas-tab" class="subtab-content" style="display: none;">
+                <div class="card">
+                    <h2><i class="fas fa-plus-circle"></i> Crear Nueva Rifa</h2>
+                    <div id="alertRifa" class="alert"></div>
+                    <form id="formRifa" onsubmit="crearRifa(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Título de la Rifa</label>
+                                <input type="text" name="titulo" class="form-input" required placeholder="Ej: Rifa de auto 0km">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Precio por Boleto ($)</label>
+                                <input type="number" name="precioBoleto" class="form-input" required min="100" placeholder="1000">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Total de Boletos</label>
+                                <input type="number" name="totalBoletos" class="form-input" required min="10" max="10000" placeholder="100">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-alt"></i> Fecha del Sorteo
+                                </label>
+                                <div class="datetime-input-wrapper">
+                                    <input type="text" id="fechaSorteoPicker" name="fechaSorteo" class="form-input datetime-input" placeholder="Selecciona fecha..." required readonly>
+                                    <i class="fas fa-clock datetime-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Descripción del Premio</label>
+                            <textarea name="descripcion" class="form-input" rows="4" required placeholder="Describe el premio..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Premio</label>
+                            <input type="text" name="premio" class="form-input" required placeholder="Ej: Auto Toyota Corolla 2024">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Valor del Premio ($)</label>
+                            <input type="number" name="valorPremio" class="form-input" required min="0" placeholder="15000000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Imagen del Premio</label>
+                            <div class="imagen-upload-container">
+                                <input type="file" id="imagenRifa" name="imagen" accept="image/*" class="imagen-input-hidden" onchange="previsualizarImagenRifa(event)">
+                                <div class="imagen-preview-box" onclick="document.getElementById('imagenRifa').click()">
+                                    <div id="imagenPreviewRifa" class="imagen-preview-content">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Haz clic para subir una imagen</p>
+                                        <span class="imagen-preview-hint">JPG, PNG o GIF (Máx. 5MB)</span>
+                                    </div>
+                                </div>
+                                <button type="button" id="btnEliminarImagenRifa" class="btn-eliminar-imagen" onclick="eliminarImagenRifa()" style="display: none;">
+                                    <i class="fas fa-trash"></i> Eliminar Imagen
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-ticket-alt"></i> Crear Rifa
+                        </button>
+                    </form>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <h2><i class="fas fa-list"></i> Mis Rifas</h2>
+                    <div id="listaRifas">
+                        <!-- Se llena con JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCTOS TAB -->
+            <div id="productos-tab" class="subtab-content" style="display: none;">
+                <div class="card">
+                    <h2><i class="fas fa-plus-circle"></i> Crear Nuevo Producto</h2>
+                    <div id="alertProducto" class="alert"></div>
+                    <form id="formProducto" onsubmit="crearProducto(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Nombre del Producto</label>
+                                <input type="text" name="nombre" class="form-input" required placeholder="Ej: Notebook HP 15">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Precio ($)</label>
+                                <input type="number" name="precio" class="form-input" required min="0" placeholder="350000">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Precio Original (Opcional)</label>
+                                <input type="number" name="precioOriginal" class="form-input" min="0" placeholder="450000">
+                                <small class="form-hint">Para mostrar descuento</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Stock Disponible</label>
+                                <input type="number" name="stock" class="form-input" required min="0" placeholder="50">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Categoría</label>
+                                <select name="categoria" class="form-input" required>
+                                    <option value="">Selecciona categoría</option>
+                                    <option value="Electrónica">Electrónica</option>
+                                    <option value="Ropa">Ropa</option>
+                                    <option value="Hogar">Hogar</option>
+                                    <option value="Alimentos">Alimentos</option>
+                                    <option value="Libros">Libros</option>
+                                    <option value="Artesanías">Artesanías</option>
+                                    <option value="Otros">Otros</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Descripción</label>
+                            <textarea name="descripcion" class="form-input" rows="4" required placeholder="Describe el producto en detalle..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Imagen del Producto</label>
+                            <div class="imagen-upload-container">
+                                <input type="file" id="imagenProducto" name="imagen" accept="image/*" class="imagen-input-hidden" onchange="previsualizarImagenProducto(event)">
+                                <div class="imagen-preview-box" onclick="document.getElementById('imagenProducto').click()">
+                                    <div id="imagenPreviewProducto" class="imagen-preview-content">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Haz clic para subir una imagen</p>
+                                        <span class="imagen-preview-hint">JPG, PNG o GIF (Máx. 5MB)</span>
+                                    </div>
+                                </div>
+                                <button type="button" id="btnEliminarImagenProducto" class="btn-eliminar-imagen" onclick="eliminarImagenProducto()" style="display: none;">
+                                    <i class="fas fa-trash"></i> Eliminar Imagen
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-shopping-bag"></i> Crear Producto
+                        </button>
+                    </form>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <h2><i class="fas fa-list"></i> Mis Productos</h2>
+                    <div id="listaProductos">
+                        <!-- Se llena con JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Tab: Configuración -->
         <div id="tab-configuracion" class="tab-content">
+            <!-- Cambiar Nombre de Usuario -->
+            <div class="card">
+                <h2><i class="fas fa-at"></i> Nombre de Usuario</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">
+                    <i class="fas fa-info-circle"></i> Tu nombre de usuario es visible públicamente. Asegúrate de elegir uno único.
+                </p>
+                <div id="alertUsername" class="alert"></div>
+                <form id="formUsername" onsubmit="cambiarNombreUsuario(event)" style="max-width: 500px;">
+                    <div class="form-group">
+                        <label class="form-label">Nombre de Usuario Actual</label>
+                        <input type="text" id="currentUsername" class="form-input" readonly style="background: #f8f9fa; cursor: not-allowed; font-weight: 600;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nuevo Nombre de Usuario *</label>
+                        <input type="text" name="username" id="newUsername" class="form-input" required placeholder="Ej: empresa123" minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+">
+                        <small style="color: #666; font-size: 0.875rem;">
+                            <i class="fas fa-check-circle" style="color: var(--secondary);"></i> Solo letras, números y guiones bajos. Mínimo 3, máximo 20 caracteres.
+                        </small>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Cambiar Nombre de Usuario
+                    </button>
+                </form>
+            </div>
+
             <div class="card">
                 <h2><i class="fas fa-bell"></i> Notificaciones</h2>
                 <div id="alertConfig" class="alert"></div>
@@ -619,26 +1148,262 @@
 
         <!-- Tab: Seguridad -->
         <div id="tab-seguridad" class="tab-content">
+            <!-- Panel de Nivel de Seguridad -->
+            <div class="card">
+                <h2><i class="fas fa-shield-alt"></i> Nivel de Seguridad de la Cuenta</h2>
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: 600;">Seguridad de tu cuenta</span>
+                        <span id="nivel-seguridad-porcentaje" style="font-weight: 700; color: var(--primary);">0%</span>
+                    </div>
+                    <div style="background: #e0e0e0; height: 10px; border-radius: 5px; overflow: hidden;">
+                        <div id="nivel-seguridad-barra" style="background: linear-gradient(90deg, var(--secondary), var(--primary)); height: 100%; width: 0%; transition: width 0.5s;"></div>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div id="indicador-password" style="padding: 1rem; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #dc3545;">
+                        <i class="fas fa-key" style="color: #dc3545; margin-right: 0.5rem;"></i>
+                        <span style="font-weight: 600;">Contraseña Fuerte</span>
+                    </div>
+                    <div id="indicador-2fa" style="padding: 1rem; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #dc3545;">
+                        <i class="fas fa-mobile-alt" style="color: #dc3545; margin-right: 0.5rem;"></i>
+                        <span style="font-weight: 600;">Verificación en 2 Pasos</span>
+                    </div>
+                    <div id="indicador-email" style="padding: 1rem; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #28a745;">
+                        <i class="fas fa-envelope-circle-check" style="color: #28a745; margin-right: 0.5rem;"></i>
+                        <span style="font-weight: 600;">Email Verificado</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cambiar Contraseña -->
             <div class="card">
                 <h2><i class="fas fa-key"></i> Cambiar Contraseña</h2>
                 <div id="alertSeguridad" class="alert"></div>
-                <form id="formPassword" onsubmit="cambiarPassword(event)">
+                <form id="formPassword" onsubmit="cambiarPasswordEmpresa(event)">
                     <div class="form-group">
                         <label class="form-label">Contraseña Actual</label>
-                        <input type="password" name="currentPassword" class="form-input" required>
+                        <div style="position: relative;">
+                            <input type="password" id="current-password-empresa" name="currentPassword" class="form-input" required>
+                            <button type="button" onclick="togglePasswordVisibilityEmpresa('current-password-empresa', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #666;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Nueva Contraseña</label>
-                        <input type="password" name="newPassword" class="form-input" required minlength="6">
+                        <div style="position: relative;">
+                            <input type="password" id="new-password-empresa" name="newPassword" class="form-input" required onkeyup="checkPasswordStrengthEmpresa(this.value)">
+                            <button type="button" onclick="togglePasswordVisibilityEmpresa('new-password-empresa', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #666;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div style="margin-top: 0.75rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="font-size: 0.875rem; font-weight: 600;">Seguridad de la contraseña</span>
+                                <span id="password-strength-text-empresa" style="font-size: 0.875rem; font-weight: 600;">Débil</span>
+                            </div>
+                            <div style="background: #e0e0e0; height: 6px; border-radius: 3px; overflow: hidden;">
+                                <div id="password-strength-bar-empresa" style="height: 100%; width: 0%; transition: all 0.3s; background: #dc3545;"></div>
+                            </div>
+                            <ul id="password-requirements-empresa" style="margin-top: 0.75rem; font-size: 0.875rem; list-style: none; padding: 0;">
+                                <li><i class="fas fa-times text-danger"></i> Al menos 8 caracteres</li>
+                                <li><i class="fas fa-times text-danger"></i> Una letra mayúscula</li>
+                                <li><i class="fas fa-times text-danger"></i> Una letra minúscula</li>
+                                <li><i class="fas fa-times text-danger"></i> Un número</li>
+                                <li><i class="fas fa-times text-danger"></i> Un carácter especial (!@#$%^&*)</li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Confirmar Nueva Contraseña</label>
-                        <input type="password" name="confirmPassword" class="form-input" required>
+                        <div style="position: relative;">
+                            <input type="password" id="confirm-password-empresa" name="confirmPassword" class="form-input" required>
+                            <button type="button" onclick="togglePasswordVisibilityEmpresa('confirm-password-empresa', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #666;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-key"></i> Cambiar Contraseña
                     </button>
                 </form>
+            </div>
+
+            <!-- Verificación en 2 Pasos -->
+            <div class="card">
+                <h2><i class="fas fa-mobile-alt"></i> Verificación en 2 Pasos (2FA)</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Agrega una capa extra de seguridad a tu cuenta requiriendo un código de verificación al iniciar sesión.</p>
+                
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1.5rem;">
+                    <div>
+                        <p style="font-weight: 600; margin-bottom: 0.25rem;">Estado: <span id="2fa-status-empresa">Desactivada</span></p>
+                        <p style="color: #666; font-size: 0.875rem; margin: 0;">Protege tu cuenta con códigos de verificación</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-2fa-empresa" onchange="toggle2FAEmpresa(this.checked)">
+                        <span class="slider-switch round"></span>
+                    </label>
+                </div>
+
+                <div id="2fa-setup-empresa" style="display: none;">
+                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; border-radius: 5px; margin-bottom: 1.5rem;">
+                        <p style="margin: 0; color: #856404;"><i class="fas fa-info-circle"></i> Escanea este código QR con tu aplicación de autenticación (Google Authenticator, Authy, etc.)</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                        <div id="qr-code-empresa" style="display: inline-block; padding: 1.5rem; background: white; border: 2px solid #e0e0e0; border-radius: 10px;">
+                            <div style="width: 200px; height: 200px; background: repeating-linear-gradient(0deg, #000 0, #000 10px, #fff 10px, #fff 20px), repeating-linear-gradient(90deg, #000 0, #000 10px, #fff 10px, #fff 20px); background-size: 20px 20px;"></div>
+                        </div>
+                        <p style="margin-top: 1rem; font-size: 0.875rem; color: #666;">O ingresa manualmente esta clave:</p>
+                        <p id="secret-key-empresa" style="font-family: monospace; font-size: 1.1rem; font-weight: 700; color: var(--primary); letter-spacing: 2px;"></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Código de Verificación (6 dígitos)</label>
+                        <input type="text" id="verification-code-empresa" class="form-input" placeholder="000000" maxlength="6" pattern="[0-9]{6}">
+                    </div>
+                    <button onclick="verify2FASetupEmpresa()" class="btn-primary">
+                        <i class="fas fa-check"></i> Verificar y Activar 2FA
+                    </button>
+                </div>
+
+                <div id="2fa-active-empresa" style="display: none;">
+                    <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 1rem; border-radius: 5px; margin-bottom: 1.5rem;">
+                        <p style="margin: 0; color: #155724;"><i class="fas fa-check-circle"></i> La verificación en 2 pasos está activada y protegiendo tu cuenta</p>
+                    </div>
+
+                    <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;"><i class="fas fa-key"></i> Códigos de Respaldo</h3>
+                    <p style="color: #666; margin-bottom: 1rem;">Guarda estos códigos en un lugar seguro. Puedes usar cada uno solo una vez si no tienes acceso a tu dispositivo de autenticación.</p>
+                    
+                    <div id="backup-codes-display-empresa" style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin-bottom: 1rem;">
+                        <!-- Los códigos se mostrarán aquí -->
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="regenerateBackupCodesEmpresa()" class="btn-secondary">
+                            <i class="fas fa-sync"></i> Regenerar Códigos
+                        </button>
+                        <button onclick="downloadBackupCodesEmpresa()" class="btn-secondary">
+                            <i class="fas fa-download"></i> Descargar Códigos
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sesiones Activas -->
+            <div class="card">
+                <h2><i class="fas fa-desktop"></i> Sesiones Activas</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Estas son las sesiones donde has iniciado sesión actualmente.</p>
+                
+                <div id="sesiones-activas-empresa">
+                    <div style="padding: 1rem; background: #e7f3ff; border-left: 4px solid var(--primary); border-radius: 5px; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <p style="font-weight: 600; margin-bottom: 0.25rem;"><i class="fas fa-circle" style="color: #28a745; font-size: 0.5rem; margin-right: 0.5rem;"></i>Sesión Actual</p>
+                                <p style="color: #666; font-size: 0.875rem; margin: 0.25rem 0;"><i class="fas fa-laptop"></i> Windows - Chrome</p>
+                                <p style="color: #666; font-size: 0.875rem; margin: 0.25rem 0;"><i class="fas fa-map-marker-alt"></i> Santiago, Chile</p>
+                                <p style="color: #666; font-size: 0.875rem; margin: 0.25rem 0;"><i class="fas fa-clock"></i> Última actividad: Ahora</p>
+                            </div>
+                            <span style="background: #28a745; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">ACTUAL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="cerrarOtrasSesionesEmpresa()" class="btn-secondary" style="margin-top: 1rem;">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Todas las Otras Sesiones
+                </button>
+            </div>
+
+            <!-- Historial de Actividad -->
+            <div class="card">
+                <h2><i class="fas fa-history"></i> Historial de Actividad</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Revisa la actividad reciente en tu cuenta.</p>
+                
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8f9fa; text-align: left;">
+                                <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Actividad</th>
+                                <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Dispositivo</th>
+                                <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Ubicación</th>
+                                <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historial-actividad-empresa">
+                            <!-- El historial se cargará aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Configuración de Privacidad -->
+            <div class="card">
+                <h2><i class="fas fa-user-shield"></i> Privacidad</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Controla quién puede ver tu información.</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8f9fa; border-radius: 10px;">
+                        <div>
+                            <p style="font-weight: 600; margin-bottom: 0.25rem;">Perfil Público</p>
+                            <p style="color: #666; font-size: 0.875rem; margin: 0;">Permite que otros usuarios vean tu perfil de empresa</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="perfil-publico-empresa" onchange="actualizarPrivacidadEmpresa('perfilPublico', this.checked)">
+                            <span class="slider-switch round"></span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8f9fa; border-radius: 10px;">
+                        <div>
+                            <p style="font-weight: 600; margin-bottom: 0.25rem;">Mostrar Email</p>
+                            <p style="color: #666; font-size: 0.875rem; margin: 0;">Permite que otros vean tu correo electrónico</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="mostrar-email-empresa" onchange="actualizarPrivacidadEmpresa('mostrarEmail', this.checked)">
+                            <span class="slider-switch round"></span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8f9fa; border-radius: 10px;">
+                        <div>
+                            <p style="font-weight: 600; margin-bottom: 0.25rem;">Historial de Subastas Público</p>
+                            <p style="color: #666; font-size: 0.875rem; margin: 0;">Permite que otros vean las subastas que has creado</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="historial-subastas-empresa" onchange="actualizarPrivacidadEmpresa('historialSubastas', this.checked)">
+                            <span class="slider-switch round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zona de Peligro -->
+            <div class="card" style="border: 2px solid #dc3545;">
+                <h2 style="color: #dc3545;"><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Estas acciones son irreversibles. Procede con precaución.</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #fff5f5; border-radius: 10px; border: 1px solid #fecaca;">
+                        <div>
+                            <p style="font-weight: 600; margin-bottom: 0.25rem; color: #dc3545;">Descargar Mis Datos</p>
+                            <p style="color: #666; font-size: 0.875rem; margin: 0;">Obtén una copia de toda la información de tu cuenta</p>
+                        </div>
+                        <button onclick="descargarMisDatosEmpresa()" class="btn-secondary">
+                            <i class="fas fa-download"></i> Descargar
+                        </button>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #fff5f5; border-radius: 10px; border: 1px solid #fecaca;">
+                        <div>
+                            <p style="font-weight: 600; margin-bottom: 0.25rem; color: #dc3545;">Eliminar Cuenta</p>
+                            <p style="color: #666; font-size: 0.875rem; margin: 0;">Elimina permanentemente tu cuenta y todos tus datos</p>
+                        </div>
+                        <button onclick="confirmarEliminarCuentaEmpresa()" style="background: #dc3545; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                            <i class="fas fa-trash"></i> Eliminar Cuenta
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -660,9 +1425,64 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="notifications.js"></script>
     <script src="auth.js"></script>
     <script src="config.js"></script>
     <script>
+        // Inicializar selector de fecha y hora
+        let fechaFinPickerInstance = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar Flatpickr para fecha y hora
+            fechaFinPickerInstance = flatpickr("#fechaFinPicker", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                time_24hr: false,
+                locale: "es",
+                minDate: "today",
+                defaultHour: 18,
+                minuteIncrement: 15,
+                altInput: true,
+                altFormat: "F j, Y - h:i K",
+                theme: "material_blue",
+                onOpen: function() {
+                    notify.info('Selecciona la fecha y hora de finalización de tu subasta', 3000);
+                },
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        const selectedDate = selectedDates[0];
+                        const now = new Date();
+                        const minDate = new Date(now.getTime() + 60 * 60 * 1000); // Mínimo 1 hora desde ahora
+                        
+                        if (selectedDate < minDate) {
+                            notify.warning('La fecha debe ser al menos 1 hora en el futuro');
+                        } else {
+                            notify.success('Fecha y hora seleccionadas correctamente', 2000);
+                        }
+                    }
+                }
+            });
+
+            // Configurar Flatpickr para fecha de sorteo de rifas
+            fechaSorteoPickerInstance = flatpickr("#fechaSorteoPicker", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                time_24hr: false,
+                locale: "es",
+                minDate: "today",
+                defaultHour: 20,
+                minuteIncrement: 15,
+                altInput: true,
+                altFormat: "F j, Y - h:i K",
+                theme: "material_blue",
+                onOpen: function() {
+                    notify.info('Selecciona la fecha y hora del sorteo', 3000);
+                }
+            });
+        });
+
         // Verificar sesión
         if (!auth.isLoggedIn()) {
             window.location.href = 'login.html';
@@ -676,23 +1496,55 @@
         // Cargar datos de la empresa
         const empresa = auth.getCurrentAccount();
         if (empresa) {
-            document.getElementById('empresaName').textContent = empresa.razonSocial;
-            document.getElementById('empresaRut').textContent = empresa.rut;
+            const nombreEmpresa = empresa.nombreEmpresa || empresa.razonSocial || 'Empresa';
+            document.getElementById('empresaName').textContent = nombreEmpresa;
+            document.getElementById('empresaRut').textContent = empresa.rut || empresa.username;
             document.getElementById('empresaEmail').textContent = empresa.email;
             document.getElementById('empresaPhone').textContent = empresa.telefono || 'No especificado';
-            document.getElementById('empresaDate').textContent = new Date(empresa.fechaRegistro).getFullYear();
+            document.getElementById('empresaDate').textContent = new Date(empresa.fechaRegistro || Date.now()).getFullYear();
             
-            // Avatar con iniciales
-            const iniciales = empresa.razonSocial.substring(0, 2);
-            document.getElementById('avatarInitials').textContent = iniciales.toUpperCase();
+            // Avatar con iniciales o foto
+            const iniciales = nombreEmpresa.substring(0, 2);
+            const avatarElement = document.getElementById('avatarInitials');
+            
+            if (empresa.profilePhoto) {
+                // Mostrar foto si existe
+                avatarElement.innerHTML = `<img src="${empresa.profilePhoto}" alt="Foto de perfil">`;
+            } else {
+                // Mostrar iniciales
+                avatarElement.innerHTML = `<span class="profile-avatar-text">${iniciales.toUpperCase()}</span>`;
+            }
 
-            // Rellenar formulario
-            document.getElementById('inputRazonSocial').value = empresa.razonSocial;
-            document.getElementById('inputRut').value = empresa.rut;
+            // Rellenar formulario de datos empresariales
+            document.getElementById('inputNombreEmpresa').value = nombreEmpresa;
+            document.getElementById('inputRut').value = empresa.rut || empresa.username;
             document.getElementById('inputEmail').value = empresa.email;
             document.getElementById('inputTelefono').value = empresa.telefono || '';
-            document.getElementById('inputDireccion').value = empresa.direccion || '';
+            document.getElementById('inputGiro').value = empresa.giro || '';
             document.getElementById('inputSitioWeb').value = empresa.sitioWeb || '';
+
+            // Rellenar formulario de dirección corporativa
+            if (empresa.direccion && typeof empresa.direccion === 'object') {
+                document.getElementById('inputDireccionEmpresa').value = empresa.direccion.direccion || '';
+                document.getElementById('inputComunaEmpresa').value = empresa.direccion.comuna || '';
+                document.getElementById('inputCiudadEmpresa').value = empresa.direccion.ciudad || '';
+                document.getElementById('inputRegionEmpresa').value = empresa.direccion.region || '';
+                document.getElementById('inputCodigoPostalEmpresa').value = empresa.direccion.codigoPostal || '';
+            }
+
+            // Rellenar formulario de representante legal
+            if (empresa.representanteLegal) {
+                document.getElementById('inputNombreRepresentante').value = empresa.representanteLegal.nombre || '';
+                document.getElementById('inputRutRepresentante').value = empresa.representanteLegal.rut || '';
+                document.getElementById('inputEmailRepresentante').value = empresa.representanteLegal.email || '';
+                document.getElementById('inputTelefonoRepresentante').value = empresa.representanteLegal.telefono || '';
+                document.getElementById('inputCargoRepresentante').value = empresa.representanteLegal.cargo || '';
+            }
+
+            // Rellenar nombre de usuario actual en configuración
+            if (document.getElementById('currentUsername')) {
+                document.getElementById('currentUsername').value = empresa.username;
+            }
 
             // Configuraciones
             if (empresa.configuraciones) {
@@ -736,6 +1588,69 @@
             }
         }
 
+        // Función para cambiar sub-tabs
+        function cambiarSubTab(subtab, element) {
+            // Actualizar botones
+            document.querySelectorAll('.subtab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.borderBottomColor = 'transparent';
+                btn.style.color = '#666';
+            });
+            element.classList.add('active');
+            element.style.borderBottomColor = 'var(--primary)';
+            element.style.color = 'var(--primary)';
+
+            // Actualizar contenido
+            document.querySelectorAll('.subtab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(subtab).style.display = 'block';
+        }
+
+        // Función para cambiar foto de perfil
+        function cambiarFotoPerfil(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validar que sea una imagen
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor selecciona un archivo de imagen válido');
+                return;
+            }
+
+            // Validar tamaño (máximo 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('La imagen no debe superar los 2MB');
+                return;
+            }
+
+            // Leer archivo y convertir a base64
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoBase64 = e.target.result;
+                
+                // Guardar en auth
+                const result = auth.updateProfilePhoto(photoBase64, 'empresa');
+                
+                if (result.success) {
+                    // Actualizar avatar en la página
+                    const avatarElement = document.getElementById('avatarInitials');
+                    avatarElement.innerHTML = `<img src="${photoBase64}" alt="Foto de perfil">`;
+                    
+                    // Actualizar navbar
+                    updateNavbar();
+                    
+                    alert('Foto de perfil actualizada correctamente');
+                } else {
+                    alert('Error al actualizar la foto: ' + result.message);
+                }
+            };
+            reader.onerror = function() {
+                alert('Error al cargar la imagen');
+            };
+            reader.readAsDataURL(file);
+        }
+
         function mostrarAlerta(tipo, mensaje, esError = false) {
             const alert = document.getElementById('alert' + tipo);
             alert.textContent = mensaje;
@@ -744,24 +1659,177 @@
             setTimeout(() => alert.style.display = 'none', 5000);
         }
 
-        function actualizarDatos(e) {
+        function actualizarDatosEmpresa(e) {
             e.preventDefault();
             const form = e.target;
             
-            const result = auth.updateEmpresa(empresa.id, {
-                razonSocial: form.razonSocial.value,
-                email: form.email.value,
-                telefono: form.telefono.value,
-                direccion: form.direccion.value,
-                sitioWeb: form.sitioWeb.value
-            });
-
-            if (result.success) {
-                mostrarAlerta('Datos', result.message, false);
-                // Actualizar vista
-                location.reload();
+            const empresa = auth.getCurrentAccount();
+            
+            // Actualizar datos
+            empresa.nombreEmpresa = form.nombreEmpresa.value;
+            empresa.email = form.email.value;
+            empresa.telefono = form.telefono.value;
+            empresa.giro = form.giro.value;
+            empresa.sitioWeb = form.sitioWeb.value;
+            
+            // Guardar en localStorage
+            const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
+            const index = empresas.findIndex(e => e.username === empresa.username || e.id === empresa.id);
+            
+            if (index !== -1) {
+                empresas[index] = empresa;
+                localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
+                
+                registrarActividadEmpresa('profile_updated', 'Información de la empresa actualizada');
+                mostrarAlerta('Datos', '✅ Información de la empresa actualizada correctamente', false);
+                
+                // Actualizar nombre en el header
+                document.querySelector('.profile-info h1').textContent = empresa.nombreEmpresa;
             } else {
-                mostrarAlerta('Datos', result.message, true);
+                mostrarAlerta('Datos', '❌ Error al actualizar los datos', true);
+            }
+        }
+
+        function actualizarDireccionEmpresa(e) {
+            e.preventDefault();
+            const form = e.target;
+            
+            const empresa = auth.getCurrentAccount();
+            
+            // Crear o actualizar dirección
+            if (!empresa.direccion) {
+                empresa.direccion = {};
+            }
+            
+            empresa.direccion = {
+                direccion: form.direccion.value,
+                comuna: form.comuna.value,
+                ciudad: form.ciudad.value,
+                region: form.region.value,
+                codigoPostal: form.codigoPostal.value
+            };
+            
+            // Guardar en localStorage
+            const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
+            const index = empresas.findIndex(e => e.username === empresa.username || e.id === empresa.id);
+            
+            if (index !== -1) {
+                empresas[index] = empresa;
+                localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
+                
+                registrarActividadEmpresa('address_updated', 'Dirección corporativa actualizada');
+                mostrarAlerta('DireccionEmpresa', '✅ Dirección corporativa guardada correctamente', false);
+            } else {
+                mostrarAlerta('DireccionEmpresa', '❌ Error al guardar la dirección', true);
+            }
+        }
+
+        function actualizarRepresentante(e) {
+            e.preventDefault();
+            const form = e.target;
+            
+            const empresa = auth.getCurrentAccount();
+            
+            // Crear o actualizar representante legal
+            if (!empresa.representanteLegal) {
+                empresa.representanteLegal = {};
+            }
+            
+            empresa.representanteLegal = {
+                nombre: form.nombreRepresentante.value,
+                rut: form.rutRepresentante.value,
+                email: form.emailRepresentante.value,
+                telefono: form.telefonoRepresentante.value,
+                cargo: form.cargoRepresentante.value
+            };
+            
+            // Guardar en localStorage
+            const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
+            const index = empresas.findIndex(e => e.username === empresa.username || e.id === empresa.id);
+            
+            if (index !== -1) {
+                empresas[index] = empresa;
+                localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
+                
+                registrarActividadEmpresa('representative_updated', 'Representante legal actualizado');
+                mostrarAlerta('Representante', '✅ Representante legal guardado correctamente', false);
+            } else {
+                mostrarAlerta('Representante', '❌ Error al guardar el representante', true);
+            }
+        }
+
+        function cambiarNombreUsuario(e) {
+            e.preventDefault();
+            const form = e.target;
+            const newUsername = form.username.value.trim();
+            
+            // Validar formato
+            const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+            if (!usernameRegex.test(newUsername)) {
+                mostrarAlerta('Username', '❌ El nombre de usuario solo puede contener letras, números y guiones bajos (3-20 caracteres)', true);
+                return;
+            }
+            
+            const empresa = auth.getCurrentAccount();
+            
+            // Verificar si el nombre de usuario ya existe (en usuarios o empresas)
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
+            
+            const usernameExists = 
+                usuarios.some(u => u.username.toLowerCase() === newUsername.toLowerCase()) ||
+                empresas.some(e => e.username.toLowerCase() === newUsername.toLowerCase() && e.id !== empresa.id);
+            
+            if (usernameExists) {
+                mostrarAlerta('Username', '❌ Este nombre de usuario ya está en uso. Por favor, elige otro.', true);
+                return;
+            }
+            
+            // Guardar el username anterior para actualizar referencias
+            const oldUsername = empresa.username;
+            
+            // Actualizar username de la empresa
+            empresa.username = newUsername;
+            
+            // Guardar en localStorage
+            const index = empresas.findIndex(e => e.id === empresa.id);
+            
+            if (index !== -1) {
+                empresas[index] = empresa;
+                localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
+                
+                // Actualizar referencias en subastas (si la empresa creó subastas)
+                const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
+                let subastasActualizadas = false;
+                
+                subastas.forEach(subasta => {
+                    if (subasta.empresaUsername === oldUsername) {
+                        subasta.empresaUsername = newUsername;
+                        subastasActualizadas = true;
+                    }
+                });
+                
+                if (subastasActualizadas) {
+                    localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
+                }
+                
+                // Registrar actividad
+                registrarActividadEmpresa('username_changed', `Nombre de usuario cambiado de "${oldUsername}" a "${newUsername}"`);
+                
+                // Actualizar la sesión actual
+                auth.updateSession(empresa);
+                
+                // Actualizar UI
+                document.getElementById('currentUsername').value = newUsername;
+                document.getElementById('newUsername').value = '';
+                document.getElementById('profileUsername').textContent = newUsername;
+                
+                mostrarAlerta('Username', `✅ Tu nombre de usuario ha sido cambiado exitosamente a "${newUsername}"`, false);
+                
+                // Actualizar navbar
+                updateNavbar();
+            } else {
+                mostrarAlerta('Username', '❌ Error al cambiar el nombre de usuario', true);
             }
         }
 
@@ -813,9 +1881,42 @@
 
         // Funciones de Wallet Empresarial
         function cargarWalletEmpresa() {
+            console.log('=== Cargando Wallet Empresa ===');
             const session = auth.getSession();
-            const saldo = auth.getSaldo(session.id, 'empresa');
-            const transacciones = auth.getTransacciones(session.id, 'empresa');
+            console.log('Session:', session);
+            
+            // Obtener datos frescos directamente de localStorage
+            const cuentasKey = session.type === 'user' ? 'nexos_usuarios' : 'nexos_empresas';
+            console.log('Clave localStorage:', cuentasKey);
+            
+            const cuentas = JSON.parse(localStorage.getItem(cuentasKey) || '[]');
+            console.log('Total cuentas:', cuentas.length);
+            console.log('Buscando con session.username:', session.username, 'session.id:', session.id);
+            console.log('Cuentas disponibles:', cuentas.map(function(c) { return { username: c.username, id: c.id, email: c.email, rut: c.rut }; }));
+            
+            const cuenta = cuentas.find(function(c) { 
+                // Buscar por username (que es el campo que tiene la sesión)
+                return c.username === session.username || c.id === session.id;
+            });
+            
+            console.log('Cuenta encontrada:', cuenta);
+            
+            if (!cuenta) {
+                console.error('No se encontró la cuenta');
+                return;
+            }
+            
+            const saldo = cuenta.saldo || 0;
+            const todasTransacciones = cuenta.transacciones || [];
+            
+            console.log('Saldo:', saldo);
+            console.log('Total transacciones:', todasTransacciones.length);
+
+            // Separar transacciones por tipo
+            const ingresos = todasTransacciones.filter(function(t) { return t.tipo === 'ingreso'; });
+            const retiros = todasTransacciones.filter(function(t) { return t.tipo === 'retiro'; });
+            
+            console.log('Ingresos:', ingresos.length, 'Retiros:', retiros.length);
 
             // Mostrar saldo
             const saldoFormateado = new Intl.NumberFormat('es-CL', {
@@ -823,25 +1924,29 @@
                 currency: 'CLP',
                 minimumFractionDigits: 0
             }).format(saldo);
-            document.getElementById('saldoActual').textContent = saldoFormateado;
-
-            // Mostrar controles de admin si es admin
-            if (session.role === 'admin') {
-                document.getElementById('adminControlsEmpresa').style.display = 'block';
+            
+            const elementoSaldo = document.getElementById('saldoActual');
+            console.log('Elemento saldoActual:', elementoSaldo);
+            
+            if (elementoSaldo) {
+                elementoSaldo.textContent = saldoFormateado;
+                console.log('Saldo actualizado a:', saldoFormateado);
+            } else {
+                console.error('No se encontró el elemento saldoActual');
             }
 
             // Cargar ingresos
             const tbodyIngresos = document.querySelector('#tablaIngresos tbody');
-            if (transacciones.ingresos.length === 0) {
+            if (ingresos.length === 0) {
                 tbodyIngresos.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No hay ingresos registrados</td></tr>';
             } else {
                 // Ordenar por fecha descendente
-                transacciones.ingresos.sort(function(a, b) {
+                ingresos.sort(function(a, b) {
                     return new Date(b.fecha) - new Date(a.fecha);
                 });
 
                 tbodyIngresos.innerHTML = '';
-                transacciones.ingresos.forEach(function(tx) {
+                ingresos.forEach(function(tx) {
                     const fecha = new Date(tx.fecha).toLocaleString('es-CL');
                     const monto = new Intl.NumberFormat('es-CL', {
                         style: 'currency',
@@ -852,7 +1957,7 @@
                         style: 'currency',
                         currency: 'CLP',
                         minimumFractionDigits: 0
-                    }).format(tx.saldoNuevo);
+                    }).format(tx.saldoFinal);
 
                     const row = document.createElement('tr');
                     row.innerHTML = '<td>' + fecha + '</td>' +
@@ -865,16 +1970,16 @@
 
             // Cargar retiros
             const tbodyRetiros = document.querySelector('#tablaRetiros tbody');
-            if (transacciones.retiros.length === 0) {
+            if (retiros.length === 0) {
                 tbodyRetiros.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No hay retiros registrados</td></tr>';
             } else {
                 // Ordenar por fecha descendente
-                transacciones.retiros.sort(function(a, b) {
+                retiros.sort(function(a, b) {
                     return new Date(b.fecha) - new Date(a.fecha);
                 });
 
                 tbodyRetiros.innerHTML = '';
-                transacciones.retiros.forEach(function(tx) {
+                retiros.forEach(function(tx) {
                     const fecha = new Date(tx.fecha).toLocaleString('es-CL');
                     const monto = new Intl.NumberFormat('es-CL', {
                         style: 'currency',
@@ -885,7 +1990,7 @@
                         style: 'currency',
                         currency: 'CLP',
                         minimumFractionDigits: 0
-                    }).format(tx.saldoNuevo);
+                    }).format(tx.saldoFinal);
 
                     const row = document.createElement('tr');
                     row.innerHTML = '<td>' + fecha + '</td>' +
@@ -898,47 +2003,22 @@
         }
 
         function refrescarWalletEmpresa(e) {
-            console.log('Refrescando wallet empresa...');
-            
-            // Animación del botón
-            const btn = e.target.closest('button');
-            const icon = btn.querySelector('i');
-            icon.classList.add('fa-spin');
-            
-            // Forzar recarga desde localStorage
-            const session = auth.getSession();
-            console.log('Session:', session);
-            
-            const saldo = auth.getSaldo(session.id, 'empresa');
-            console.log('Saldo empresa obtenido:', saldo);
-            
-            const transacciones = auth.getTransacciones(session.id, 'empresa');
-            console.log('Ingresos:', transacciones.ingresos.length, 'Retiros:', transacciones.retiros.length);
-            
-            // Actualizar saldo directamente en el DOM
-            const saldoFormateado = new Intl.NumberFormat('es-CL', {
-                style: 'currency',
-                currency: 'CLP',
-                minimumFractionDigits: 0
-            }).format(saldo);
-            
-            const saldoElement = document.getElementById('saldoActual');
-            console.log('Elemento saldoActual:', saldoElement);
-            console.log('Actualizando saldo a:', saldoFormateado);
-            saldoElement.textContent = saldoFormateado;
+            if (e) {
+                // Animación del botón si existe
+                const btn = e.target.closest('button');
+                const icon = btn.querySelector('i');
+                icon.classList.add('fa-spin');
+                
+                setTimeout(function() {
+                    icon.classList.remove('fa-spin');
+                }, 500);
+            }
             
             // Recargar toda la wallet (incluyendo ingresos y retiros)
             cargarWalletEmpresa();
             
             // Actualizar navbar también
             updateNavbar();
-            
-            // Detener animación y mostrar mensaje
-            setTimeout(function() {
-                icon.classList.remove('fa-spin');
-                mostrarAlerta('Ingresos', 'Saldo actualizado: ' + saldoFormateado, false);
-                console.log('Refresh empresa completado');
-            }, 500);
         }
 
         function modificarSaldoEmpresa(e) {
@@ -985,30 +2065,142 @@
             setTimeout(cargarWalletEmpresa, 100);
         }
 
-        // Cargar subastas de la empresa
+        // Cargar subastas, rifas y productos de la empresa
         cargarSubastas();
+        cargarRifas();
+        cargarProductos();
+
+        // Variable global para almacenar la imagen en base64
+        let imagenSubastaBase64 = null;
+
+        // Función para previsualizar la imagen
+        function previsualizarImagenSubasta(event) {
+            const file = event.target.files[0];
+            
+            if (!file) return;
+
+            // Validar tipo de archivo
+            if (!file.type.startsWith('image/')) {
+                notify.error('Por favor selecciona un archivo de imagen válido (JPG, PNG, GIF)');
+                return;
+            }
+
+            // Validar tamaño (5MB máximo)
+            const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+            if (file.size > maxSize) {
+                notify.error('La imagen es demasiado grande. El tamaño máximo es 5MB');
+                event.target.value = '';
+                return;
+            }
+
+            // Mostrar indicador de carga
+            const previewBox = document.querySelector('.imagen-preview-box');
+            previewBox.innerHTML = '<div class="imagen-loading"><div class="imagen-loading-spinner"></div></div>';
+
+            // Leer el archivo y convertirlo a base64
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                imagenSubastaBase64 = e.target.result;
+                
+                // Crear preview de la imagen
+                const sizeKB = (file.size / 1024).toFixed(2);
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                const sizeText = file.size > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
+                
+                previewBox.innerHTML = `
+                    <img src="${imagenSubastaBase64}" alt="Preview">
+                    <span class="imagen-size-badge">${sizeText}</span>
+                `;
+                previewBox.classList.add('has-image');
+                
+                // Mostrar botón de eliminar
+                document.getElementById('btnEliminarImagen').style.display = 'flex';
+                
+                notify.success('Imagen cargada correctamente');
+            };
+
+            reader.onerror = function() {
+                notify.error('Error al cargar la imagen. Por favor intenta nuevamente');
+                previewBox.innerHTML = `
+                    <div class="imagen-preview-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Haz clic para subir una imagen</p>
+                        <span class="imagen-preview-hint">JPG, PNG o GIF (Máx. 5MB)</span>
+                    </div>
+                `;
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // Función para eliminar la imagen
+        function eliminarImagenSubasta() {
+            imagenSubastaBase64 = null;
+            document.getElementById('imagenSubasta').value = '';
+            
+            const previewBox = document.querySelector('.imagen-preview-box');
+            previewBox.innerHTML = `
+                <div class="imagen-preview-content">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Haz clic para subir una imagen</p>
+                    <span class="imagen-preview-hint">JPG, PNG o GIF (Máx. 5MB)</span>
+                </div>
+            `;
+            previewBox.classList.remove('has-image');
+            
+            document.getElementById('btnEliminarImagen').style.display = 'none';
+            notify.info('Imagen eliminada');
+        }
 
         function crearSubasta(e) {
             e.preventDefault();
             const form = e.target;
 
+            // Validar que haya una imagen
+            if (!imagenSubastaBase64) {
+                notify.warning('Por favor sube una imagen para la subasta');
+                return;
+            }
+
+            // Validar que haya una fecha seleccionada
+            if (!form.fechaFin.value) {
+                notify.warning('Por favor selecciona una fecha y hora de finalización');
+                return;
+            }
+
+            // Convertir fecha al formato ISO para almacenamiento
+            const fechaFinDate = new Date(form.fechaFin.value);
+            const now = new Date();
+            
+            // Validar que la fecha sea futura (al menos 1 hora)
+            const minDate = new Date(now.getTime() + 60 * 60 * 1000);
+            if (fechaFinDate < minDate) {
+                notify.error('La fecha de finalización debe ser al menos 1 hora en el futuro');
+                return;
+            }
+
             const subastaData = {
                 tipo: form.tipo.value,
                 titulo: form.titulo.value,
                 descripcion: form.descripcion.value,
-                imagen: form.imagen.value,
+                imagen: imagenSubastaBase64, // Guardar la imagen en base64
                 precioInicial: parseFloat(form.precioInicial.value),
-                fechaFin: form.fechaFin.value
+                fechaFin: fechaFinDate.toISOString()
             };
 
             const result = auth.crearSubasta(subastaData);
 
             if (result.success) {
-                mostrarAlerta('Subasta', result.message, false);
+                notify.success(result.message);
                 form.reset();
+                eliminarImagenSubasta(); // Limpiar la imagen
+                if (fechaFinPickerInstance) {
+                    fechaFinPickerInstance.clear(); // Limpiar el selector de fecha
+                }
                 cargarSubastas();
             } else {
-                mostrarAlerta('Subasta', result.message, true);
+                notify.error(result.message);
             }
         }
 
@@ -1027,12 +2219,21 @@
             subastas.forEach(function(subasta) {
                 const fechaFin = new Date(subasta.fechaFin).toLocaleDateString();
                 const card = document.createElement('div');
-                card.style.cssText = 'padding: 1.5rem; border: 1px solid #eee; border-radius: 10px; margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center;';
+                card.style.cssText = 'padding: 1.5rem; border: 1px solid #eee; border-radius: 10px; margin-bottom: 1rem; display: flex; gap: 1.5rem; align-items: center;';
                 
                 const tipoBadge = subasta.tipo === 'subasta' ? '#3498db' : subasta.tipo === 'rifa' ? '#27ae60' : '#e67e22';
                 const estadoBadge = subasta.estado === 'activa' ? '#27ae60' : '#95a5a6';
 
-                card.innerHTML = '<div style="flex: 1;">' +
+                // Imagen de la subasta
+                let imagenHTML = '';
+                if (subasta.imagen) {
+                    imagenHTML = '<img src="' + subasta.imagen + '" alt="' + subasta.titulo + '" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">';
+                } else {
+                    imagenHTML = '<div style="width: 120px; height: 120px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; flex-shrink: 0;"><i class="fas fa-image" style="font-size: 2rem;"></i></div>';
+                }
+
+                card.innerHTML = imagenHTML +
+                    '<div style="flex: 1;">' +
                     '<div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">' +
                     '<span style="background: ' + tipoBadge + '; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600;">' + subasta.tipo + '</span>' +
                     '<span style="background: ' + estadoBadge + '; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600;">' + subasta.estado + '</span>' +
@@ -1050,17 +2251,1004 @@
             });
         }
 
-        function eliminarSubasta(subastaId) {
-            if (confirm('¿Estás seguro de que deseas eliminar esta publicación?')) {
+        async function eliminarSubasta(subastaId) {
+            const confirmed = await confirm('¿Estás seguro de que deseas eliminar esta publicación? Esta acción no se puede deshacer.');
+            if (confirmed) {
                 const result = auth.eliminarSubasta(subastaId);
                 if (result.success) {
-                    mostrarAlerta('Subasta', result.message, false);
+                    notify.success(result.message);
                     cargarSubastas();
                 } else {
-                    mostrarAlerta('Subasta', result.message, true);
+                    notify.error(result.message);
                 }
             }
         }
+
+        // ========== FUNCIONES PARA RIFAS ==========
+        let imagenRifaBase64 = null;
+        let fechaSorteoPickerInstance = null;
+
+        function previsualizarImagenRifa(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                notify.error('Por favor selecciona un archivo de imagen válido');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                notify.error('La imagen no debe superar los 5MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagenRifaBase64 = e.target.result;
+                document.getElementById('imagenPreviewRifa').innerHTML = 
+                    '<img src="' + imagenRifaBase64 + '" style="max-width: 100%; max-height: 300px; border-radius: 10px;">';
+                document.getElementById('btnEliminarImagenRifa').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function eliminarImagenRifa() {
+            imagenRifaBase64 = null;
+            document.getElementById('imagenRifa').value = '';
+            document.getElementById('imagenPreviewRifa').innerHTML = 
+                '<i class="fas fa-cloud-upload-alt"></i>' +
+                '<p>Haz clic para subir una imagen</p>' +
+                '<span class="imagen-preview-hint">JPG, PNG o GIF (Máx. 5MB)</span>';
+            document.getElementById('btnEliminarImagenRifa').style.display = 'none';
+        }
+
+        function crearRifa(e) {
+            e.preventDefault();
+            const form = e.target;
+
+            if (!imagenRifaBase64) {
+                notify.warning('Por favor sube una imagen para la rifa');
+                return;
+            }
+
+            if (!form.fechaSorteo.value) {
+                notify.warning('Por favor selecciona una fecha para el sorteo');
+                return;
+            }
+
+            const fechaSorteo = new Date(form.fechaSorteo.value);
+            const now = new Date();
+            
+            if (fechaSorteo < now) {
+                notify.error('La fecha del sorteo debe ser futura');
+                return;
+            }
+
+            const rifaData = {
+                id: 'rifa-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                titulo: form.titulo.value,
+                descripcion: form.descripcion.value,
+                imagen: imagenRifaBase64,
+                precioBoleto: parseFloat(form.precioBoleto.value),
+                totalBoletos: parseInt(form.totalBoletos.value),
+                fechaSorteo: fechaSorteo.toISOString(),
+                premio: form.premio.value,
+                valorPremio: parseFloat(form.valorPremio.value),
+                empresaId: empresa.id,
+                empresaNombre: empresa.nombre,
+                estado: 'activa',
+                fechaCreacion: new Date().toISOString(),
+                boletos: []
+            };
+
+            // Inicializar boletos
+            for (let i = 0; i < rifaData.totalBoletos; i++) {
+                rifaData.boletos.push({
+                    numero: i,
+                    comprado: false,
+                    userId: null,
+                    fechaCompra: null
+                });
+            }
+
+            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
+            rifas.push(rifaData);
+            localStorage.setItem('nexos_rifas', JSON.stringify(rifas));
+
+            notify.success('Rifa creada exitosamente');
+            form.reset();
+            eliminarImagenRifa();
+            if (fechaSorteoPickerInstance) {
+                fechaSorteoPickerInstance.clear();
+            }
+            cargarRifas();
+        }
+
+        function cargarRifas() {
+            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
+            const misRifas = rifas.filter(r => r.empresaId === empresa.id);
+            const container = document.getElementById('listaRifas');
+
+            if (!container) return;
+
+            if (misRifas.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">No tienes rifas creadas todavía</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            misRifas.forEach(rifa => {
+                const vendidos = rifa.boletos.filter(b => b.comprado).length;
+                const porcentaje = (vendidos / rifa.totalBoletos * 100).toFixed(1);
+                const fechaSorteo = new Date(rifa.fechaSorteo).toLocaleDateString();
+
+                const card = document.createElement('div');
+                card.style.cssText = 'padding: 1.5rem; border: 1px solid #eee; border-radius: 10px; margin-bottom: 1rem; display: flex; gap: 1.5rem; align-items: center;';
+
+                card.innerHTML = 
+                    '<img src="' + rifa.imagen + '" alt="' + rifa.titulo + '" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">' +
+                    '<div style="flex: 1;">' +
+                    '<div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">' +
+                    '<span style="background: #27ae60; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600;">RIFA</span>' +
+                    '<span style="background: ' + (rifa.estado === 'activa' ? '#27ae60' : '#95a5a6') + '; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600;">' + rifa.estado.toUpperCase() + '</span>' +
+                    '</div>' +
+                    '<h3 style="margin: 0.5rem 0; color: var(--dark);">' + rifa.titulo + '</h3>' +
+                    '<p style="color: #666; margin: 0.25rem 0; font-size: 0.9rem;">🎁 ' + rifa.premio + '</p>' +
+                    '<p style="color: #999; margin: 0.5rem 0; font-size: 0.875rem;">' +
+                    '<i class="fas fa-ticket-alt"></i> Vendidos: ' + vendidos + '/' + rifa.totalBoletos + ' (' + porcentaje + '%) | ' +
+                    '<i class="fas fa-dollar-sign"></i> $' + rifa.precioBoleto.toLocaleString() + ' c/u | ' +
+                    '<i class="fas fa-calendar"></i> Sorteo: ' + fechaSorteo +
+                    '</p>' +
+                    '<div style="background: #f0f0f0; border-radius: 10px; overflow: hidden; height: 8px; margin-top: 0.5rem;">' +
+                    '<div style="background: #27ae60; height: 100%; width: ' + porcentaje + '%;"></div>' +
+                    '</div>' +
+                    '</div>' +
+                    '<button onclick="eliminarRifa(\'' + rifa.id + '\')" style="background: #e74c3c; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600;">' +
+                    '<i class="fas fa-trash"></i> Eliminar</button>';
+
+                container.appendChild(card);
+            });
+        }
+
+        async function eliminarRifa(rifaId) {
+            const confirmed = await confirm('¿Estás seguro de que deseas eliminar esta rifa? Esta acción no se puede deshacer.');
+            if (confirmed) {
+                let rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
+                rifas = rifas.filter(r => r.id !== rifaId);
+                localStorage.setItem('nexos_rifas', JSON.stringify(rifas));
+                notify.success('Rifa eliminada correctamente');
+                cargarRifas();
+            }
+        }
+
+        // ========== FUNCIONES PARA PRODUCTOS ==========
+        let imagenProductoBase64 = null;
+
+        function previsualizarImagenProducto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                notify.error('Por favor selecciona un archivo de imagen válido');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                notify.error('La imagen no debe superar los 5MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagenProductoBase64 = e.target.result;
+                document.getElementById('imagenPreviewProducto').innerHTML = 
+                    '<img src="' + imagenProductoBase64 + '" style="max-width: 100%; max-height: 300px; border-radius: 10px;">';
+                document.getElementById('btnEliminarImagenProducto').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function eliminarImagenProducto() {
+            imagenProductoBase64 = null;
+            document.getElementById('imagenProducto').value = '';
+            document.getElementById('imagenPreviewProducto').innerHTML = 
+                '<i class="fas fa-cloud-upload-alt"></i>' +
+                '<p>Haz clic para subir una imagen</p>' +
+                '<span class="imagen-preview-hint">JPG, PNG o GIF (Máx. 5MB)</span>';
+            document.getElementById('btnEliminarImagenProducto').style.display = 'none';
+        }
+
+        function crearProducto(e) {
+            e.preventDefault();
+            const form = e.target;
+
+            if (!imagenProductoBase64) {
+                notify.warning('Por favor sube una imagen para el producto');
+                return;
+            }
+
+            const productoData = {
+                id: 'prod-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                nombre: form.nombre.value,
+                descripcion: form.descripcion.value,
+                imagen: imagenProductoBase64,
+                precio: parseFloat(form.precio.value),
+                precioOriginal: form.precioOriginal.value ? parseFloat(form.precioOriginal.value) : null,
+                stock: parseInt(form.stock.value),
+                categoria: form.categoria.value,
+                empresaId: empresa.id,
+                empresaNombre: empresa.nombre,
+                fechaCreacion: new Date().toISOString(),
+                ventas: []
+            };
+
+            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
+            productos.push(productoData);
+            localStorage.setItem('nexos_productos', JSON.stringify(productos));
+
+            notify.success('Producto creado exitosamente');
+            form.reset();
+            eliminarImagenProducto();
+            cargarProductos();
+        }
+
+        function cargarProductos() {
+            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
+            const misProductos = productos.filter(p => p.empresaId === empresa.id);
+            const container = document.getElementById('listaProductos');
+
+            if (!container) return;
+
+            if (misProductos.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">No tienes productos creados todavía</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            misProductos.forEach(producto => {
+                const descuento = producto.precioOriginal ? Math.round(((producto.precioOriginal - producto.precio) / producto.precioOriginal) * 100) : 0;
+                const totalVentas = producto.ventas ? producto.ventas.reduce((sum, v) => sum + v.cantidad, 0) : 0;
+
+                const card = document.createElement('div');
+                card.style.cssText = 'padding: 1.5rem; border: 1px solid #eee; border-radius: 10px; margin-bottom: 1rem; display: flex; gap: 1.5rem; align-items: center;';
+
+                let stockBadge = '';
+                if (producto.stock === 0) {
+                    stockBadge = '<span style="background: #e74c3c; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600;">AGOTADO</span>';
+                } else if (producto.stock <= 5) {
+                    stockBadge = '<span style="background: #f39c12; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600;">STOCK BAJO</span>';
+                }
+
+                card.innerHTML = 
+                    '<img src="' + producto.imagen + '" alt="' + producto.nombre + '" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">' +
+                    '<div style="flex: 1;">' +
+                    '<div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">' +
+                    '<span style="background: #e67e22; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600;">' + producto.categoria + '</span>' +
+                    stockBadge +
+                    (descuento > 0 ? '<span style="background: #e74c3c; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600;">-' + descuento + '%</span>' : '') +
+                    '</div>' +
+                    '<h3 style="margin: 0.5rem 0; color: var(--dark);">' + producto.nombre + '</h3>' +
+                    '<p style="color: #666; margin: 0.25rem 0; font-size: 0.9rem;">' + producto.descripcion.substring(0, 80) + (producto.descripcion.length > 80 ? '...' : '') + '</p>' +
+                    '<p style="color: #999; margin: 0.5rem 0; font-size: 0.875rem;">' +
+                    '<i class="fas fa-dollar-sign"></i> $' + producto.precio.toLocaleString() + ' | ' +
+                    '<i class="fas fa-box"></i> Stock: ' + producto.stock + ' | ' +
+                    '<i class="fas fa-shopping-cart"></i> Vendidos: ' + totalVentas +
+                    '</p></div>' +
+                    '<div style="display: flex; flex-direction: column; gap: 0.5rem;">' +
+                    '<button onclick="editarProducto(\'' + producto.id + '\')" style="background: #3498db; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600;">' +
+                    '<i class="fas fa-edit"></i> Editar</button>' +
+                    '<button onclick="eliminarProducto(\'' + producto.id + '\')" style="background: #e74c3c; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600;">' +
+                    '<i class="fas fa-trash"></i> Eliminar</button>' +
+                    '</div>';
+
+                container.appendChild(card);
+            });
+        }
+
+        function editarProducto(productoId) {
+            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
+            const producto = productos.find(p => p.id === productoId);
+            if (!producto) return;
+
+            const nuevoStock = prompt('Ingresa el nuevo stock para ' + producto.nombre + ':', producto.stock);
+            if (nuevoStock === null) return;
+
+            const stock = parseInt(nuevoStock);
+            if (isNaN(stock) || stock < 0) {
+                notify.error('Stock inválido');
+                return;
+            }
+
+            producto.stock = stock;
+            localStorage.setItem('nexos_productos', JSON.stringify(productos));
+            notify.success('Stock actualizado correctamente');
+            cargarProductos();
+        }
+
+        async function eliminarProducto(productoId) {
+            const confirmed = await confirm('¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.');
+            if (confirmed) {
+                let productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
+                productos = productos.filter(p => p.id !== productoId);
+                localStorage.setItem('nexos_productos', JSON.stringify(productos));
+                notify.success('Producto eliminado correctamente');
+                cargarProductos();
+            }
+        }
+
+        // Función para mostrar modal de retiro
+        function mostrarModalRetiro() {
+            const cuenta = auth.getCurrentAccount();
+            const saldoActual = cuenta.saldo || 0;
+
+            if (saldoActual <= 0) {
+                notify.alert('No tienes saldo disponible para retirar.', 'warning', 'Sin Saldo');
+                return;
+            }
+
+            // Mostrar saldo en el modal
+            document.getElementById('saldoDisponibleRetiro').textContent = 
+                new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(saldoActual);
+            
+            // Pre-llenar algunos campos
+            document.querySelector('[name="rutTitular"]').value = cuenta.rut || '';
+            document.querySelector('[name="nombreTitular"]').value = cuenta.razonSocial || '';
+            document.querySelector('[name="emailConfirmacion"]').value = cuenta.email || '';
+            
+            // Establecer el máximo en el input de monto
+            document.getElementById('montoRetiro').max = saldoActual;
+            
+            // Mostrar modal
+            document.getElementById('modalRetiro').style.display = 'flex';
+        }
+
+        // Función para cerrar modal de retiro
+        function cerrarModalRetiro() {
+            document.getElementById('modalRetiro').style.display = 'none';
+            document.getElementById('formRetiro').reset();
+        }
+
+        // Función para procesar el retiro
+        async function procesarRetiro(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const datos = {
+                monto: parseInt(formData.get('monto')),
+                banco: formData.get('banco'),
+                tipoCuenta: formData.get('tipoCuenta'),
+                numeroCuenta: formData.get('numeroCuenta'),
+                rutTitular: formData.get('rutTitular'),
+                nombreTitular: formData.get('nombreTitular'),
+                emailConfirmacion: formData.get('emailConfirmacion')
+            };
+
+            const cuenta = auth.getCurrentAccount();
+            const saldoActual = cuenta.saldo || 0;
+
+            // Validaciones
+            if (datos.monto < 1000) {
+                notify.error('El monto mínimo de retiro es $1,000.');
+                return;
+            }
+
+            if (datos.monto > saldoActual) {
+                notify.error('No tienes suficiente saldo. Tu saldo actual es $' + saldoActual.toLocaleString('es-CL'));
+                return;
+            }
+
+            // Confirmar retiro
+            const confirmed = await notify.confirm(
+                '¿Confirmas el retiro con los siguientes datos?\n\n' +
+                'Monto: $' + datos.monto.toLocaleString('es-CL') + '\n' +
+                'Banco: ' + datos.banco + '\n' +
+                'Cuenta: ' + datos.tipoCuenta + ' - ' + datos.numeroCuenta + '\n' +
+                'Titular: ' + datos.nombreTitular + '\n\n' +
+                'Esta operación no se puede deshacer.'
+            );
+
+            if (!confirmed) return;
+
+            // Realizar el retiro
+            realizarRetiro(datos);
+        }
+
+        // Función para realizar el retiro
+        function realizarRetiro(datos) {
+            const session = auth.getSession();
+            const cuenta = auth.getCurrentAccount();
+            const saldoActual = cuenta.saldo || 0;
+            const nuevoSaldo = saldoActual - datos.monto;
+
+            // Actualizar saldo
+            cuenta.saldo = nuevoSaldo;
+
+            // Registrar transacción de retiro con datos bancarios
+            if (!cuenta.transacciones) {
+                cuenta.transacciones = [];
+            }
+
+            cuenta.transacciones.push({
+                tipo: 'retiro',
+                monto: datos.monto,
+                descripcion: 'Retiro a ' + datos.banco + ' - ' + datos.tipoCuenta,
+                fecha: new Date().toISOString(),
+                saldoFinal: nuevoSaldo,
+                datosBancarios: {
+                    banco: datos.banco,
+                    tipoCuenta: datos.tipoCuenta,
+                    numeroCuenta: datos.numeroCuenta,
+                    rutTitular: datos.rutTitular,
+                    nombreTitular: datos.nombreTitular,
+                    emailConfirmacion: datos.emailConfirmacion
+                }
+            });
+
+            // Guardar en localStorage
+            const cuentasKey = session.type === 'user' ? 'nexos_usuarios' : 'nexos_empresas';
+            const cuentas = JSON.parse(localStorage.getItem(cuentasKey) || '[]');
+            const indiceCuenta = cuentas.findIndex(function(c) { 
+                // Buscar por username o id (que son los campos que tiene la sesión)
+                return c.username === session.username || c.id === session.id;
+            });
+            
+            if (indiceCuenta !== -1) {
+                cuentas[indiceCuenta] = cuenta;
+                localStorage.setItem(cuentasKey, JSON.stringify(cuentas));
+            }
+
+            // Cerrar modal
+            cerrarModalRetiro();
+
+            // Refrescar wallet y navbar
+            cargarWalletEmpresa();
+            updateNavbar();
+
+            notify.success(
+                '¡Retiro solicitado exitosamente!\n\n' +
+                'Monto: $' + datos.monto.toLocaleString('es-CL') + '\n' +
+                'Banco: ' + datos.banco + '\n' +
+                'Cuenta: ' + datos.numeroCuenta + '\n' +
+                'Nuevo saldo: $' + nuevoSaldo.toLocaleString('es-CL') + '\n\n' +
+                'Recibirás un email de confirmación en ' + datos.emailConfirmacion + '\n' +
+                'El dinero será transferido en 1-2 días hábiles.'
+            );
+        }
+
+        // ==================== FUNCIONES DE SEGURIDAD ====================
+
+        // Verificar fortaleza de contraseña
+        function checkPasswordStrengthEmpresa(password) {
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+            };
+
+            const requirementsList = document.querySelectorAll('#password-requirements-empresa li');
+            const checks = [requirements.length, requirements.uppercase, requirements.lowercase, requirements.number, requirements.special];
+            
+            requirementsList.forEach((li, index) => {
+                if (checks[index]) {
+                    li.innerHTML = li.innerHTML.replace('fa-times text-danger', 'fa-check text-success');
+                    li.innerHTML = li.innerHTML.replace('<i class="fas fa-check text-success"></i>', '<i class="fas fa-check text-success"></i>');
+                    li.style.color = '#28a745';
+                } else {
+                    li.innerHTML = li.innerHTML.replace('fa-check text-success', 'fa-times text-danger');
+                    li.innerHTML = li.innerHTML.replace('<i class="fas fa-times text-danger"></i>', '<i class="fas fa-times text-danger"></i>');
+                    li.style.color = '#666';
+                }
+            });
+
+            const strength = Object.values(requirements).filter(Boolean).length;
+            const strengthBar = document.getElementById('password-strength-bar-empresa');
+            const strengthText = document.getElementById('password-strength-text-empresa');
+
+            if (strength <= 2) {
+                strengthBar.style.width = '33%';
+                strengthBar.style.background = '#dc3545';
+                strengthText.textContent = 'Débil';
+                strengthText.style.color = '#dc3545';
+            } else if (strength <= 4) {
+                strengthBar.style.width = '66%';
+                strengthBar.style.background = '#ffc107';
+                strengthText.textContent = 'Media';
+                strengthText.style.color = '#ffc107';
+            } else {
+                strengthBar.style.width = '100%';
+                strengthBar.style.background = '#28a745';
+                strengthText.textContent = 'Fuerte';
+                strengthText.style.color = '#28a745';
+            }
+        }
+
+        // Toggle visibilidad de contraseña
+        function togglePasswordVisibilityEmpresa(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        // Cambiar contraseña
+        function cambiarPasswordEmpresa(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const currentPassword = formData.get('currentPassword');
+            const newPassword = formData.get('newPassword');
+            const confirmPassword = formData.get('confirmPassword');
+
+            const session = auth.getSession();
+            const empresa = auth.getCurrentAccount();
+
+            if (empresa.password !== currentPassword) {
+                mostrarAlerta('Seguridad', 'La contraseña actual es incorrecta', true);
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                mostrarAlerta('Seguridad', 'Las contraseñas nuevas no coinciden', true);
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                mostrarAlerta('Seguridad', 'La contraseña debe tener al menos 8 caracteres', true);
+                return;
+            }
+
+            // Actualizar contraseña
+            empresa.password = newPassword;
+            
+            const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
+            const index = empresas.findIndex(e => e.username === session.username || e.id === session.id);
+            
+            if (index !== -1) {
+                empresas[index] = empresa;
+                localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
+                
+                registrarActividadEmpresa('password_change', 'Contraseña actualizada');
+                calcularNivelSeguridadEmpresa();
+                
+                mostrarAlerta('Seguridad', 'Contraseña actualizada exitosamente', false);
+                event.target.reset();
+                
+                // Limpiar indicadores
+                document.getElementById('password-strength-bar-empresa').style.width = '0%';
+                document.getElementById('password-strength-text-empresa').textContent = 'Débil';
+                
+                const requirementsList = document.querySelectorAll('#password-requirements-empresa li');
+                requirementsList.forEach(li => {
+                    li.innerHTML = li.innerHTML.replace('fa-check text-success', 'fa-times text-danger');
+                    li.style.color = '#666';
+                });
+            }
+        }
+
+        // Toggle 2FA
+        function toggle2FAEmpresa(enabled) {
+            const empresa = auth.getCurrentAccount();
+            
+            if (enabled) {
+                // Mostrar configuración de 2FA
+                document.getElementById('2fa-setup-empresa').style.display = 'block';
+                document.getElementById('2fa-active-empresa').style.display = 'none';
+                document.getElementById('2fa-status-empresa').textContent = 'Configurando...';
+                document.getElementById('2fa-status-empresa').style.color = '#ffc107';
+                
+                // Generar clave secreta
+                const secretKey = generateSecretKeyEmpresa();
+                document.getElementById('secret-key-empresa').textContent = secretKey;
+                
+                notify.info('Escanea el código QR con tu app de autenticación');
+            } else {
+                if (empresa.twoFactorEnabled) {
+                    if (confirm('¿Estás seguro de que deseas desactivar la verificación en 2 pasos? Esto hará tu cuenta menos segura.')) {
+                        empresa.twoFactorEnabled = false;
+                        empresa.twoFactorSecret = null;
+                        empresa.backupCodes = [];
+                        
+                        guardarCambiosEmpresa();
+                        registrarActividadEmpresa('2fa_disabled', 'Verificación en 2 pasos desactivada');
+                        calcularNivelSeguridadEmpresa();
+                        
+                        document.getElementById('2fa-setup-empresa').style.display = 'none';
+                        document.getElementById('2fa-active-empresa').style.display = 'none';
+                        document.getElementById('2fa-status-empresa').textContent = 'Desactivada';
+                        document.getElementById('2fa-status-empresa').style.color = '#dc3545';
+                        
+                        notify.success('Verificación en 2 pasos desactivada');
+                    } else {
+                        document.getElementById('toggle-2fa-empresa').checked = true;
+                    }
+                } else {
+                    document.getElementById('2fa-setup-empresa').style.display = 'none';
+                    document.getElementById('2fa-status-empresa').textContent = 'Desactivada';
+                    document.getElementById('2fa-status-empresa').style.color = '#dc3545';
+                }
+            }
+        }
+
+        // Generar clave secreta para 2FA
+        function generateSecretKeyEmpresa() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+            let secret = '';
+            for (let i = 0; i < 16; i++) {
+                secret += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return secret;
+        }
+
+        // Verificar código 2FA y activar
+        function verify2FASetupEmpresa() {
+            const code = document.getElementById('verification-code-empresa').value;
+            
+            if (code.length !== 6 || !/^\d{6}$/.test(code)) {
+                notify.error('Por favor ingresa un código de 6 dígitos válido');
+                return;
+            }
+
+            // Simulación: aceptar cualquier código de 6 dígitos
+            const empresa = auth.getCurrentAccount();
+            empresa.twoFactorEnabled = true;
+            empresa.twoFactorSecret = document.getElementById('secret-key-empresa').textContent;
+            
+            // Generar códigos de respaldo
+            const backupCodes = generateBackupCodesEmpresa();
+            empresa.backupCodes = backupCodes;
+            
+            guardarCambiosEmpresa();
+            registrarActividadEmpresa('2fa_enabled', 'Verificación en 2 pasos activada');
+            calcularNivelSeguridadEmpresa();
+            
+            // Mostrar códigos de respaldo
+            document.getElementById('2fa-setup-empresa').style.display = 'none';
+            document.getElementById('2fa-active-empresa').style.display = 'block';
+            document.getElementById('2fa-status-empresa').textContent = 'Activada';
+            document.getElementById('2fa-status-empresa').style.color = '#28a745';
+            
+            mostrarCodigosRespaldoEmpresa(backupCodes);
+            
+            notify.success('¡Verificación en 2 pasos activada correctamente!');
+        }
+
+        // Generar códigos de respaldo
+        function generateBackupCodesEmpresa() {
+            const codes = [];
+            for (let i = 0; i < 8; i++) {
+                const code = Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000);
+                codes.push(code);
+            }
+            return codes;
+        }
+
+        // Mostrar códigos de respaldo
+        function mostrarCodigosRespaldoEmpresa(codes) {
+            const container = document.getElementById('backup-codes-display-empresa');
+            container.innerHTML = '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">';
+            
+            codes.forEach(code => {
+                container.innerHTML += `
+                    <div style="background: white; padding: 0.75rem; border: 1px solid #e0e0e0; border-radius: 5px; font-family: monospace; font-weight: 700; text-align: center; color: var(--primary);">
+                        ${code}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML += '</div>';
+        }
+
+        // Regenerar códigos de respaldo
+        function regenerateBackupCodesEmpresa() {
+            if (!confirm('¿Estás seguro? Los códigos actuales dejarán de funcionar.')) return;
+            
+            const empresa = auth.getCurrentAccount();
+            const newCodes = generateBackupCodesEmpresa();
+            empresa.backupCodes = newCodes;
+            
+            guardarCambiosEmpresa();
+            registrarActividadEmpresa('backup_codes_regenerated', 'Códigos de respaldo regenerados');
+            
+            mostrarCodigosRespaldoEmpresa(newCodes);
+            notify.success('Códigos de respaldo regenerados correctamente');
+        }
+
+        // Descargar códigos de respaldo
+        function downloadBackupCodesEmpresa() {
+            const empresa = auth.getCurrentAccount();
+            
+            if (!empresa.backupCodes || empresa.backupCodes.length === 0) {
+                notify.error('No hay códigos de respaldo disponibles');
+                return;
+            }
+
+            const content = `NEXOS - Códigos de Respaldo 2FA\n` +
+                          `Empresa: ${empresa.nombreEmpresa}\n` +
+                          `Fecha: ${new Date().toLocaleString('es-CL')}\n\n` +
+                          `GUARDA ESTOS CÓDIGOS EN UN LUGAR SEGURO\n` +
+                          `Cada código solo se puede usar una vez\n\n` +
+                          empresa.backupCodes.join('\n') +
+                          `\n\n¡NO COMPARTAS ESTOS CÓDIGOS CON NADIE!`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nexos-backup-codes-${empresa.username}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            registrarActividadEmpresa('backup_codes_downloaded', 'Códigos de respaldo descargados');
+            notify.success('Códigos descargados correctamente');
+        }
+
+        // Calcular nivel de seguridad
+        function calcularNivelSeguridadEmpresa() {
+            const empresa = auth.getCurrentAccount();
+            let nivel = 0;
+            
+            // Contraseña fuerte (25 puntos)
+            if (empresa.password && empresa.password.length >= 8) {
+                const hasUppercase = /[A-Z]/.test(empresa.password);
+                const hasLowercase = /[a-z]/.test(empresa.password);
+                const hasNumber = /[0-9]/.test(empresa.password);
+                const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(empresa.password);
+                
+                if (hasUppercase && hasLowercase && hasNumber && hasSpecial) {
+                    nivel += 25;
+                    document.getElementById('indicador-password').style.borderLeftColor = '#28a745';
+                    document.getElementById('indicador-password').querySelector('i').style.color = '#28a745';
+                }
+            }
+            
+            // 2FA activado (50 puntos)
+            if (empresa.twoFactorEnabled) {
+                nivel += 50;
+                document.getElementById('indicador-2fa').style.borderLeftColor = '#28a745';
+                document.getElementById('indicador-2fa').querySelector('i').style.color = '#28a745';
+            } else {
+                document.getElementById('indicador-2fa').style.borderLeftColor = '#dc3545';
+                document.getElementById('indicador-2fa').querySelector('i').style.color = '#dc3545';
+            }
+            
+            // Email verificado (25 puntos) - asumimos que está verificado
+            nivel += 25;
+            
+            document.getElementById('nivel-seguridad-porcentaje').textContent = nivel + '%';
+            document.getElementById('nivel-seguridad-barra').style.width = nivel + '%';
+            
+            if (nivel < 50) {
+                document.getElementById('nivel-seguridad-barra').style.background = '#dc3545';
+            } else if (nivel < 75) {
+                document.getElementById('nivel-seguridad-barra').style.background = '#ffc107';
+            } else {
+                document.getElementById('nivel-seguridad-barra').style.background = 'linear-gradient(90deg, var(--secondary), var(--primary))';
+            }
+        }
+
+        // Registrar actividad
+        function registrarActividadEmpresa(tipo, descripcion) {
+            const empresa = auth.getCurrentAccount();
+            
+            if (!empresa.actividadReciente) {
+                empresa.actividadReciente = [];
+            }
+
+            empresa.actividadReciente.unshift({
+                tipo: tipo,
+                descripcion: descripcion,
+                fecha: new Date().toISOString(),
+                dispositivo: 'Windows - Chrome',
+                ubicacion: 'Santiago, Chile',
+                ip: '192.168.1.' + Math.floor(Math.random() * 255)
+            });
+
+            // Mantener solo las últimas 50 actividades
+            if (empresa.actividadReciente.length > 50) {
+                empresa.actividadReciente = empresa.actividadReciente.slice(0, 50);
+            }
+
+            guardarCambiosEmpresa();
+        }
+
+        // Cargar configuración de seguridad
+        function cargarConfiguracionSeguridadEmpresa() {
+            const empresa = auth.getCurrentAccount();
+            
+            // Calcular nivel de seguridad
+            calcularNivelSeguridadEmpresa();
+            
+            // Estado de 2FA
+            const toggle2FA = document.getElementById('toggle-2fa-empresa');
+            toggle2FA.checked = empresa.twoFactorEnabled || false;
+            
+            if (empresa.twoFactorEnabled) {
+                document.getElementById('2fa-status-empresa').textContent = 'Activada';
+                document.getElementById('2fa-status-empresa').style.color = '#28a745';
+                document.getElementById('2fa-setup-empresa').style.display = 'none';
+                document.getElementById('2fa-active-empresa').style.display = 'block';
+                mostrarCodigosRespaldoEmpresa(empresa.backupCodes || []);
+            } else {
+                document.getElementById('2fa-status-empresa').textContent = 'Desactivada';
+                document.getElementById('2fa-status-empresa').style.color = '#dc3545';
+                document.getElementById('2fa-setup-empresa').style.display = 'none';
+                document.getElementById('2fa-active-empresa').style.display = 'none';
+            }
+            
+            // Cargar historial de actividad
+            const tbody = document.getElementById('historial-actividad-empresa');
+            tbody.innerHTML = '';
+            
+            const actividades = empresa.actividadReciente || [];
+            const actividadesRecientes = actividades.slice(0, 10);
+            
+            if (actividadesRecientes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: #666;">No hay actividad registrada</td></tr>';
+            } else {
+                actividadesRecientes.forEach(act => {
+                    const fecha = new Date(act.fecha);
+                    const iconos = {
+                        'login': 'fa-sign-in-alt',
+                        'logout': 'fa-sign-out-alt',
+                        'password_change': 'fa-key',
+                        '2fa_enabled': 'fa-shield-alt',
+                        '2fa_disabled': 'fa-shield-alt',
+                        'backup_codes_regenerated': 'fa-sync',
+                        'backup_codes_downloaded': 'fa-download',
+                        'profile_updated': 'fa-user-edit',
+                        'privacy_updated': 'fa-user-shield',
+                        'auction_created': 'fa-gavel',
+                        'data_downloaded': 'fa-file-download'
+                    };
+                    
+                    const icono = iconos[act.tipo] || 'fa-circle';
+                    
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><i class="fas ${icono}" style="margin-right: 0.5rem; color: var(--primary);"></i>${act.descripcion}</td>
+                            <td>${act.dispositivo || 'Desconocido'}</td>
+                            <td>${act.ubicacion || 'Desconocido'}</td>
+                            <td>${fecha.toLocaleString('es-CL')}</td>
+                        </tr>
+                    `;
+                });
+            }
+            
+            // Configuración de privacidad
+            if (!empresa.privacidad) {
+                empresa.privacidad = {
+                    perfilPublico: true,
+                    mostrarEmail: false,
+                    historialSubastas: true
+                };
+                guardarCambiosEmpresa();
+            }
+            
+            document.getElementById('perfil-publico-empresa').checked = empresa.privacidad.perfilPublico;
+            document.getElementById('mostrar-email-empresa').checked = empresa.privacidad.mostrarEmail;
+            document.getElementById('historial-subastas-empresa').checked = empresa.privacidad.historialSubastas;
+        }
+
+        // Actualizar configuración de privacidad
+        function actualizarPrivacidadEmpresa(setting, value) {
+            const empresa = auth.getCurrentAccount();
+            
+            if (!empresa.privacidad) {
+                empresa.privacidad = {};
+            }
+            
+            empresa.privacidad[setting] = value;
+            guardarCambiosEmpresa();
+            registrarActividadEmpresa('privacy_updated', 'Configuración de privacidad actualizada');
+            
+            notify.success('Configuración de privacidad actualizada');
+        }
+
+        // Cerrar otras sesiones
+        function cerrarOtrasSesionesEmpresa() {
+            if (confirm('¿Estás seguro de que deseas cerrar todas las otras sesiones? Solo permanecerá activa esta sesión.')) {
+                registrarActividadEmpresa('sessions_closed', 'Todas las otras sesiones fueron cerradas');
+                notify.success('Todas las otras sesiones han sido cerradas');
+            }
+        }
+
+        // Confirmar eliminación de cuenta
+        function confirmarEliminarCuentaEmpresa() {
+            const confirmText = prompt(
+                'Esta acción es IRREVERSIBLE y eliminará permanentemente:\n\n' +
+                '• Tu perfil y datos de empresa\n' +
+                '• Todas tus subastas y participaciones\n' +
+                '• Tu saldo y transacciones\n' +
+                '• Todas tus configuraciones\n\n' +
+                'Escribe "ELIMINAR" (en mayúsculas) para confirmar:'
+            );
+
+            if (confirmText !== 'ELIMINAR') {
+                if (confirmText !== null) {
+                    notify.error('Texto de confirmación incorrecto');
+                }
+                return;
+            }
+
+            const password = prompt('Por seguridad, ingresa tu contraseña para confirmar la eliminación:');
+            const empresa = auth.getCurrentAccount();
+
+            if (password !== empresa.password) {
+                notify.error('Contraseña incorrecta');
+                return;
+            }
+
+            // Eliminar cuenta
+            const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
+            const nuevasEmpresas = empresas.filter(e => e.username !== empresa.username);
+            localStorage.setItem('nexos_empresas', JSON.stringify(nuevasEmpresas));
+
+            // Cerrar sesión
+            auth.logout();
+
+            notify.success('Tu cuenta ha sido eliminada permanentemente');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+        }
+
+        // Descargar datos de la cuenta
+        function descargarMisDatosEmpresa() {
+            const empresa = auth.getCurrentAccount();
+            
+            // Crear copia sin datos sensibles
+            const datosExportar = {
+                ...empresa,
+                password: '***OCULTO***',
+                twoFactorSecret: empresa.twoFactorSecret ? '***OCULTO***' : null,
+                backupCodes: empresa.backupCodes ? ['***OCULTOS***'] : []
+            };
+
+            const content = JSON.stringify(datosExportar, null, 2);
+            const blob = new Blob([content], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nexos-datos-${empresa.username}-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            registrarActividadEmpresa('data_downloaded', 'Datos de la cuenta descargados');
+            notify.success('Tus datos han sido descargados correctamente');
+        }
+
+        // Guardar cambios en la cuenta
+        function guardarCambiosEmpresa() {
+            const session = auth.getSession();
+            const empresa = auth.getCurrentAccount();
+            
+            const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
+            const index = empresas.findIndex(e => e.username === session.username || e.id === session.id);
+            
+            if (index !== -1) {
+                empresas[index] = empresa;
+                localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
+            }
+        }
+
+        // Modificar cambiarTab para cargar seguridad
+        const originalCambiarTab2Empresa = cambiarTab;
+        cambiarTab = function(tab, element) {
+            originalCambiarTab2Empresa(tab, element);
+            if (tab === 'finanzas') {
+                cargarWalletEmpresa();
+            } else if (tab === 'seguridad') {
+                cargarConfiguracionSeguridadEmpresa();
+            }
+        };
     </script>
 </body>
 </html>

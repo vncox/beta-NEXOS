@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Exitoso - Nexos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .success-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+        }
+
+        .success-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #27ae60, #229954);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        .success-icon i {
+            font-size: 3rem;
+            color: white;
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        h1 {
+            color: #27ae60;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+
+        .transaction-info {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            color: #666;
+        }
+
+        .transaction-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .transaction-item strong {
+            color: #333;
+        }
+
+        .btn-volver {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-volver:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-card">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+
+            <h1>¡Pago Exitoso!</h1>
+            <p style="color: #666; margin-bottom: 2rem;">Tu transacción ha sido procesada correctamente</p>
+
+            <div class="transaction-info">
+                <div class="transaction-item">
+                    <span>ID de Transacción:</span>
+                    <strong id="transaction-id">-</strong>
+                </div>
+                <div class="transaction-item">
+                    <span>Monto:</span>
+                    <strong id="transaction-amount" style="color: #27ae60;">$0</strong>
+                </div>
+                <div class="transaction-item">
+                    <span>Estado:</span>
+                    <strong style="color: #27ae60;">✓ Aprobado</strong>
+                </div>
+                <div class="transaction-item">
+                    <span>Fecha:</span>
+                    <strong id="transaction-date">-</strong>
+                </div>
+            </div>
+
+            <p style="color: #999; font-size: 0.9rem; margin-bottom: 2rem;">
+                Recibirás un comprobante por correo electrónico
+            </p>
+
+            <a href="perfil.html" class="btn-volver">
+                <i class="fas fa-home"></i> Volver a Mi Perfil
+            </a>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="mercadopago.js"></script>
+    <script>
+        // Obtener parámetros de la URL enviados por Mercado Pago
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentId = urlParams.get('payment_id');
+        const status = urlParams.get('status');
+        const merchantOrderId = urlParams.get('merchant_order_id');
+
+        // Obtener información del pago pendiente
+        const pagoPendiente = JSON.parse(localStorage.getItem('nexos_pago_pendiente') || '{}');
+
+        if (paymentId && status === 'approved' && pagoPendiente.tipo) {
+            // Pago aprobado por Mercado Pago - Procesar
+            document.getElementById('transaction-id').textContent = 'MP-' + paymentId;
+            document.getElementById('transaction-amount').textContent = '$' + (pagoPendiente.monto || 0).toLocaleString('es-CL');
+            document.getElementById('transaction-date').textContent = new Date().toLocaleString('es-CL');
+
+            // Procesar el pago según el tipo
+            procesarPagoAprobado(pagoPendiente, paymentId);
+
+        } else {
+            // Verificar resultado en localStorage (para pagos sandbox)
+            const resultado = JSON.parse(localStorage.getItem('nexos_pago_resultado') || '{}');
+
+            if (resultado.success) {
+                document.getElementById('transaction-id').textContent = resultado.transactionId || '-';
+                document.getElementById('transaction-amount').textContent = '$' + (resultado.amount || 0).toLocaleString('es-CL');
+                document.getElementById('transaction-date').textContent = new Date().toLocaleString('es-CL');
+
+                setTimeout(() => {
+                    localStorage.removeItem('nexos_pago_resultado');
+                }, 5000);
+            } else if (!paymentId) {
+                // Si no hay ni payment_id ni resultado, redirigir
+                window.location.href = 'index.html';
+            }
+        }
+
+        async function procesarPagoAprobado(pagoInfo, paymentId) {
+            const transactionId = 'MP-' + paymentId;
+            const tipo = pagoInfo.tipo;
+            const itemId = pagoInfo.itemId;
+            const monto = pagoInfo.monto;
+            const extra = pagoInfo.extra;
+
+            try {
+                // Procesar según tipo
+                if (tipo === 'deposito') {
+                    await MercadoPagoPayment.procesarDepositoAprobado(monto, transactionId);
+                } else if (tipo === 'rifa') {
+                    await MercadoPagoPayment.procesarPagoRifaAprobado(itemId, monto, extra, transactionId);
+                } else if (tipo === 'producto') {
+                    await MercadoPagoPayment.procesarPagoProductoAprobado(itemId, monto, extra, transactionId);
+                }
+
+                // Limpiar pago pendiente
+                localStorage.removeItem('nexos_pago_pendiente');
+
+                console.log('✅ Pago procesado exitosamente');
+            } catch (error) {
+                console.error('❌ Error al procesar pago:', error);
+            }
+        }
+    </script>
+</body>
+</html>

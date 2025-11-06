@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Rechazado - Nexos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .error-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+        }
+
+        .error-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .error-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: shake 0.5s ease-out;
+        }
+
+        .error-icon i {
+            font-size: 3rem;
+            color: white;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-10px);
+            }
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        h1 {
+            color: #e74c3c;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+
+        .error-info {
+            background: #fff5f5;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .error-message {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .error-code {
+            color: #999;
+            font-size: 0.9rem;
+            font-family: monospace;
+        }
+
+        .suggestions {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .suggestions h3 {
+            color: #333;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .suggestions li {
+            color: #666;
+            margin-bottom: 0.8rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .suggestions li:before {
+            content: "•";
+            color: #667eea;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 1rem;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-reintentar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-reintentar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-volver {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-volver:hover {
+            background: #f8f9fa;
+        }
+
+        @media (max-width: 480px) {
+            .btn-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-card">
+            <div class="error-icon">
+                <i class="fas fa-times"></i>
+            </div>
+
+            <h1>Pago Rechazado</h1>
+            <p style="color: #666; margin-bottom: 2rem;">Lo sentimos, tu transacción no pudo ser procesada</p>
+
+            <div class="error-info">
+                <p class="error-message" id="error-message">
+                    El pago fue rechazado. Por favor, verifica tu información e intenta nuevamente.
+                </p>
+                <p class="error-code" id="error-code">
+                    ID de Transacción: <span id="transaction-id">-</span>
+                </p>
+            </div>
+
+            <div class="suggestions">
+                <h3><i class="fas fa-lightbulb"></i> Sugerencias:</h3>
+                <ul>
+                    <li>Verifica que los datos de tu tarjeta sean correctos</li>
+                    <li>Asegúrate de tener fondos suficientes</li>
+                    <li>Confirma que tu tarjeta esté habilitada para compras en línea</li>
+                    <li>Contacta a tu banco si el problema persiste</li>
+                </ul>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn btn-reintentar" onclick="reintentar()">
+                    <i class="fas fa-redo"></i> Reintentar Pago
+                </button>
+                <a href="perfil.html" class="btn btn-volver">
+                    <i class="fas fa-home"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Obtener resultado del pago
+        const resultado = JSON.parse(localStorage.getItem('nexos_pago_resultado') || '{}');
+
+        if (!resultado.success) {
+            document.getElementById('transaction-id').textContent = resultado.transactionId || '-';
+            
+            if (resultado.message) {
+                document.getElementById('error-message').textContent = resultado.message;
+            }
+        } else {
+            // Si el resultado fue exitoso, redirigir a la página de éxito
+            window.location.href = 'pago-exitoso.html';
+        }
+
+        function reintentar() {
+            // Recuperar información del pago pendiente
+            const pagoPendiente = JSON.parse(localStorage.getItem('nexos_pago_pendiente') || '{}');
+            
+            if (pagoPendiente.tipo) {
+                // Limpiar resultados anteriores
+                localStorage.removeItem('nexos_pago_resultado');
+                
+                // Volver a la página de pago
+                window.location.href = 'pago-mercadopago.html';
+            } else {
+                // Si no hay pago pendiente, volver al perfil
+                window.location.href = 'perfil.html';
+            }
+        }
+
+        // Limpiar resultado después de 30 segundos
+        setTimeout(() => {
+            localStorage.removeItem('nexos_pago_resultado');
+        }, 30000);
+    </script>
+</body>
+</html>

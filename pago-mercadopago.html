@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercado Pago - Checkout</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #009ee3 0%, #0082c3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .checkout-container {
+            background: white;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .checkout-header {
+            background: linear-gradient(135deg, #009ee3, #0082c3);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .checkout-header img {
+            height: 40px;
+            margin-bottom: 1rem;
+        }
+
+        .checkout-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .checkout-body {
+            padding: 2rem;
+        }
+
+        .orden-info {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .orden-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            color: #666;
+        }
+
+        .orden-item:last-child {
+            margin-bottom: 0;
+            padding-top: 1rem;
+            border-top: 2px solid #dee2e6;
+            font-weight: 700;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .payment-form {
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #009ee3;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+        }
+
+        .security-badge {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #2e7d32;
+            font-size: 0.9rem;
+        }
+
+        .security-badge i {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-pagar {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+
+        .btn-pagar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-cancelar {
+            width: 100%;
+            padding: 1rem;
+            background: transparent;
+            color: #666;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            margin-top: 1rem;
+        }
+
+        .btn-rechazar {
+            width: 100%;
+            padding: 1rem;
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #009ee3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .sandbox-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ffc107;
+            color: #000;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="sandbox-badge">
+        <i class="fas fa-vial"></i> MODO SANDBOX
+    </div>
+
+    <div class="checkout-container">
+        <div class="checkout-header">
+            <i class="fab fa-cc-mastercard" style="font-size: 3rem;"></i>
+            <h1>Mercado Pago</h1>
+            <p style="opacity: 0.9;">Checkout Seguro</p>
+        </div>
+
+        <div class="checkout-body">
+            <div id="form-container">
+                <div class="orden-info">
+                    <div class="orden-item">
+                        <span>Comercio:</span>
+                        <strong>Nexos</strong>
+                    </div>
+                    <div class="orden-item">
+                        <span>Descripción:</span>
+                        <strong id="orden-descripcion">-</strong>
+                    </div>
+                    <div class="orden-item">
+                        <span>Total a pagar:</span>
+                        <strong id="orden-total" style="color: #009ee3; font-size: 1.5rem;">$0</strong>
+                    </div>
+                </div>
+
+                <div class="security-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <div><strong>Pago 100% Seguro</strong></div>
+                    <div style="font-size: 0.8rem; margin-top: 0.3rem;">Tus datos están protegidos</div>
+                </div>
+
+                <form class="payment-form" id="payment-form">
+                    <div class="form-group">
+                        <label>Número de Tarjeta</label>
+                        <input type="text" id="card-number" placeholder="0000 0000 0000 0000" maxlength="19" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nombre del Titular</label>
+                        <input type="text" id="card-holder" placeholder="Nombre como aparece en la tarjeta" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha de Vencimiento</label>
+                            <input type="text" id="card-expiry" placeholder="MM/AA" maxlength="5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input type="text" id="card-cvv" placeholder="123" maxlength="3" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-pagar">
+                        <i class="fas fa-lock"></i> Pagar Ahora
+                    </button>
+                </form>
+
+                <button class="btn-rechazar" onclick="rechazarPago()">
+                    <i class="fas fa-times-circle"></i> Simular Pago Rechazado
+                </button>
+
+                <button class="btn-cancelar" onclick="cancelarPago()">
+                    Cancelar y volver
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <h3 style="color: #333; margin-bottom: 0.5rem;">Procesando Pago...</h3>
+                <p style="color: #666;">No cierres esta ventana</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Obtener información del pago
+        const pagoInfo = JSON.parse(localStorage.getItem('nexos_pago_pendiente') || '{}');
+
+        // Mostrar información de la orden
+        document.getElementById('orden-descripcion').textContent = pagoInfo.preferencia?.items[0]?.title || 'Compra en Nexos';
+        document.getElementById('orden-total').textContent = '$' + (pagoInfo.monto || 0).toLocaleString('es-CL');
+
+        // Auto-formatear número de tarjeta
+        document.getElementById('card-number').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedValue;
+        });
+
+        // Auto-formatear fecha
+        document.getElementById('card-expiry').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // Solo números en CVV
+        document.getElementById('card-cvv').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Procesar pago
+        document.getElementById('payment-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
+            const cardHolder = document.getElementById('card-holder').value;
+            const cardExpiry = document.getElementById('card-expiry').value;
+            const cardCvv = document.getElementById('card-cvv').value;
+
+            // Validaciones básicas
+            if (cardNumber.length < 16 || cardExpiry.length < 5 || cardCvv.length < 3 || cardHolder.length < 3) {
+                alert('Por favor completa todos los campos correctamente');
+                return;
+            }
+
+            // Mostrar loading
+            document.getElementById('form-container').style.display = 'none';
+            document.getElementById('loading').classList.add('active');
+
+            // Simular procesamiento
+            await new Promise(resolve => setTimeout(resolve, 3000));
+
+            // Validar tarjeta (en sandbox, cualquier tarjeta que empiece con 4 es aprobada)
+            if (!cardNumber.startsWith('4')) {
+                alert('❌ Pago Rechazado\n\nLa tarjeta fue rechazada por el banco.\n\nUsa una tarjeta de prueba que comience con 4 (ej: 4509 9535 6623 3704)');
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('form-container').style.display = 'block';
+                return;
+            }
+
+            // Pago aprobado
+            procesarPagoAprobado();
+        });
+
+        async function procesarPagoAprobado() {
+            // Generar ID de transacción
+            const transactionId = 'MP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+            // Procesar según tipo
+            const tipo = pagoInfo.tipo;
+            const itemId = pagoInfo.itemId;
+            const monto = pagoInfo.monto;
+            const extra = pagoInfo.extra;
+
+            // Cargar script de mercadopago para usar las funciones de procesamiento
+            const script = document.createElement('script');
+            script.src = 'mercadopago.js';
+            document.head.appendChild(script);
+
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Procesar según tipo
+            let resultado = null;
+            if (tipo === 'deposito') {
+                resultado = await MercadoPagoPayment.procesarDepositoAprobado(monto, transactionId);
+            } else if (tipo === 'rifa') {
+                resultado = await MercadoPagoPayment.procesarPagoRifaAprobado(itemId, monto, extra, transactionId);
+            } else if (tipo === 'producto') {
+                resultado = await MercadoPagoPayment.procesarPagoProductoAprobado(itemId, monto, extra, transactionId);
+            }
+
+            // Limpiar información de pago pendiente
+            localStorage.removeItem('nexos_pago_pendiente');
+
+            // Guardar resultado para mostrar en página de retorno
+            localStorage.setItem('nexos_pago_resultado', JSON.stringify({
+                success: true,
+                transactionId: transactionId,
+                amount: monto,
+                tipo: tipo
+            }));
+
+            // Redirigir a página de éxito
+            window.location.href = 'pago-exitoso.html';
+        }
+
+        function rechazarPago() {
+            localStorage.removeItem('nexos_pago_pendiente');
+            localStorage.setItem('nexos_pago_resultado', JSON.stringify({
+                success: false,
+                status: 'rejected'
+            }));
+            window.location.href = 'pago-fallido.html';
+        }
+
+        function cancelarPago() {
+            localStorage.removeItem('nexos_pago_pendiente');
+            window.location.href = document.referrer || 'index.html';
+        }
+    </script>
+</body>
+</html>

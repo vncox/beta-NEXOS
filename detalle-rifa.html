@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle Rifa - Nexos</title>
+    <link rel="icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="shortcut icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="mercadopago.js"></script>
+    <style>
+        .detalle-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        .imagen-principal {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .boleto-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .boleto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .boleto-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .boleto-numero {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .boleto-numero.disponible {
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .boleto-numero.disponible:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .boleto-numero.vendido {
+            background: #e0e0e0;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .boleto-numero.seleccionado {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .boleto-numero.mio {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+
+        @media (max-width: 968px) {
+            .detalle-container {
+                grid-template-columns: 1fr;
+            }
+            .boleto-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="rifas.html" class="active">Rifas</a></li>
+                <li><a href="ventas.html">Ventas</a></li>
+                <li><a href="causas.html">Causas</a></li>
+                <li><a href="empresas.html">Empresas</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+            </ul>
+            <button class="cta-button" onclick="window.location.href='login.html'">Iniciar Sesión</button>
+        </nav>
+    </header>
+
+    <div class="detalle-container">
+        <!-- Columna principal -->
+        <div>
+            <button onclick="window.location.href='rifas.html'" style="background: none; border: none; color: var(--primary); font-size: 1rem; cursor: pointer; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-arrow-left"></i> Volver a rifas
+            </button>
+
+            <div class="boleto-card">
+                <img id="rifaImagen" class="imagen-principal" src="" alt="Premio de la rifa">
+            </div>
+
+            <div class="boleto-card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
+                    <div>
+                        <h1 id="rifaTitulo" style="margin: 0 0 0.5rem 0; font-size: 2.5rem; color: #333;"></h1>
+                        <p id="rifaEmpresa" style="color: #666; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-building"></i> <span></span>
+                        </p>
+                    </div>
+                    <span id="rifaEstado" style="padding: 0.5rem 1.5rem; border-radius: 25px; font-weight: 600;"></span>
+                </div>
+
+                <p id="rifaDescripcion" style="color: #666; line-height: 1.8; font-size: 1.05rem;"></p>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 2rem 0; padding: 1.5rem; background: #f8f9fa; border-radius: 15px;">
+                    <div style="text-align: center;">
+                        <i class="fas fa-calendar-alt" style="font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem;"></i>
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.3rem;">Fecha del Sorteo</div>
+                        <div id="rifaFechaSorteo" style="font-weight: 700; font-size: 1.1rem; color: #333;"></div>
+                    </div>
+                    <div style="text-align: center;">
+                        <i class="fas fa-ticket-alt" style="font-size: 2rem; color: var(--secondary); margin-bottom: 0.5rem;"></i>
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.3rem;">Boletos Vendidos</div>
+                        <div id="rifaBoletosVendidos" style="font-weight: 700; font-size: 1.1rem; color: #333;"></div>
+                    </div>
+                    <div style="text-align: center;">
+                        <i class="fas fa-money-bill-wave" style="font-size: 2rem; color: #27ae60; margin-bottom: 0.5rem;"></i>
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.3rem;">Precio por Boleto</div>
+                        <div id="rifaPrecio" style="font-weight: 700; font-size: 1.3rem; color: var(--primary);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selección de boletos -->
+            <div class="boleto-card">
+                <h2 style="margin: 0 0 1rem 0; color: #333;">
+                    <i class="fas fa-th"></i> Selecciona tus Boletos
+                </h2>
+                
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div class="boleto-numero disponible" style="width: 30px; height: 30px; font-size: 0.75rem;">00</div>
+                        <span style="color: #666; font-size: 0.9rem;">Disponible</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div class="boleto-numero vendido" style="width: 30px; height: 30px; font-size: 0.75rem;">00</div>
+                        <span style="color: #666; font-size: 0.9rem;">Vendido</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div class="boleto-numero mio" style="width: 30px; height: 30px; font-size: 0.75rem;">00</div>
+                        <span style="color: #666; font-size: 0.9rem;">Mis boletos</span>
+                    </div>
+                </div>
+
+                <div id="boletosGrid" class="boleto-grid">
+                    <!-- Se llenan con JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna lateral - Compra -->
+        <div style="position: sticky; top: 2rem;">
+            <div class="boleto-card">
+                <h3 style="margin: 0 0 1.5rem 0; color: #333;">
+                    <i class="fas fa-shopping-cart"></i> Carrito de Compra
+                </h3>
+
+                <div id="boletosSeleccionados" style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 10px; min-height: 100px;">
+                    <div style="text-align: center; color: #999; padding: 2rem 0;">
+                        <i class="fas fa-ticket-alt" style="font-size: 3rem; margin-bottom: 0.5rem;"></i>
+                        <p style="margin: 0;">Selecciona boletos para continuar</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-top: 2px solid #e0e0e0; border-bottom: 2px solid #e0e0e0; margin-bottom: 1.5rem;">
+                    <span style="font-weight: 600; color: #666;">Total a pagar:</span>
+                    <span id="totalPagar" style="font-size: 2rem; font-weight: 700; color: var(--primary);">$0</span>
+                </div>
+
+                <button id="btnComprar" onclick="comprarBoletos()" disabled
+                    style="width: 100%; padding: 1rem; background: #ccc; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: not-allowed; transition: all 0.3s;">
+                    <i class="fas fa-lock"></i> Comprar Boletos
+                </button>
+
+                <div style="margin-top: 1rem; padding: 1rem; background: #e3f2fd; border-radius: 10px; border-left: 4px solid #2196f3;">
+                    <p style="margin: 0; color: #1565c0; font-size: 0.9rem;">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Importante:</strong> Los boletos se reservarán después de confirmar tu compra.
+                    </p>
+                </div>
+            </div>
+
+            <div class="boleto-card" style="margin-top: 1.5rem;">
+                <h4 style="margin: 0 0 1rem 0; color: #333;">
+                    <i class="fas fa-trophy"></i> Información del Premio
+                </h4>
+                <div id="rifaPremioInfo" style="color: #666; line-height: 1.6; font-size: 0.95rem;">
+                    <!-- Se llena con JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-heart"></i> Nexos</h3>
+                <p>Conectando empresas con causas que transforman vidas</p>
+            </div>
+            <div class="footer-section">
+                <h4>Enlaces</h4>
+                <a href="index.html">Inicio</a>
+                <a href="subastas.html">Subastas</a>
+                <a href="rifas.html">Rifas</a>
+                <a href="ventas.html">Ventas</a>
+            </div>
+            <div class="footer-section">
+                <h4>Contacto</h4>
+                <p><i class="fas fa-envelope"></i> info@nexos.cl</p>
+                <p><i class="fas fa-phone"></i> +56 9 1234 5678</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Nexos. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script src="notify.js"></script>
+    <script>
+        let rifaActual = null;
+        let boletosSeleccionados = [];
+        const urlParams = new URLSearchParams(window.location.search);
+        const rifaId = urlParams.get('id');
+
+        // Cargar navbar dinámico
+        if (auth.isLoggedIn()) {
+            const session = auth.getSession();
+            const navbar = document.querySelector('.navbar');
+            const ctaButton = navbar.querySelector('.cta-button');
+            
+            if (session.role === 'admin') {
+                ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'admin.html\'">Panel Admin</button>';
+            } else if (session.role === 'empresa') {
+                ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil-empresa.html\'">Mi Perfil</button>';
+            } else {
+                ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil.html\'">Mi Perfil</button>';
+            }
+        }
+
+        function cargarRifa() {
+            if (!rifaId) {
+                notify.error('Rifa no encontrada');
+                setTimeout(() => window.location.href = 'rifas.html', 2000);
+                return;
+            }
+
+            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
+            rifaActual = rifas.find(r => r.id === rifaId);
+
+            if (!rifaActual) {
+                notify.error('Rifa no encontrada');
+                setTimeout(() => window.location.href = 'rifas.html', 2000);
+                return;
+            }
+
+            // Inicializar boletos si no existen
+            if (!rifaActual.boletos) {
+                rifaActual.boletos = [];
+                for (let i = 0; i < rifaActual.totalBoletos; i++) {
+                    rifaActual.boletos.push({
+                        numero: i,
+                        comprado: false,
+                        userId: null,
+                        fechaCompra: null
+                    });
+                }
+                guardarRifas(rifas);
+            }
+
+            // Cargar información
+            document.getElementById('rifaTitulo').textContent = rifaActual.titulo;
+            document.getElementById('rifaDescripcion').textContent = rifaActual.descripcion;
+            document.getElementById('rifaEmpresa').querySelector('span').textContent = rifaActual.empresaNombre || 'Empresa';
+            document.getElementById('rifaImagen').src = rifaActual.imagen || 'images/placeholder-rifa.jpg';
+            document.getElementById('rifaFechaSorteo').textContent = new Date(rifaActual.fechaSorteo).toLocaleDateString('es-CL', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('rifaPrecio').textContent = '$' + rifaActual.precioBoleto.toLocaleString('es-CL');
+
+            // Estado
+            const fechaSorteo = new Date(rifaActual.fechaSorteo);
+            const ahora = new Date();
+            const estadoEl = document.getElementById('rifaEstado');
+            
+            if (rifaActual.estado === 'finalizada' || fechaSorteo < ahora) {
+                estadoEl.textContent = '🏁 FINALIZADA';
+                estadoEl.style.background = '#e74c3c';
+                estadoEl.style.color = 'white';
+            } else if (rifaActual.estado === 'activa') {
+                estadoEl.textContent = '🎯 ACTIVA';
+                estadoEl.style.background = '#27ae60';
+                estadoEl.style.color = 'white';
+            } else {
+                estadoEl.textContent = '📅 PRÓXIMA';
+                estadoEl.style.background = '#3498db';
+                estadoEl.style.color = 'white';
+            }
+
+            // Boletos vendidos
+            const vendidos = rifaActual.boletos.filter(b => b.comprado).length;
+            document.getElementById('rifaBoletosVendidos').textContent = vendidos + ' / ' + rifaActual.totalBoletos;
+
+            // Premio info
+            document.getElementById('rifaPremioInfo').innerHTML = `
+                <p style="margin-bottom: 0.8rem;"><strong>🎁 Premio:</strong> ${rifaActual.premio || rifaActual.titulo}</p>
+                <p style="margin-bottom: 0.8rem;"><strong>📊 Total de boletos:</strong> ${rifaActual.totalBoletos}</p>
+                <p style="margin-bottom: 0.8rem;"><strong>💰 Valor del premio:</strong> $${(rifaActual.valorPremio || rifaActual.precioBoleto * rifaActual.totalBoletos).toLocaleString('es-CL')}</p>
+                <p style="margin: 0;"><strong>🎲 Sorteo:</strong> ${new Date(rifaActual.fechaSorteo).toLocaleDateString('es-CL')}</p>
+            `;
+
+            cargarBoletos();
+        }
+
+        function cargarBoletos() {
+            const grid = document.getElementById('boletosGrid');
+            grid.innerHTML = '';
+
+            const session = auth.getSession();
+            const miUserId = session ? session.id : null;
+
+            rifaActual.boletos.forEach(boleto => {
+                const div = document.createElement('div');
+                div.className = 'boleto-numero';
+                div.textContent = String(boleto.numero).padStart(2, '0');
+
+                if (boleto.comprado) {
+                    if (boleto.userId === miUserId) {
+                        div.classList.add('mio');
+                        div.title = 'Este boleto es tuyo';
+                    } else {
+                        div.classList.add('vendido');
+                        div.title = 'Boleto vendido';
+                    }
+                } else {
+                    div.classList.add('disponible');
+                    div.onclick = () => toggleBoleto(boleto.numero);
+                }
+
+                grid.appendChild(div);
+            });
+        }
+
+        function toggleBoleto(numero) {
+            if (!auth.isLoggedIn()) {
+                notify.error('Debes iniciar sesión para comprar boletos');
+                setTimeout(() => window.location.href = 'login.html', 1500);
+                return;
+            }
+
+            const session = auth.getSession();
+            if (session.role === 'admin') {
+                notify.error('Los administradores no pueden comprar boletos');
+                return;
+            }
+
+            const index = boletosSeleccionados.indexOf(numero);
+            if (index > -1) {
+                boletosSeleccionados.splice(index, 1);
+            } else {
+                boletosSeleccionados.push(numero);
+            }
+
+            actualizarCarrito();
+        }
+
+        function actualizarCarrito() {
+            const container = document.getElementById('boletosSeleccionados');
+            const totalEl = document.getElementById('totalPagar');
+            const btnComprar = document.getElementById('btnComprar');
+
+            // Actualizar visualización de boletos seleccionados
+            document.querySelectorAll('.boleto-numero.seleccionado').forEach(el => {
+                el.classList.remove('seleccionado');
+            });
+
+            boletosSeleccionados.forEach(num => {
+                const boleto = document.querySelector(`.boleto-numero:nth-child(${num + 1})`);
+                if (boleto && boleto.classList.contains('disponible')) {
+                    boleto.classList.add('seleccionado');
+                }
+            });
+
+            // Actualizar carrito
+            if (boletosSeleccionados.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #999; padding: 2rem 0;">
+                        <i class="fas fa-ticket-alt" style="font-size: 3rem; margin-bottom: 0.5rem;"></i>
+                        <p style="margin: 0;">Selecciona boletos para continuar</p>
+                    </div>
+                `;
+                totalEl.textContent = '$0';
+                btnComprar.disabled = true;
+                btnComprar.style.background = '#ccc';
+                btnComprar.style.cursor = 'not-allowed';
+                btnComprar.innerHTML = '<i class="fas fa-lock"></i> Comprar Boletos';
+            } else {
+                container.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 0.8rem; color: #333;">
+                        Boletos seleccionados (${boletosSeleccionados.length}):
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        ${boletosSeleccionados.sort((a, b) => a - b).map(num => `
+                            <span style="background: var(--primary); color: white; padding: 0.3rem 0.8rem; border-radius: 8px; font-weight: 600;">
+                                #${String(num).padStart(2, '0')}
+                            </span>
+                        `).join('')}
+                    </div>
+                `;
+
+                const total = boletosSeleccionados.length * rifaActual.precioBoleto;
+                totalEl.textContent = '$' + total.toLocaleString('es-CL');
+                
+                btnComprar.disabled = false;
+                btnComprar.style.background = 'var(--primary)';
+                btnComprar.style.cursor = 'pointer';
+                btnComprar.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar Compra';
+            }
+        }
+
+        async function comprarBoletos() {
+            if (boletosSeleccionados.length === 0) {
+                notify.error('Debes seleccionar al menos un boleto');
+                return;
+            }
+
+            if (!auth.isLoggedIn()) {
+                notify.error('Debes iniciar sesión');
+                setTimeout(() => window.location.href = 'login.html', 1500);
+                return;
+            }
+
+            const session = auth.getSession();
+            const total = boletosSeleccionados.length * rifaActual.precioBoleto;
+
+            // Procesar pago con Mercado Pago
+            const resultado = await MercadoPagoPayment.procesarPagoRifa(
+                rifaActual.id,
+                boletosSeleccionados
+            );
+
+            if (!resultado || !resultado.success) {
+                notify.error('Pago cancelado o rechazado');
+                return;
+            }
+
+            // Pago exitoso - actualizar interfaz
+            notify.success(`¡Pago aprobado! Has adquirido ${boletosSeleccionados.length} boleto(s) 🎉`);
+            
+            boletosSeleccionados = [];
+            
+            // Recargar la rifa para mostrar cambios
+            cargarRifa();
+        }
+
+        function guardarRifas(rifas) {
+            const index = rifas.findIndex(r => r.id === rifaActual.id);
+            if (index !== -1) {
+                rifas[index] = rifaActual;
+                localStorage.setItem('nexos_rifas', JSON.stringify(rifas));
+            }
+        }
+
+        // Cargar rifa al iniciar
+        cargarRifa();
+    </script>
+</body>
+</html>

@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empresas - Nexos</title>
+    <title>Nexos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-        <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-        <link rel="shortcut icon" href="images/favicon.svg" type="image/svg+xml">
+        <link rel="icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+        <link rel="shortcut icon" href="images/favicon.svg?v=2" type="image/svg+xml">
 </head>
 <body>
     <header>
@@ -19,6 +19,8 @@
             <ul class="nav-links">
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="rifas.html">Rifas</a></li>
+                <li><a href="ventas.html">Ventas</a></li>
                 <li><a href="causas.html">Causas</a></li>
                 <li><a href="empresas.html">Empresas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
@@ -141,136 +143,9 @@
                 </div>
             </div>
 
-            <button class="cta-button" onclick="abrirModalRegistro()" style="width: 100%; margin-top: 2rem; padding: 1rem; font-size: 1.1rem;">Únete Ahora</button>
+            <button class="cta-button" onclick="window.location.href='login.html#empresa'" style="width: 100%; margin-top: 2rem; padding: 1rem; font-size: 1.1rem;">Únete Ahora</button>
         </div>
     </section>
-
-    <!-- Modal de Registro de Empresas -->
-    <div id="modalRegistro" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; overflow-y: auto;">
-        <div style="max-width: 700px; margin: 2rem auto; background: white; border-radius: 20px; padding: 3rem; position: relative;">
-            <button onclick="cerrarModalRegistro()" style="position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 2rem; cursor: pointer; color: #666; line-height: 1;">&times;</button>
-            
-            <h2 style="color: var(--primary); margin-bottom: 0.5rem; text-align: center;">Registro de Empresa</h2>
-            <p style="text-align: center; color: #666; margin-bottom: 2rem;">Completa el formulario para unirte a Nexos</p>
-
-            <form id="formRegistroEmpresa" onsubmit="enviarRegistro(event)">
-                <!-- Información de la Empresa -->
-                <div style="margin-bottom: 2rem;">
-                    <h3 style="color: var(--secondary); margin-bottom: 1rem; font-size: 1.2rem;">Información de la Empresa</h3>
-                    
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Nombre de la Empresa *</label>
-                        <input type="text" name="nombreEmpresa" required style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
-                    </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">RUC/NIT *</label>
-                        <input type="text" name="ruc" required style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
-                    </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Sector/Industria *</label>
-                        <select name="sector" required style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
-                            <option value="">Seleccionar...</option>
-                            <option value="tecnologia">Tecnología</option>
-                            <option value="retail">Retail</option>
-                            <option value="manufactura">Manufactura</option>
-                            <option value="alimentos">Alimentos y Bebidas</option>
-                            <option value="servicios">Servicios</option>
-                            <option value="construccion">Construcción</option>
-                            <option value="salud">Salud</option>
-                            <option value="educacion">Educación</option>
-                            <option value="otro">Otro</option>
-                        </select>
-                    </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Sitio Web</label>
-                        <input type="url" name="sitioWeb" placeholder="https://www.ejemplo.com" style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
-                    </div>
-                </div>
-
-                <!-- Representante Legal -->
-                <div style="margin-bottom: 2rem;">
-                    <h3 style="color: var(--secondary); margin-bottom: 1rem; font-size: 1.2rem;">Representante Legal</h3>
-                    
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Nombre Completo *</label>
-                        <input type="text" name="nombreRepresentante" required style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                        <div>
-                            <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Email *</label>
-                            <input type="email" name="email" required style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Teléfono *</label>
-                            <input type="tel" name="telefono" required style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Cargo *</label>
-                        <input type="text" name="cargo" required style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
-                    </div>
-                </div>
-
-                <!-- Documentos -->
-                <div style="margin-bottom: 2rem;">
-                    <h3 style="color: var(--secondary); margin-bottom: 1rem; font-size: 1.2rem;">Documentos Requeridos</h3>
-                    
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Cédula Jurídica / Certificado de Constitución *</label>
-                        <input type="file" name="cedulaJuridica" required accept=".pdf,.jpg,.jpeg,.png" style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; background: white;">
-                    </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Comprobante de Domicilio *</label>
-                        <input type="file" name="comprobanteDomicilio" required accept=".pdf,.jpg,.jpeg,.png" style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; background: white;">
-                    </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">Identificación del Representante Legal *</label>
-                        <input type="file" name="idRepresentante" required accept=".pdf,.jpg,.jpeg,.png" style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; background: white;">
-                    </div>
-                </div>
-
-                <!-- Motivación -->
-                <div style="margin-bottom: 2rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; color: var(--dark); font-weight: 500;">¿Por qué quiere unirse a Nexos? *</label>
-                    <textarea name="motivacion" required rows="4" style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; font-family: inherit; resize: vertical; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'"></textarea>
-                </div>
-
-                <!-- Términos y Condiciones -->
-                <div style="margin-bottom: 2rem;">
-                    <label style="display: flex; align-items: start; gap: 0.5rem; cursor: pointer;">
-                        <input type="checkbox" name="terminos" required style="margin-top: 0.3rem;">
-                        <span style="color: #666; font-size: 0.95rem;">Acepto los términos y condiciones, y autorizo a Nexos a verificar la información proporcionada.</span>
-                    </label>
-                </div>
-
-                <button type="submit" class="cta-button" style="width: 100%; padding: 1rem; font-size: 1.1rem; border: none;">Enviar Solicitud</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal de Confirmación -->
-    <div id="modalConfirmacion" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1001; align-items: center; justify-content: center;">
-        <div style="max-width: 500px; margin: 2rem; background: white; border-radius: 20px; padding: 3rem; text-align: center;">
-            <div style="width: 80px; height: 80px; background: var(--secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
-                <i class="fas fa-check" style="font-size: 2.5rem; color: white;"></i>
-            </div>
-            <h2 style="color: var(--primary); margin-bottom: 1rem;">¡Solicitud Enviada!</h2>
-            <p style="color: #666; line-height: 1.6; margin-bottom: 2rem;">
-                Tu solicitud de registro ha sido recibida exitosamente. Nuestro equipo de administradores revisará la información y se pondrá en contacto contigo dentro de las próximas 48-72 horas.
-            </p>
-            <p style="color: var(--secondary); font-weight: 600; margin-bottom: 2rem;">
-                Recibirás un correo de confirmación con los próximos pasos.
-            </p>
-            <button onclick="cerrarModalConfirmacion()" class="cta-button" style="padding: 0.8rem 2rem; border: none;">Entendido</button>
-        </div>
-    </div>
 
     <footer>
         <div class="footer-content">
@@ -289,67 +164,7 @@
         </div>
     </footer>
 
-    <script>
-        function abrirModalRegistro() {
-            document.getElementById('modalRegistro').style.display = 'block';
-            document.body.style.overflow = 'hidden'; // Prevenir scroll del body
-        }
-
-        function cerrarModalRegistro() {
-            document.getElementById('modalRegistro').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            // Limpiar el formulario
-            document.getElementById('formRegistroEmpresa').reset();
-        }
-
-        function cerrarModalConfirmacion() {
-            document.getElementById('modalConfirmacion').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        function enviarRegistro(event) {
-            event.preventDefault(); // Prevenir el envío normal del formulario
-            
-            // Aquí puedes agregar la lógica para enviar los datos al servidor
-            // Por ahora, simularemos el envío
-            
-            const formData = new FormData(event.target);
-            
-            // Validar que todos los archivos estén adjuntos
-            const cedulaJuridica = formData.get('cedulaJuridica');
-            const comprobanteDomicilio = formData.get('comprobanteDomicilio');
-            const idRepresentante = formData.get('idRepresentante');
-            
-            if (!cedulaJuridica || !comprobanteDomicilio || !idRepresentante) {
-                alert('Por favor, adjunta todos los documentos requeridos.');
-                return;
-            }
-
-            // Simular envío (aquí iría tu llamada AJAX/fetch al servidor)
-            console.log('Datos del formulario:', Object.fromEntries(formData));
-            
-            // Cerrar modal de registro
-            cerrarModalRegistro();
-            
-            // Mostrar modal de confirmación
-            setTimeout(() => {
-                document.getElementById('modalConfirmacion').style.display = 'flex';
-            }, 300);
-        }
-
-        // Cerrar modal al hacer clic fuera de él
-        window.onclick = function(event) {
-            const modalRegistro = document.getElementById('modalRegistro');
-            const modalConfirmacion = document.getElementById('modalConfirmacion');
-            
-            if (event.target === modalRegistro) {
-                cerrarModalRegistro();
-            }
-            if (event.target === modalConfirmacion) {
-                cerrarModalConfirmacion();
-            }
-        }
-    </script>
+    <script src="notifications.js"></script>
     <script src="auth.js"></script>
     <script src="config.js"></script>
 </body>

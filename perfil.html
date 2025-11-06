@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil - Nexos</title>
+    <title>Nexos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-    <link rel="shortcut icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="shortcut icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <script src="mercadopago.js"></script>
     <style>
         .user-menu {
             position: relative;
@@ -82,6 +83,47 @@
             font-size: 3rem;
             color: white;
             font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        .profile-avatar::after {
+            content: '\f030';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .profile-avatar:hover::after {
+            opacity: 1;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .profile-avatar-text {
+            position: relative;
+            z-index: 1;
+        }
+        #photoInput {
+            display: none;
         }
         .profile-info h1 {
             color: var(--primary);
@@ -152,10 +194,18 @@
             border-radius: 10px;
             font-size: 1rem;
             transition: border-color 0.3s;
+            font-family: inherit;
         }
         .form-input:focus {
             outline: none;
             border-color: var(--primary);
+        }
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+        select.form-input {
+            cursor: pointer;
         }
         .btn-primary {
             padding: 0.9rem 2rem;
@@ -324,6 +374,8 @@
             <ul class="nav-links">
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="rifas.html">Rifas</a></li>
+                <li><a href="ventas.html">Ventas</a></li>
                 <li><a href="causas.html">Causas</a></li>
                 <li><a href="empresas.html">Empresas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
@@ -334,7 +386,10 @@
 
     <div class="profile-container">
         <div class="profile-header">
-            <div class="profile-avatar" id="avatarInitials">U</div>
+            <div class="profile-avatar" id="avatarInitials" onclick="document.getElementById('photoInput').click()" title="Haz clic para cambiar tu foto de perfil">
+                <span class="profile-avatar-text">U</span>
+            </div>
+            <input type="file" id="photoInput" accept="image/*" onchange="cambiarFotoPerfil(event)">
             <div class="profile-info">
                 <h1 id="userName">Usuario</h1>
                 <p><i class="fas fa-envelope"></i> <span id="userEmail">usuario@nexos.com</span></p>
@@ -360,30 +415,94 @@
 
         <!-- Tab: Mis Datos -->
         <div id="tab-datos" class="tab-content active">
+            <!-- Información Personal -->
             <div class="card">
                 <h2><i class="fas fa-user-edit"></i> Información Personal</h2>
                 <div id="alertDatos" class="alert"></div>
                 <form id="formDatos" onsubmit="actualizarDatos(event)">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label">Nombre</label>
-                            <input type="text" name="nombre" id="inputNombre" class="form-input" required>
+                            <label class="form-label">Nombre Completo *</label>
+                            <input type="text" name="nombre" id="inputNombre" class="form-input" required placeholder="Ej: Juan Pérez">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Apellido</label>
-                            <input type="text" name="apellido" id="inputApellido" class="form-input" required>
+                            <label class="form-label">RUT *</label>
+                            <input type="text" name="rut" id="inputRut" class="form-input" required placeholder="12.345.678-9" readonly style="background: #f8f9fa; cursor: not-allowed;">
+                            <small style="color: #666; font-size: 0.875rem;">El RUT no se puede modificar</small>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" id="inputEmail" class="form-input" required>
+                            <label class="form-label">Email *</label>
+                            <input type="email" name="email" id="inputEmail" class="form-input" required placeholder="ejemplo@correo.com">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Teléfono</label>
-                            <input type="tel" name="telefono" id="inputTelefono" class="form-input">
+                            <label class="form-label">Teléfono *</label>
+                            <input type="tel" name="telefono" id="inputTelefono" class="form-input" required placeholder="+56 9 1234 5678" pattern="[+]?[0-9\s]{8,15}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fecha de Nacimiento</label>
+                            <input type="date" name="fechaNacimiento" id="inputFechaNacimiento" class="form-input" max="2007-12-31">
                         </div>
                     </div>
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </form>
+            </div>
+
+            <!-- Dirección de Envío -->
+            <div class="card">
+                <h2><i class="fas fa-map-marker-alt"></i> Dirección de Envío</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">
+                    <i class="fas fa-info-circle"></i> Esta dirección se utilizará para enviar los productos que ganes en las subastas.
+                </p>
+                <div id="alertDireccion" class="alert"></div>
+                <form id="formDireccion" onsubmit="actualizarDireccion(event)">
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label">Dirección *</label>
+                            <input type="text" name="direccion" id="inputDireccion" class="form-input" required placeholder="Calle, número, depto/casa">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Comuna *</label>
+                            <input type="text" name="comuna" id="inputComuna" class="form-input" required placeholder="Ej: Santiago Centro">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Ciudad *</label>
+                            <input type="text" name="ciudad" id="inputCiudad" class="form-input" required placeholder="Ej: Santiago">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Región *</label>
+                            <select name="region" id="inputRegion" class="form-input" required>
+                                <option value="">Selecciona una región</option>
+                                <option value="Región de Arica y Parinacota">Región de Arica y Parinacota</option>
+                                <option value="Región de Tarapacá">Región de Tarapacá</option>
+                                <option value="Región de Antofagasta">Región de Antofagasta</option>
+                                <option value="Región de Atacama">Región de Atacama</option>
+                                <option value="Región de Coquimbo">Región de Coquimbo</option>
+                                <option value="Región de Valparaíso">Región de Valparaíso</option>
+                                <option value="Región Metropolitana">Región Metropolitana</option>
+                                <option value="Región del Libertador General Bernardo O'Higgins">Región del Libertador Gral. B. O'Higgins</option>
+                                <option value="Región del Maule">Región del Maule</option>
+                                <option value="Región de Ñuble">Región de Ñuble</option>
+                                <option value="Región del Biobío">Región del Biobío</option>
+                                <option value="Región de La Araucanía">Región de La Araucanía</option>
+                                <option value="Región de Los Ríos">Región de Los Ríos</option>
+                                <option value="Región de Los Lagos">Región de Los Lagos</option>
+                                <option value="Región de Aysén">Región de Aysén</option>
+                                <option value="Región de Magallanes">Región de Magallanes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Código Postal</label>
+                            <input type="text" name="codigoPostal" id="inputCodigoPostal" class="form-input" placeholder="Ej: 8320000" pattern="[0-9]{7}">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label">Referencias/Instrucciones de Entrega</label>
+                            <textarea name="referencia" id="inputReferencia" class="form-input" rows="2" placeholder="Ej: Casa blanca con portón negro, timbre no funciona"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Guardar Dirección
                     </button>
                 </form>
             </div>
@@ -394,9 +513,14 @@
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <h2><i class="fas fa-wallet"></i> Mi Wallet</h2>
-                    <button onclick="refrescarWallet(event)" class="btn-secondary" style="padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fas fa-sync-alt"></i> Refrescar
-                    </button>
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="mostrarModalDeposito()" class="cta-button" style="padding: 0.6rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-plus-circle"></i> Depositar Dinero
+                        </button>
+                        <button onclick="refrescarWallet(event)" class="btn-secondary" style="padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-sync-alt"></i> Refrescar
+                        </button>
+                    </div>
                 </div>
                 <div class="wallet-summary">
                     <div class="wallet-balance">
@@ -457,6 +581,31 @@
 
         <!-- Tab: Configuración -->
         <div id="tab-configuracion" class="tab-content">
+            <!-- Cambiar Nombre de Usuario -->
+            <div class="card">
+                <h2><i class="fas fa-at"></i> Nombre de Usuario</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">
+                    <i class="fas fa-info-circle"></i> Tu nombre de usuario es visible públicamente. Asegúrate de elegir uno único.
+                </p>
+                <div id="alertUsername" class="alert"></div>
+                <form id="formUsername" onsubmit="cambiarNombreUsuario(event)" style="max-width: 500px;">
+                    <div class="form-group">
+                        <label class="form-label">Nombre de Usuario Actual</label>
+                        <input type="text" id="currentUsername" class="form-input" readonly style="background: #f8f9fa; cursor: not-allowed; font-weight: 600;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nuevo Nombre de Usuario *</label>
+                        <input type="text" name="username" id="newUsername" class="form-input" required placeholder="Ej: usuario123" minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+">
+                        <small style="color: #666; font-size: 0.875rem;">
+                            <i class="fas fa-check-circle" style="color: var(--secondary);"></i> Solo letras, números y guiones bajos. Mínimo 3, máximo 20 caracteres.
+                        </small>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Cambiar Nombre de Usuario
+                    </button>
+                </form>
+            </div>
+
             <div class="card">
                 <h2><i class="fas fa-bell"></i> Notificaciones</h2>
                 <div id="alertConfig" class="alert"></div>
@@ -544,29 +693,538 @@
 
         <!-- Tab: Seguridad -->
         <div id="tab-seguridad" class="tab-content">
+            <!-- Resumen de Seguridad -->
+            <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <h2 style="color: white; margin-bottom: 0.5rem;"><i class="fas fa-shield-alt"></i> Estado de Seguridad</h2>
+                        <p style="opacity: 0.9; margin: 0;">Nivel de seguridad de tu cuenta</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 2rem; backdrop-filter: blur(10px);">
+                            <span id="nivel-seguridad-porcentaje">0%</span>
+                        </div>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; opacity: 0.9;" id="nivel-seguridad-texto">Básico</p>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem; background: rgba(255,255,255,0.15); border-radius: 10px; padding: 1rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-check-circle" id="icono-password" style="font-size: 1.2rem;"></i>
+                            <span>Contraseña fuerte</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-times-circle" id="icono-2fa" style="font-size: 1.2rem; opacity: 0.5;"></i>
+                            <span id="texto-2fa" style="opacity: 0.7;">Autenticación 2FA</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-check-circle" id="icono-email" style="font-size: 1.2rem;"></i>
+                            <span>Email verificado</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cambiar Contraseña -->
             <div class="card">
                 <h2><i class="fas fa-key"></i> Cambiar Contraseña</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Actualiza tu contraseña regularmente para mantener tu cuenta segura.</p>
                 <div id="alertSeguridad" class="alert"></div>
+                
+                <!-- Indicador de fortaleza de contraseña -->
+                <div id="password-strength-indicator" style="display: none; margin-bottom: 1rem; padding: 0.75rem; border-radius: 8px; background: #f8f9fa;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="font-weight: 600;">Fortaleza de la contraseña:</span>
+                        <span id="password-strength-text" style="font-weight: 700;">Débil</span>
+                    </div>
+                    <div style="height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden;">
+                        <div id="password-strength-bar" style="height: 100%; width: 0%; transition: all 0.3s; background: #dc3545;"></div>
+                    </div>
+                    <ul id="password-requirements" style="margin: 0.75rem 0 0; padding-left: 1.5rem; font-size: 0.85rem; color: #666;">
+                        <li id="req-length"><i class="fas fa-times text-danger"></i> Mínimo 8 caracteres</li>
+                        <li id="req-uppercase"><i class="fas fa-times text-danger"></i> Al menos una mayúscula</li>
+                        <li id="req-lowercase"><i class="fas fa-times text-danger"></i> Al menos una minúscula</li>
+                        <li id="req-number"><i class="fas fa-times text-danger"></i> Al menos un número</li>
+                        <li id="req-special"><i class="fas fa-times text-danger"></i> Al menos un carácter especial</li>
+                    </ul>
+                </div>
+
                 <form id="formPassword" onsubmit="cambiarPassword(event)">
                     <div class="form-group">
-                        <label class="form-label">Contraseña Actual</label>
-                        <input type="password" name="currentPassword" class="form-input" required>
+                        <label class="form-label"><i class="fas fa-lock"></i> Contraseña Actual</label>
+                        <div style="position: relative;">
+                            <input type="password" id="current-password" name="currentPassword" class="form-input" required style="padding-right: 3rem;">
+                            <button type="button" onclick="togglePasswordVisibility('current-password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #666; cursor: pointer; font-size: 1.1rem;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Nueva Contraseña</label>
-                        <input type="password" name="newPassword" class="form-input" required minlength="6">
+                        <label class="form-label"><i class="fas fa-key"></i> Nueva Contraseña</label>
+                        <div style="position: relative;">
+                            <input type="password" id="new-password" name="newPassword" class="form-input" required minlength="8" oninput="checkPasswordStrength(this.value)">
+                            <button type="button" onclick="togglePasswordVisibility('new-password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #666; cursor: pointer; font-size: 1.1rem;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Confirmar Nueva Contraseña</label>
-                        <input type="password" name="confirmPassword" class="form-input" required>
+                        <label class="form-label"><i class="fas fa-check-double"></i> Confirmar Nueva Contraseña</label>
+                        <div style="position: relative;">
+                            <input type="password" id="confirm-password" name="confirmPassword" class="form-input" required>
+                            <button type="button" onclick="togglePasswordVisibility('confirm-password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #666; cursor: pointer; font-size: 1.1rem;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-key"></i> Cambiar Contraseña
                     </button>
                 </form>
             </div>
+
+            <!-- Autenticación de Dos Factores (2FA) -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <div>
+                        <h2><i class="fas fa-mobile-alt"></i> Autenticación de Dos Factores (2FA)</h2>
+                        <p style="color: #666; margin: 0.5rem 0 0;">Añade una capa extra de seguridad a tu cuenta.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-2fa" onchange="toggle2FA(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div id="2fa-disabled" style="padding: 1.5rem; background: #fff3cd; border-radius: 10px; border-left: 4px solid #ffc107;">
+                    <div style="display: flex; align-items: start; gap: 1rem;">
+                        <i class="fas fa-exclamation-triangle" style="color: #ff9800; font-size: 1.5rem; margin-top: 0.25rem;"></i>
+                        <div>
+                            <h4 style="margin: 0 0 0.5rem; color: #856404;">2FA no activado</h4>
+                            <p style="margin: 0; color: #856404; font-size: 0.9rem;">Tu cuenta es vulnerable. Activa la autenticación de dos factores para mayor seguridad.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="2fa-setup" style="display: none;">
+                    <div style="padding: 1.5rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1.5rem;">
+                        <h4 style="margin: 0 0 1rem;"><i class="fas fa-qrcode"></i> Configurar 2FA</h4>
+                        <ol style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">
+                            <li>Descarga una app de autenticación (Google Authenticator, Authy, etc.)</li>
+                            <li>Escanea el código QR o ingresa la clave manualmente</li>
+                            <li>Ingresa el código de 6 dígitos generado por la app</li>
+                        </ol>
+                    </div>
+
+                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                        <div id="qr-code" style="display: inline-block; padding: 1rem; background: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            <div style="width: 200px; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                                <i class="fas fa-qrcode" style="font-size: 4rem; color: #ccc;"></i>
+                            </div>
+                        </div>
+                        <p style="margin: 1rem 0 0.5rem; font-weight: 600;">Clave secreta:</p>
+                        <code id="secret-key" style="background: #f8f9fa; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 1.1rem; letter-spacing: 2px; display: inline-block;">XXXX XXXX XXXX XXXX</code>
+                        <button onclick="copySecretKey()" style="margin-left: 0.5rem; padding: 0.5rem 1rem; background: none; border: 2px solid var(--primary); color: var(--primary); border-radius: 5px; cursor: pointer;">
+                            <i class="fas fa-copy"></i> Copiar
+                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Código de Verificación (6 dígitos)</label>
+                        <input type="text" id="2fa-code" class="form-input" placeholder="000000" maxlength="6" pattern="[0-9]{6}" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem; font-weight: 600;">
+                    </div>
+
+                    <button onclick="verify2FASetup()" class="btn-primary">
+                        <i class="fas fa-check-circle"></i> Verificar y Activar 2FA
+                    </button>
+                </div>
+
+                <div id="2fa-enabled" style="display: none;">
+                    <div style="padding: 1.5rem; background: #d4edda; border-radius: 10px; border-left: 4px solid #28a745; margin-bottom: 1.5rem;">
+                        <div style="display: flex; align-items: start; gap: 1rem;">
+                            <i class="fas fa-check-circle" style="color: #28a745; font-size: 1.5rem; margin-top: 0.25rem;"></i>
+                            <div>
+                                <h4 style="margin: 0 0 0.5rem; color: #155724;">2FA Activado</h4>
+                                <p style="margin: 0; color: #155724; font-size: 0.9rem;">Tu cuenta está protegida con autenticación de dos factores.</p>
+                                <p style="margin: 0.5rem 0 0; color: #155724; font-size: 0.85rem;"><i class="fas fa-clock"></i> Activado: <span id="2fa-activated-date">-</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 style="margin: 0 0 1rem;"><i class="fas fa-key"></i> Códigos de Respaldo</h4>
+                    <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">Guarda estos códigos en un lugar seguro. Puedes usarlos si pierdes acceso a tu dispositivo de autenticación.</p>
+                    <div id="backup-codes" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+                        <!-- Códigos generados dinámicamente -->
+                    </div>
+                    <button onclick="regenerateBackupCodes()" class="btn-secondary" style="margin-right: 0.5rem;">
+                        <i class="fas fa-sync-alt"></i> Regenerar Códigos
+                    </button>
+                    <button onclick="downloadBackupCodes()" class="btn-secondary">
+                        <i class="fas fa-download"></i> Descargar Códigos
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sesiones Activas -->
+            <div class="card">
+                <h2><i class="fas fa-laptop"></i> Sesiones Activas</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Administra los dispositivos que tienen acceso a tu cuenta.</p>
+                
+                <div id="active-sessions">
+                    <!-- Sesión actual -->
+                    <div style="padding: 1rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1rem; border-left: 4px solid var(--primary);">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                    <i class="fas fa-desktop" style="font-size: 1.5rem; color: var(--primary);"></i>
+                                    <div>
+                                        <h4 style="margin: 0; color: var(--dark);">Sesión Actual</h4>
+                                        <p style="margin: 0.25rem 0 0; color: #666; font-size: 0.85rem;" id="current-session-info">
+                                            <i class="fas fa-check-circle" style="color: #28a745;"></i> Windows 11 • Chrome 120
+                                        </p>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 1.5rem; font-size: 0.85rem; color: #999;">
+                                    <span><i class="fas fa-map-marker-alt"></i> Santiago, Chile</span>
+                                    <span><i class="fas fa-clock"></i> Hace 5 minutos</span>
+                                </div>
+                            </div>
+                            <span style="padding: 0.25rem 0.75rem; background: #28a745; color: white; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">ACTIVA</span>
+                        </div>
+                    </div>
+
+                    <!-- Otras sesiones -->
+                    <div id="other-sessions-container">
+                        <!-- Se llenan dinámicamente -->
+                    </div>
+                </div>
+
+                <button onclick="cerrarTodasLasSesiones()" class="btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Todas las Otras Sesiones
+                </button>
+            </div>
+
+            <!-- Historial de Actividad -->
+            <div class="card">
+                <h2><i class="fas fa-history"></i> Historial de Actividad Reciente</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Revisa las acciones realizadas en tu cuenta.</p>
+                
+                <div class="table-container">
+                    <table class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Actividad</th>
+                                <th>Dispositivo</th>
+                                <th>Ubicación</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activity-history">
+                            <tr>
+                                <td><i class="fas fa-sign-in-alt" style="color: #28a745;"></i> Inicio de sesión</td>
+                                <td>Chrome • Windows</td>
+                                <td>Santiago, Chile</td>
+                                <td>Hace 5 minutos</td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-key" style="color: #ffc107;"></i> Cambio de contraseña</td>
+                                <td>Chrome • Windows</td>
+                                <td>Santiago, Chile</td>
+                                <td>Hace 2 días</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Opciones de Privacidad -->
+            <div class="card">
+                <h2><i class="fas fa-user-shield"></i> Privacidad de la Cuenta</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Controla quién puede ver tu información.</p>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3><i class="fas fa-eye"></i> Perfil Público</h3>
+                        <p>Permite que otros usuarios vean tu perfil</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="perfil-publico" checked onchange="actualizarPrivacidad('perfilPublico', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3><i class="fas fa-envelope"></i> Mostrar Email</h3>
+                        <p>Permite que otros usuarios vean tu correo electrónico</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="mostrar-email" onchange="actualizarPrivacidad('mostrarEmail', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3><i class="fas fa-chart-line"></i> Historial de Actividad</h3>
+                        <p>Muestra tu actividad reciente en tu perfil</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="historial-actividad" checked onchange="actualizarPrivacidad('historialActividad', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Zona de Peligro -->
+            <div class="card" style="border: 2px solid #dc3545;">
+                <h2 style="color: #dc3545;"><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Acciones irreversibles que afectan tu cuenta.</p>
+                
+                <div style="padding: 1rem; background: #fff5f5; border-radius: 8px; margin-bottom: 1rem;">
+                    <h4 style="margin: 0 0 0.5rem; color: #dc3545;">Eliminar Cuenta</h4>
+                    <p style="margin: 0 0 1rem; color: #721c24; font-size: 0.9rem;">Una vez eliminada, no podrás recuperar tu cuenta ni tus datos.</p>
+                    <button onclick="confirmarEliminarCuenta()" class="btn-secondary" style="background: #dc3545; color: white; border-color: #dc3545;">
+                        <i class="fas fa-trash-alt"></i> Eliminar Mi Cuenta
+                    </button>
+                </div>
+
+                <div style="padding: 1rem; background: #fff5f5; border-radius: 8px;">
+                    <h4 style="margin: 0 0 0.5rem; color: #dc3545;">Descargar Mis Datos</h4>
+                    <p style="margin: 0 0 1rem; color: #721c24; font-size: 0.9rem;">Obtén una copia de toda la información asociada a tu cuenta.</p>
+                    <button onclick="descargarMisDatos()" class="btn-secondary">
+                        <i class="fas fa-download"></i> Descargar Datos
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Modal de Depósito WebPay -->
+    <div id="modal-deposito" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center;">
+        <div style="background: white; border-radius: 20px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <!-- Paso 1: Selección de monto -->
+            <div id="paso-monto" style="padding: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #f0f0f0;">
+                    <h2 style="margin: 0; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-wallet"></i> Depositar Dinero
+                    </h2>
+                    <button onclick="cerrarModalDeposito()" style="background: none; border: none; font-size: 1.5rem; color: #999; cursor: pointer; padding: 0; width: 30px; height: 30px;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <p style="color: #666; margin-bottom: 1.5rem;">Selecciona el monto que deseas depositar a tu billetera.</p>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1rem;">
+                    <button onclick="seleccionarMonto(10000)" class="btn-monto" style="padding: 1rem; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        $10.000
+                    </button>
+                    <button onclick="seleccionarMonto(25000)" class="btn-monto" style="padding: 1rem; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        $25.000
+                    </button>
+                    <button onclick="seleccionarMonto(50000)" class="btn-monto" style="padding: 1rem; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        $50.000
+                    </button>
+                    <button onclick="seleccionarMonto(100000)" class="btn-monto" style="padding: 1rem; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        $100.000
+                    </button>
+                    <button onclick="seleccionarMonto(250000)" class="btn-monto" style="padding: 1rem; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        $250.000
+                    </button>
+                    <button onclick="seleccionarMonto(500000)" class="btn-monto" style="padding: 1rem; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        $500.000
+                    </button>
+                </div>
+
+                <!-- Botón para monto personalizado -->
+                <button onclick="mostrarMontoPersonalizado()" id="btn-monto-personalizado" class="btn-monto" style="width: 100%; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: 2px solid transparent; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <i class="fas fa-edit"></i> Otro monto (personalizado)
+                </button>
+
+                <!-- Campo de monto personalizado (oculto por defecto) -->
+                <div id="monto-personalizado-container" style="display: none; margin-bottom: 1.5rem; animation: slideDown 0.3s ease;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--dark);">
+                        <i class="fas fa-dollar-sign"></i> Ingresa tu monto personalizado
+                    </label>
+                    <input type="number" id="monto-deposito" placeholder="Ingresa el monto" min="1000" step="1000" 
+                           style="width: 100%; padding: 1rem; border: 2px solid var(--primary); border-radius: 10px; font-size: 1.1rem; font-weight: 600; box-sizing: border-box; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);">
+                    <small style="color: #666; display: block; margin-top: 0.5rem;">
+                        <i class="fas fa-info-circle"></i> Monto mínimo: $1.000
+                    </small>
+                </div>
+
+                <button onclick="continuarAWebPay()" class="cta-button" style="width: 100%; padding: 1rem; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: linear-gradient(135deg, #009ee3, #0082c3);">
+                    <i class="fab fa-cc-mastercard"></i> Continuar con Mercado Pago
+                </button>
+            </div>
+
+            <!-- Paso 2: Simulación de Mercado Pago (Ya no se usa) -->
+            <div id="paso-webpay" style="display: none; padding: 2rem;">
+                <div style="text-align: center; margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #00a19a 0%, #007b77 100%); border-radius: 15px; color: white;">
+                    <img src="https://www.webpay.cl/themes/custom/webpay_theme/logo.svg" alt="WebPay" style="height: 40px; margin-bottom: 1rem; filter: brightness(0) invert(1);" onerror="this.style.display='none'">
+                    <h2 style="margin: 0; font-size: 1.5rem;">WebPay Plus</h2>
+                    <p style="margin: 0.5rem 0 0; opacity: 0.9; font-size: 0.9rem;">Simulación de Pago Seguro</p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: #666;">Comercio:</span>
+                        <strong>Nexos Chile</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: #666;">Orden de compra:</span>
+                        <strong id="orden-compra">-</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-top: 1rem; border-top: 2px solid #dee2e6;">
+                        <span style="color: #666; font-size: 1.1rem;">Monto total:</span>
+                        <strong style="color: var(--primary); font-size: 1.5rem;" id="monto-webpay">$0</strong>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--dark);">
+                        <i class="fas fa-credit-card"></i> Número de Tarjeta
+                    </label>
+                    <input type="text" id="numero-tarjeta" placeholder="4111 1111 1111 1111" maxlength="19"
+                           style="width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; box-sizing: border-box;">
+                    <small style="color: #666; display: block; margin-top: 0.5rem;">💳 Tarjeta de prueba: 4111 1111 1111 1111</small>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--dark);">
+                            Fecha de Vencimiento
+                        </label>
+                        <input type="text" id="fecha-vencimiento" placeholder="MM/AA" maxlength="5"
+                               style="width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--dark);">
+                            CVV
+                        </label>
+                        <input type="text" id="cvv" placeholder="123" maxlength="3"
+                               style="width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--dark);">
+                        <i class="fas fa-user"></i> Nombre del Titular
+                    </label>
+                    <input type="text" id="nombre-titular" placeholder="NOMBRE APELLIDO"
+                           style="width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; text-transform: uppercase; box-sizing: border-box;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <button onclick="volverAMonto()" class="btn-secondary" style="width: 100%; padding: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                    <button onclick="procesarPago()" class="cta-button" style="width: 100%; padding: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <i class="fas fa-check"></i> Pagar
+                    </button>
+                </div>
+
+                <p style="text-align: center; color: #999; font-size: 0.85rem; margin-top: 1rem;">
+                    <i class="fas fa-lock"></i> Conexión segura SSL 256-bit
+                </p>
+            </div>
+
+            <!-- Paso 3: Procesando pago -->
+            <div id="paso-procesando" style="display: none; padding: 3rem 2rem; text-align: center;">
+                <div style="width: 80px; height: 80px; border: 4px solid #f0f0f0; border-top-color: var(--primary); border-radius: 50%; margin: 0 auto 1.5rem; animation: spin 1s linear infinite;"></div>
+                <h3 style="color: var(--primary); margin-bottom: 0.5rem;">Procesando pago...</h3>
+                <p style="color: #666;">Por favor espera mientras verificamos tu transacción</p>
+            </div>
+
+            <!-- Paso 4: Confirmación -->
+            <div id="paso-confirmacion" style="display: none; padding: 2rem; text-align: center;">
+                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border-radius: 50%; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);">
+                    <i class="fas fa-check" style="font-size: 3rem; color: white;"></i>
+                </div>
+                <h2 style="color: #28a745; margin-bottom: 0.5rem;">¡Pago Exitoso!</h2>
+                <p style="color: #666; margin-bottom: 2rem;">Tu depósito se ha realizado correctamente</p>
+                
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: #666;">Monto depositado:</span>
+                        <strong id="monto-confirmado" style="color: var(--primary);">$0</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: #666;">Número de transacción:</span>
+                        <strong id="numero-transaccion">-</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-top: 1rem; border-top: 2px solid #dee2e6;">
+                        <span style="color: #666; font-size: 1.1rem;">Nuevo saldo:</span>
+                        <strong style="color: #28a745; font-size: 1.3rem;" id="nuevo-saldo-confirmacion">$0</strong>
+                    </div>
+                </div>
+
+                <button onclick="cerrarModalDeposito()" class="cta-button" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                    <i class="fas fa-check-circle"></i> Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .btn-monto:hover {
+            background: var(--primary) !important;
+            color: white !important;
+            border-color: var(--primary) !important;
+            transform: translateY(-2px);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Efecto de formato de tarjeta */
+        #numero-tarjeta {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        /* Animación para monto personalizado */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #monto-personalizado-container {
+            animation: slideDown 0.3s ease;
+        }
+
+        /* Efecto hover para botón de monto personalizado */
+        #btn-monto-personalizado:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Estilos para seguridad */
+        .text-success {
+            color: #28a745 !important;
+        }
+
+        .text-danger {
+            color: #dc3545 !important;
+        }
+
+        #password-requirements li {
+            transition: all 0.3s ease;
+        }
+
+        #password-requirements li i {
+            width: 16px;
+            display: inline-block;
+        }
+    </style>
 
     <footer>
         <div class="footer-content">
@@ -585,6 +1243,7 @@
         </div>
     </footer>
 
+    <script src="notifications.js"></script>
     <script src="auth.js"></script>
     <script src="config.js"></script>
     <script>
@@ -601,20 +1260,47 @@
         // Cargar datos del usuario
         const usuario = auth.getCurrentAccount();
         if (usuario) {
-            document.getElementById('userName').textContent = `${usuario.nombre} ${usuario.apellido}`;
+            // Mostrar nombre de usuario en vez de nombre real
+            const username = usuario.username || 'Usuario';
+            
+            document.getElementById('userName').textContent = username;
             document.getElementById('userEmail').textContent = usuario.email;
             document.getElementById('userPhone').textContent = usuario.telefono || 'No especificado';
             document.getElementById('userDate').textContent = new Date(usuario.fechaRegistro).getFullYear();
             
-            // Avatar con iniciales
-            const iniciales = usuario.nombre[0] + usuario.apellido[0];
-            document.getElementById('avatarInitials').textContent = iniciales.toUpperCase();
+            // Avatar con iniciales del username o foto
+            const iniciales = username.length >= 2 ? username.substring(0, 2) : username[0] + 'U';
+            const avatarElement = document.getElementById('avatarInitials');
+            
+            if (usuario.profilePhoto) {
+                // Mostrar foto si existe
+                avatarElement.innerHTML = `<img src="${usuario.profilePhoto}" alt="Foto de perfil">`;
+            } else {
+                // Mostrar iniciales
+                avatarElement.innerHTML = `<span class="profile-avatar-text">${iniciales.toUpperCase()}</span>`;
+            }
 
-            // Rellenar formulario
-            document.getElementById('inputNombre').value = usuario.nombre;
-            document.getElementById('inputApellido').value = usuario.apellido;
+            // Rellenar formulario de datos personales
+            document.getElementById('inputNombre').value = nombreCompleto;
+            document.getElementById('inputRut').value = usuario.rut || usuario.username;
             document.getElementById('inputEmail').value = usuario.email;
             document.getElementById('inputTelefono').value = usuario.telefono || '';
+            document.getElementById('inputFechaNacimiento').value = usuario.fechaNacimiento || '';
+
+            // Rellenar formulario de dirección
+            if (usuario.direccionEnvio) {
+                document.getElementById('inputDireccion').value = usuario.direccionEnvio.direccion || '';
+                document.getElementById('inputComuna').value = usuario.direccionEnvio.comuna || '';
+                document.getElementById('inputCiudad').value = usuario.direccionEnvio.ciudad || '';
+                document.getElementById('inputRegion').value = usuario.direccionEnvio.region || '';
+                document.getElementById('inputCodigoPostal').value = usuario.direccionEnvio.codigoPostal || '';
+                document.getElementById('inputReferencia').value = usuario.direccionEnvio.referencia || '';
+            }
+
+            // Rellenar nombre de usuario actual en configuración
+            if (document.getElementById('currentUsername')) {
+                document.getElementById('currentUsername').value = usuario.username;
+            }
 
             // Configuraciones
             if (usuario.configuraciones) {
@@ -666,6 +1352,50 @@
             }
         }
 
+        // Función para cambiar foto de perfil
+        function cambiarFotoPerfil(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validar que sea una imagen
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor selecciona un archivo de imagen válido');
+                return;
+            }
+
+            // Validar tamaño (máximo 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('La imagen no debe superar los 2MB');
+                return;
+            }
+
+            // Leer archivo y convertir a base64
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoBase64 = e.target.result;
+                
+                // Guardar en auth
+                const result = auth.updateProfilePhoto(photoBase64, 'user');
+                
+                if (result.success) {
+                    // Actualizar avatar en la página
+                    const avatarElement = document.getElementById('avatarInitials');
+                    avatarElement.innerHTML = `<img src="${photoBase64}" alt="Foto de perfil">`;
+                    
+                    // Actualizar navbar
+                    updateNavbar();
+                    
+                    alert('Foto de perfil actualizada correctamente');
+                } else {
+                    alert('Error al actualizar la foto: ' + result.message);
+                }
+            };
+            reader.onerror = function() {
+                alert('Error al cargar la imagen');
+            };
+            reader.readAsDataURL(file);
+        }
+
         function mostrarAlerta(tipo, mensaje, esError = false) {
             const alert = document.getElementById('alert' + tipo);
             alert.textContent = mensaje;
@@ -678,19 +1408,139 @@
             e.preventDefault();
             const form = e.target;
             
-            const result = auth.updateUser(usuario.id, {
-                nombre: form.nombre.value,
-                apellido: form.apellido.value,
-                email: form.email.value,
-                telefono: form.telefono.value
-            });
-
-            if (result.success) {
-                mostrarAlerta('Datos', result.message, false);
-                // Actualizar vista
-                location.reload();
+            const usuario = auth.getCurrentAccount();
+            
+            // Actualizar datos
+            usuario.nombre = form.nombre.value;
+            usuario.email = form.email.value;
+            usuario.telefono = form.telefono.value;
+            usuario.fechaNacimiento = form.fechaNacimiento.value;
+            
+            // Guardar en localStorage
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const index = usuarios.findIndex(u => u.username === usuario.username || u.id === usuario.id);
+            
+            if (index !== -1) {
+                usuarios[index] = usuario;
+                localStorage.setItem('nexos_users', JSON.stringify(usuarios));
+                
+                registrarActividad('profile_updated', 'Información personal actualizada');
+                mostrarAlerta('Datos', '✅ Información personal actualizada correctamente', false);
+                
+                // Actualizar navbar (no el header del perfil, ya que muestra username que no cambia)
+                updateNavbar();
             } else {
-                mostrarAlerta('Datos', result.message, true);
+                mostrarAlerta('Datos', '❌ Error al actualizar los datos', true);
+            }
+        }
+
+        function actualizarDireccion(e) {
+            e.preventDefault();
+            const form = e.target;
+            
+            const usuario = auth.getCurrentAccount();
+            
+            // Crear o actualizar dirección
+            if (!usuario.direccionEnvio) {
+                usuario.direccionEnvio = {};
+            }
+            
+            usuario.direccionEnvio = {
+                direccion: form.direccion.value,
+                comuna: form.comuna.value,
+                ciudad: form.ciudad.value,
+                region: form.region.value,
+                codigoPostal: form.codigoPostal.value,
+                referencia: form.referencia.value
+            };
+            
+            // Guardar en localStorage
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const index = usuarios.findIndex(u => u.username === usuario.username || u.id === usuario.id);
+            
+            if (index !== -1) {
+                usuarios[index] = usuario;
+                localStorage.setItem('nexos_users', JSON.stringify(usuarios));
+                
+                registrarActividad('address_updated', 'Dirección de envío actualizada');
+                mostrarAlerta('Direccion', '✅ Dirección de envío guardada correctamente', false);
+            } else {
+                mostrarAlerta('Direccion', '❌ Error al guardar la dirección', true);
+            }
+        }
+
+        function cambiarNombreUsuario(e) {
+            e.preventDefault();
+            const form = e.target;
+            const newUsername = form.username.value.trim();
+            
+            // Validar formato
+            const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+            if (!usernameRegex.test(newUsername)) {
+                mostrarAlerta('Username', '❌ El nombre de usuario solo puede contener letras, números y guiones bajos (3-20 caracteres)', true);
+                return;
+            }
+            
+            const usuario = auth.getCurrentAccount();
+            
+            // Verificar si el nombre de usuario ya existe
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const usernameExists = usuarios.some(u => u.username.toLowerCase() === newUsername.toLowerCase() && u.id !== usuario.id);
+            
+            if (usernameExists) {
+                mostrarAlerta('Username', '❌ Este nombre de usuario ya está en uso. Por favor, elige otro.', true);
+                return;
+            }
+            
+            // Guardar el username anterior para actualizar referencias
+            const oldUsername = usuario.username;
+            
+            // Actualizar username del usuario
+            usuario.username = newUsername;
+            
+            // Guardar en localStorage
+            const index = usuarios.findIndex(u => u.id === usuario.id);
+            
+            if (index !== -1) {
+                usuarios[index] = usuario;
+                localStorage.setItem('nexos_users', JSON.stringify(usuarios));
+                
+                // Actualizar referencias en subastas (pujas)
+                const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
+                let subastasActualizadas = false;
+                
+                subastas.forEach(subasta => {
+                    if (subasta.pujas && subasta.pujas.length > 0) {
+                        subasta.pujas.forEach(puja => {
+                            if (puja.username === oldUsername) {
+                                puja.username = newUsername;
+                                subastasActualizadas = true;
+                            }
+                        });
+                    }
+                });
+                
+                if (subastasActualizadas) {
+                    localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
+                }
+                
+                // Registrar actividad
+                registrarActividad('username_changed', `Nombre de usuario cambiado de "${oldUsername}" a "${newUsername}"`);
+                
+                // Actualizar la sesión actual
+                auth.updateSession(usuario);
+                
+                // Actualizar UI
+                document.getElementById('currentUsername').value = newUsername;
+                document.getElementById('newUsername').value = '';
+                document.getElementById('profileUsername').textContent = newUsername;
+                
+                mostrarAlerta('Username', `✅ Tu nombre de usuario ha sido cambiado exitosamente a "${newUsername}"`, false);
+                
+                // Actualizar navbar
+                updateNavbar();
+            } else {
+                mostrarAlerta('Username', '❌ Error al cambiar el nombre de usuario', true);
             }
         }
 
@@ -735,8 +1585,585 @@
             if (result.success) {
                 mostrarAlerta('Seguridad', result.message, false);
                 form.reset();
+                document.getElementById('password-strength-indicator').style.display = 'none';
+                
+                // Actualizar nivel de seguridad
+                calcularNivelSeguridad();
+                
+                // Registrar actividad
+                registrarActividad('Cambio de contraseña', 'Se actualizó la contraseña de la cuenta');
             } else {
                 mostrarAlerta('Seguridad', result.message, true);
+            }
+        }
+
+        // ========== FUNCIONES DE SEGURIDAD ==========
+
+        // Verificador de fortaleza de contraseña
+        function checkPasswordStrength(password) {
+            const indicator = document.getElementById('password-strength-indicator');
+            const bar = document.getElementById('password-strength-bar');
+            const text = document.getElementById('password-strength-text');
+            
+            if (!password) {
+                indicator.style.display = 'none';
+                return;
+            }
+            
+            indicator.style.display = 'block';
+            
+            let strength = 0;
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+            };
+            
+            // Actualizar checkmarks
+            Object.keys(requirements).forEach(req => {
+                const element = document.getElementById('req-' + req);
+                const icon = element.querySelector('i');
+                if (requirements[req]) {
+                    icon.className = 'fas fa-check text-success';
+                    strength += 20;
+                } else {
+                    icon.className = 'fas fa-times text-danger';
+                }
+            });
+            
+            // Actualizar barra y texto
+            bar.style.width = strength + '%';
+            
+            if (strength === 100) {
+                bar.style.background = '#28a745';
+                text.textContent = 'Muy Fuerte';
+                text.style.color = '#28a745';
+            } else if (strength >= 80) {
+                bar.style.background = '#20c997';
+                text.textContent = 'Fuerte';
+                text.style.color = '#20c997';
+            } else if (strength >= 60) {
+                bar.style.background = '#ffc107';
+                text.textContent = 'Media';
+                text.style.color = '#ffc107';
+            } else if (strength >= 40) {
+                bar.style.background = '#fd7e14';
+                text.textContent = 'Débil';
+                text.style.color = '#fd7e14';
+            } else {
+                bar.style.background = '#dc3545';
+                text.textContent = 'Muy Débil';
+                text.style.color = '#dc3545';
+            }
+        }
+
+        // Toggle visibilidad de contraseña
+        function togglePasswordVisibility(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Autenticación de dos factores
+        function toggle2FA(enabled) {
+            const disabledDiv = document.getElementById('2fa-disabled');
+            const setupDiv = document.getElementById('2fa-setup');
+            const enabledDiv = document.getElementById('2fa-enabled');
+            
+            const session = auth.getSession();
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const usuario = usuarios.find(u => u.username === session.username || u.id === session.id);
+            
+            if (!usuario) return;
+            
+            if (enabled) {
+                // Mostrar configuración de 2FA
+                disabledDiv.style.display = 'none';
+                setupDiv.style.display = 'block';
+                enabledDiv.style.display = 'none';
+                
+                // Generar clave secreta
+                const secretKey = generateSecretKey();
+                document.getElementById('secret-key').textContent = secretKey;
+                
+                // En una implementación real, aquí generarías un QR code real
+                // Por ahora simulamos
+                
+            } else {
+                // Si ya estaba activado, pedir confirmación
+                if (usuario.twoFactorEnabled) {
+                    if (!confirm('¿Estás seguro de que deseas desactivar la autenticación de dos factores? Esto reducirá la seguridad de tu cuenta.')) {
+                        document.getElementById('toggle-2fa').checked = true;
+                        return;
+                    }
+                    
+                    usuario.twoFactorEnabled = false;
+                    usuario.twoFactorSecret = null;
+                    usuario.backupCodes = null;
+                    
+                    // Guardar
+                    const indice = usuarios.findIndex(u => u.id === usuario.id);
+                    usuarios[indice] = usuario;
+                    localStorage.setItem('nexos_users', JSON.stringify(usuarios));
+                    
+                    registrarActividad('2FA Desactivado', 'Se desactivó la autenticación de dos factores');
+                }
+                
+                disabledDiv.style.display = 'block';
+                setupDiv.style.display = 'none';
+                enabledDiv.style.display = 'none';
+            }
+            
+            calcularNivelSeguridad();
+        }
+
+        function generateSecretKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+            let key = '';
+            for (let i = 0; i < 16; i++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+                if ((i + 1) % 4 === 0 && i !== 15) key += ' ';
+            }
+            return key;
+        }
+
+        function copySecretKey() {
+            const key = document.getElementById('secret-key').textContent;
+            navigator.clipboard.writeText(key.replace(/\s/g, '')).then(() => {
+                notify.success('Clave secreta copiada al portapapeles');
+            });
+        }
+
+        async function verify2FASetup() {
+            const code = document.getElementById('2fa-code').value;
+            
+            if (!code || code.length !== 6) {
+                notify.error('Ingresa un código de 6 dígitos válido');
+                return;
+            }
+            
+            // Simulación: cualquier código funciona en esta demo
+            // En producción, validarías contra el código TOTP real
+            
+            const session = auth.getSession();
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const indice = usuarios.findIndex(u => u.username === session.username || u.id === session.id);
+            
+            if (indice === -1) return;
+            
+            const usuario = usuarios[indice];
+            const secretKey = document.getElementById('secret-key').textContent;
+            
+            // Activar 2FA
+            usuario.twoFactorEnabled = true;
+            usuario.twoFactorSecret = secretKey;
+            usuario.twoFactorActivatedDate = new Date().toISOString();
+            
+            // Generar códigos de respaldo
+            usuario.backupCodes = generateBackupCodes();
+            
+            // Guardar
+            usuarios[indice] = usuario;
+            localStorage.setItem('nexos_users', JSON.stringify(usuarios));
+            
+            // Mostrar vista de 2FA activado
+            document.getElementById('2fa-setup').style.display = 'none';
+            document.getElementById('2fa-enabled').style.display = 'block';
+            document.getElementById('2fa-activated-date').textContent = new Date().toLocaleString('es-CL');
+            
+            // Mostrar códigos de respaldo
+            mostrarCodigosRespaldo(usuario.backupCodes);
+            
+            notify.success('¡Autenticación de dos factores activada correctamente!');
+            registrarActividad('2FA Activado', 'Se activó la autenticación de dos factores');
+            calcularNivelSeguridad();
+        }
+
+        function generateBackupCodes() {
+            const codes = [];
+            for (let i = 0; i < 8; i++) {
+                let code = '';
+                for (let j = 0; j < 8; j++) {
+                    code += Math.floor(Math.random() * 10);
+                    if (j === 3) code += '-';
+                }
+                codes.push(code);
+            }
+            return codes;
+        }
+
+        function mostrarCodigosRespaldo(codes) {
+            const container = document.getElementById('backup-codes');
+            container.innerHTML = '';
+            
+            codes.forEach(code => {
+                const div = document.createElement('div');
+                div.style.cssText = 'padding: 0.75rem; background: #f8f9fa; border-radius: 6px; text-align: center; font-family: monospace; font-weight: 600; font-size: 1.1rem;';
+                div.textContent = code;
+                container.appendChild(div);
+            });
+        }
+
+        function regenerateBackupCodes() {
+            if (!confirm('¿Estás seguro? Los códigos anteriores dejarán de funcionar.')) return;
+            
+            const session = auth.getSession();
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const indice = usuarios.findIndex(u => u.username === session.username || u.id === session.id);
+            
+            if (indice === -1) return;
+            
+            const usuario = usuarios[indice];
+            usuario.backupCodes = generateBackupCodes();
+            
+            usuarios[indice] = usuario;
+            localStorage.setItem('nexos_users', JSON.stringify(usuarios));
+            
+            mostrarCodigosRespaldo(usuario.backupCodes);
+            notify.success('Códigos de respaldo regenerados');
+            registrarActividad('Códigos de respaldo regenerados', 'Se generaron nuevos códigos de respaldo para 2FA');
+        }
+
+        function downloadBackupCodes() {
+            const session = auth.getSession();
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const usuario = usuarios.find(u => u.username === session.username || u.id === session.id);
+            
+            if (!usuario || !usuario.backupCodes) return;
+            
+            const content = `NEXOS - Códigos de Respaldo 2FA
+Usuario: ${usuario.username}
+Fecha: ${new Date().toLocaleString('es-CL')}
+
+GUARDA ESTOS CÓDIGOS EN UN LUGAR SEGURO
+Cada código solo puede usarse una vez.
+
+${usuario.backupCodes.map((code, i) => `${i + 1}. ${code}`).join('\n')}
+
+IMPORTANTE: Mantén estos códigos seguros y privados.`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'nexos-backup-codes-' + Date.now() + '.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            notify.success('Códigos descargados correctamente');
+        }
+
+        // Sesiones activas
+        function cerrarTodasLasSesiones() {
+            if (!confirm('¿Estás seguro de que deseas cerrar todas las demás sesiones? Tendrás que iniciar sesión nuevamente en esos dispositivos.')) {
+                return;
+            }
+            
+            // En una implementación real, cerrarías las sesiones en el servidor
+            notify.success('Se han cerrado todas las demás sesiones');
+            registrarActividad('Sesiones cerradas', 'Se cerraron todas las demás sesiones activas');
+        }
+
+        // Privacidad
+        function actualizarPrivacidad(setting, value) {
+            const session = auth.getSession();
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const indice = usuarios.findIndex(u => u.username === session.username || u.id === session.id);
+            
+            if (indice === -1) return;
+            
+            const usuario = usuarios[indice];
+            if (!usuario.privacidad) {
+                usuario.privacidad = {};
+            }
+            
+            usuario.privacidad[setting] = value;
+            
+            usuarios[indice] = usuario;
+            localStorage.setItem('nexos_users', JSON.stringify(usuarios));
+            
+            const messages = {
+                perfilPublico: value ? 'Tu perfil ahora es público' : 'Tu perfil ahora es privado',
+                mostrarEmail: value ? 'Tu email ahora es visible' : 'Tu email ahora está oculto',
+                historialActividad: value ? 'Tu historial de actividad ahora es visible' : 'Tu historial de actividad ahora está oculto'
+            };
+            
+            notify.success(messages[setting]);
+            registrarActividad('Configuración de privacidad', `Se ${value ? 'activó' : 'desactivó'} ${setting}`);
+        }
+
+        // Zona de peligro
+        async function confirmarEliminarCuenta() {
+            const confirmed = await notify.confirm(
+                '⚠️ ¿ESTÁS COMPLETAMENTE SEGURO?\n\n' +
+                'Esta acción es IRREVERSIBLE y eliminará:\n' +
+                '• Toda tu información personal\n' +
+                '• Tu historial de pujas y transacciones\n' +
+                '• Tus datos de wallet\n' +
+                '• Todo el contenido asociado a tu cuenta\n\n' +
+                'Escribe "ELIMINAR" para confirmar',
+                'danger',
+                'Eliminar Cuenta Permanentemente'
+            );
+            
+            if (confirmed) {
+                const password = await notify.prompt(
+                    'Por favor, ingresa tu contraseña actual para confirmar:',
+                    'warning',
+                    'Verificación de Seguridad'
+                );
+                
+                if (password) {
+                    const result = auth.verifyPassword(password);
+                    
+                    if (result.success) {
+                        // Eliminar cuenta
+                        const session = auth.getSession();
+                        const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+                        const nuevosUsuarios = usuarios.filter(u => u.id !== session.id);
+                        localStorage.setItem('nexos_users', JSON.stringify(nuevosUsuarios));
+                        
+                        auth.logout();
+                        notify.success('Tu cuenta ha sido eliminada permanentemente');
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+                    } else {
+                        notify.error('Contraseña incorrecta');
+                    }
+                }
+            }
+        }
+
+        function descargarMisDatos() {
+            const session = auth.getSession();
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const usuario = usuarios.find(u => u.username === session.username || u.id === session.id);
+            
+            if (!usuario) return;
+            
+            // Preparar datos para descarga
+            const datosDescarga = {
+                informacionPersonal: {
+                    id: usuario.id,
+                    username: usuario.username,
+                    email: usuario.email,
+                    nombre: usuario.nombre,
+                    apellido: usuario.apellido,
+                    telefono: usuario.telefono,
+                    fechaRegistro: usuario.createdAt
+                },
+                finanzas: {
+                    saldoActual: usuario.saldo || 0,
+                    transacciones: usuario.transacciones || []
+                },
+                seguridad: {
+                    twoFactorEnabled: usuario.twoFactorEnabled || false,
+                    ultimoCambioPassword: usuario.lastPasswordChange || null
+                },
+                privacidad: usuario.privacidad || {},
+                fechaDescarga: new Date().toISOString()
+            };
+            
+            const content = JSON.stringify(datosDescarga, null, 2);
+            const blob = new Blob([content], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'nexos-mis-datos-' + Date.now() + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            notify.success('Tus datos han sido descargados correctamente');
+            registrarActividad('Descarga de datos', 'Se descargó una copia de todos los datos de la cuenta');
+        }
+
+        // Calcular nivel de seguridad
+        function calcularNivelSeguridad() {
+            const session = auth.getSession();
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const usuario = usuarios.find(u => u.username === session.username || u.id === session.id);
+            
+            if (!usuario) return;
+            
+            let puntos = 0;
+            
+            // Contraseña fuerte (25 puntos)
+            if (usuario.password && usuario.password.length >= 8) puntos += 25;
+            
+            // 2FA activado (50 puntos)
+            if (usuario.twoFactorEnabled) puntos += 50;
+            
+            // Email verificado (25 puntos)
+            puntos += 25; // Asumimos que todos tienen email verificado
+            
+            // Actualizar UI
+            const porcentaje = document.getElementById('nivel-seguridad-porcentaje');
+            const texto = document.getElementById('nivel-seguridad-texto');
+            const icono2fa = document.getElementById('icono-2fa');
+            const texto2fa = document.getElementById('texto-2fa');
+            
+            porcentaje.textContent = puntos + '%';
+            
+            if (puntos === 100) {
+                texto.textContent = 'Excelente';
+            } else if (puntos >= 75) {
+                texto.textContent = 'Bueno';
+            } else if (puntos >= 50) {
+                texto.textContent = 'Medio';
+            } else {
+                texto.textContent = 'Básico';
+            }
+            
+            // Actualizar ícono 2FA
+            if (usuario.twoFactorEnabled) {
+                icono2fa.className = 'fas fa-check-circle';
+                icono2fa.style.opacity = '1';
+                texto2fa.textContent = 'Autenticación 2FA';
+                texto2fa.style.opacity = '1';
+            } else {
+                icono2fa.className = 'fas fa-times-circle';
+                icono2fa.style.opacity = '0.5';
+                texto2fa.textContent = 'Autenticación 2FA';
+                texto2fa.style.opacity = '0.7';
+            }
+        }
+
+        // Registrar actividad
+        function registrarActividad(tipo, descripcion) {
+            const session = auth.getSession();
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const indice = usuarios.findIndex(u => u.username === session.username || u.id === session.id);
+            
+            if (indice === -1) return;
+            
+            const usuario = usuarios[indice];
+            if (!usuario.actividadReciente) {
+                usuario.actividadReciente = [];
+            }
+            
+            // Obtener info del dispositivo
+            const dispositivo = navigator.userAgent.includes('Windows') ? 'Windows' : 
+                               navigator.userAgent.includes('Mac') ? 'Mac' :
+                               navigator.userAgent.includes('Linux') ? 'Linux' : 'Otro';
+            
+            const navegador = navigator.userAgent.includes('Chrome') ? 'Chrome' :
+                             navigator.userAgent.includes('Firefox') ? 'Firefox' :
+                             navigator.userAgent.includes('Safari') ? 'Safari' : 'Otro';
+            
+            usuario.actividadReciente.unshift({
+                tipo: tipo,
+                descripcion: descripcion,
+                dispositivo: navegador + ' • ' + dispositivo,
+                ubicacion: 'Santiago, Chile', // En producción usarías geolocalización
+                fecha: new Date().toISOString(),
+                timestamp: Date.now()
+            });
+            
+            // Mantener solo las últimas 50 actividades
+            if (usuario.actividadReciente.length > 50) {
+                usuario.actividadReciente = usuario.actividadReciente.slice(0, 50);
+            }
+            
+            usuarios[indice] = usuario;
+            localStorage.setItem('nexos_users', JSON.stringify(usuarios));
+        }
+
+        // Cargar configuración de seguridad al abrir la pestaña
+        function cargarConfiguracionSeguridad() {
+            const session = auth.getSession();
+            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
+            const usuario = usuarios.find(u => u.username === session.username || u.id === session.id);
+            
+            if (!usuario) return;
+            
+            // Calcular nivel de seguridad
+            calcularNivelSeguridad();
+            
+            // Cargar estado de 2FA
+            if (usuario.twoFactorEnabled) {
+                document.getElementById('toggle-2fa').checked = true;
+                document.getElementById('2fa-disabled').style.display = 'none';
+                document.getElementById('2fa-enabled').style.display = 'block';
+                document.getElementById('2fa-activated-date').textContent = 
+                    new Date(usuario.twoFactorActivatedDate).toLocaleString('es-CL');
+                
+                if (usuario.backupCodes) {
+                    mostrarCodigosRespaldo(usuario.backupCodes);
+                }
+            }
+            
+            // Cargar configuración de privacidad
+            if (usuario.privacidad) {
+                if (usuario.privacidad.perfilPublico !== undefined) {
+                    document.getElementById('perfil-publico').checked = usuario.privacidad.perfilPublico;
+                }
+                if (usuario.privacidad.mostrarEmail !== undefined) {
+                    document.getElementById('mostrar-email').checked = usuario.privacidad.mostrarEmail;
+                }
+                if (usuario.privacidad.historialActividad !== undefined) {
+                    document.getElementById('historial-actividad').checked = usuario.privacidad.historialActividad;
+                }
+            }
+            
+            // Cargar historial de actividad
+            if (usuario.actividadReciente && usuario.actividadReciente.length > 0) {
+                const tbody = document.getElementById('activity-history');
+                tbody.innerHTML = '';
+                
+                usuario.actividadReciente.slice(0, 10).forEach(actividad => {
+                    const tr = document.createElement('tr');
+                    
+                    let icono = 'fa-info-circle';
+                    let color = '#666';
+                    
+                    if (actividad.tipo.includes('sesión') || actividad.tipo.includes('Inicio')) {
+                        icono = 'fa-sign-in-alt';
+                        color = '#28a745';
+                    } else if (actividad.tipo.includes('contraseña') || actividad.tipo.includes('Cambio')) {
+                        icono = 'fa-key';
+                        color = '#ffc107';
+                    } else if (actividad.tipo.includes('2FA')) {
+                        icono = 'fa-mobile-alt';
+                        color = '#17a2b8';
+                    } else if (actividad.tipo.includes('Eliminar') || actividad.tipo.includes('cerrado')) {
+                        icono = 'fa-trash-alt';
+                        color = '#dc3545';
+                    }
+                    
+                    const fecha = new Date(actividad.fecha);
+                    const ahora = new Date();
+                    const diff = ahora - fecha;
+                    const minutos = Math.floor(diff / 60000);
+                    const horas = Math.floor(diff / 3600000);
+                    const dias = Math.floor(diff / 86400000);
+                    
+                    let tiempoTexto;
+                    if (minutos < 1) tiempoTexto = 'Justo ahora';
+                    else if (minutos < 60) tiempoTexto = 'Hace ' + minutos + ' min';
+                    else if (horas < 24) tiempoTexto = 'Hace ' + horas + ' hora' + (horas > 1 ? 's' : '');
+                    else tiempoTexto = 'Hace ' + dias + ' día' + (dias > 1 ? 's' : '');
+                    
+                    tr.innerHTML = `
+                        <td><i class="fas ${icono}" style="color: ${color};"></i> ${actividad.tipo}</td>
+                        <td>${actividad.dispositivo}</td>
+                        <td>${actividad.ubicacion}</td>
+                        <td>${tiempoTexto}</td>
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
             }
         }
 
@@ -843,6 +2270,197 @@
             }, 500);
         }
 
+        // ========== FUNCIONES DE DEPÓSITO WEBPAY ==========
+        let montoDepositoActual = 0;
+
+        function mostrarModalDeposito() {
+            const modal = document.getElementById('modal-deposito');
+            modal.style.display = 'flex';
+            
+            // Reset al paso 1
+            document.getElementById('paso-monto').style.display = 'block';
+            document.getElementById('paso-webpay').style.display = 'none';
+            document.getElementById('paso-procesando').style.display = 'none';
+            document.getElementById('paso-confirmacion').style.display = 'none';
+            
+            // Limpiar campos
+            document.getElementById('monto-deposito').value = '';
+            document.getElementById('numero-tarjeta').value = '';
+            document.getElementById('fecha-vencimiento').value = '';
+            document.getElementById('cvv').value = '';
+            document.getElementById('nombre-titular').value = '';
+            
+            // Reset del campo de monto personalizado
+            const container = document.getElementById('monto-personalizado-container');
+            const btn = document.getElementById('btn-monto-personalizado');
+            if (container) {
+                container.style.display = 'none';
+            }
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-edit"></i> Otro monto (personalizado)';
+                btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                btn.style.color = 'white';
+                btn.style.border = '2px solid transparent';
+            }
+            
+            // Limpiar selección de botones de monto
+            document.querySelectorAll('.btn-monto').forEach(function(b) {
+                if (b.id !== 'btn-monto-personalizado') {
+                    b.style.background = '#f8f9fa';
+                    b.style.color = 'inherit';
+                    b.style.borderColor = '#e0e0e0';
+                }
+            });
+        }
+
+        function cerrarModalDeposito() {
+            const modal = document.getElementById('modal-deposito');
+            modal.style.display = 'none';
+            
+            // Recargar wallet si se completó el depósito
+            if (document.getElementById('paso-confirmacion').style.display === 'block') {
+                cargarWallet();
+                updateNavbar();
+            }
+        }
+
+        function mostrarMontoPersonalizado() {
+            const container = document.getElementById('monto-personalizado-container');
+            const input = document.getElementById('monto-deposito');
+            const btn = document.getElementById('btn-monto-personalizado');
+            
+            if (container.style.display === 'none' || container.style.display === '') {
+                // Mostrar campo personalizado
+                container.style.display = 'block';
+                input.focus();
+                
+                // Cambiar estilo del botón
+                btn.innerHTML = '<i class="fas fa-times-circle"></i> Ocultar monto personalizado';
+                btn.style.background = '#f8f9fa';
+                btn.style.color = 'var(--dark)';
+                btn.style.border = '2px solid #e0e0e0';
+                
+                // Limpiar selección de otros botones
+                document.querySelectorAll('.btn-monto').forEach(function(b) {
+                    if (b.id !== 'btn-monto-personalizado') {
+                        b.style.background = '#f8f9fa';
+                        b.style.color = 'inherit';
+                        b.style.borderColor = '#e0e0e0';
+                    }
+                });
+                
+                // Limpiar el input
+                input.value = '';
+            } else {
+                // Ocultar campo personalizado
+                container.style.display = 'none';
+                
+                // Restaurar botón
+                btn.innerHTML = '<i class="fas fa-edit"></i> Otro monto (personalizado)';
+                btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                btn.style.color = 'white';
+                btn.style.border = '2px solid transparent';
+            }
+        }
+
+        function seleccionarMonto(monto) {
+            // Ocultar campo personalizado si está visible
+            const container = document.getElementById('monto-personalizado-container');
+            const btn = document.getElementById('btn-monto-personalizado');
+            if (container.style.display === 'block') {
+                container.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-edit"></i> Otro monto (personalizado)';
+                btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                btn.style.color = 'white';
+                btn.style.border = '2px solid transparent';
+            }
+            
+            document.getElementById('monto-deposito').value = monto;
+            
+            // Animación de botones (excepto el de monto personalizado)
+            document.querySelectorAll('.btn-monto').forEach(function(btn) {
+                if (btn.id !== 'btn-monto-personalizado') {
+                    btn.style.background = '#f8f9fa';
+                    btn.style.color = 'inherit';
+                    btn.style.borderColor = '#e0e0e0';
+                }
+            });
+            
+            // Marcar el botón seleccionado
+            if (event && event.target) {
+                event.target.style.background = 'var(--primary)';
+                event.target.style.color = 'white';
+                event.target.style.borderColor = 'var(--primary)';
+            }
+        }
+
+        async function continuarAWebPay() {
+            const monto = parseInt(document.getElementById('monto-deposito').value);
+            
+            if (!monto || monto < 1000) {
+                notify.error('Debes ingresar un monto mínimo de $1.000');
+                return;
+            }
+
+            // Procesar depósito con Mercado Pago
+            const resultado = await MercadoPagoPayment.procesarDeposito(monto);
+
+            if (!resultado || !resultado.success) {
+                notify.error('Depósito cancelado o rechazado');
+                return;
+            }
+
+            // Depósito exitoso
+            const saldoNuevo = resultado.saldoNuevo || resultado.usuario.saldo;
+            
+            // Cerrar modal
+            cerrarModalDeposito();
+            
+            // Actualizar interfaz
+            cargarWallet();
+            updateNavbar();
+            
+            notify.success(`¡Depósito exitoso! Nuevo saldo: $${saldoNuevo.toLocaleString('es-CL')} 🎉`);
+        }
+
+        function volverAMonto() {
+            document.getElementById('paso-webpay').style.display = 'none';
+            document.getElementById('paso-monto').style.display = 'block';
+        }
+
+        // Auto-formatear número de tarjeta
+        document.addEventListener('DOMContentLoaded', function() {
+            const numeroTarjetaInput = document.getElementById('numero-tarjeta');
+            if (numeroTarjetaInput) {
+                numeroTarjetaInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\s/g, '');
+                    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                    e.target.value = formattedValue;
+                });
+            }
+
+            const fechaInput = document.getElementById('fecha-vencimiento');
+            if (fechaInput) {
+                fechaInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                    }
+                    e.target.value = value;
+                });
+            }
+
+            const cvvInput = document.getElementById('cvv');
+            if (cvvInput) {
+                cvvInput.addEventListener('input', function(e) {
+                    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 3);
+                });
+            }
+        });
+
+        // FUNCIÓN ANTIGUA DE WEBPAY - YA NO SE USA (Reemplazada por Mercado Pago)
+        // Ver función continuarAWebPay() para la nueva implementación con Mercado Pago
+
         function modificarSaldoPropio(e) {
             e.preventDefault();
             const form = e.target;
@@ -879,13 +2497,35 @@
             originalCambiarTab(tab, element);
             if (tab === 'finanzas') {
                 cargarWallet();
+            } else if (tab === 'seguridad') {
+                cargarConfiguracionSeguridad();
             }
         };
 
-        // Si la URL tiene #finanzas, cargar wallet
+        // Si la URL tiene #finanzas o #seguridad, cargar la configuración correspondiente
         if (window.location.hash === '#finanzas') {
             setTimeout(cargarWallet, 100);
+        } else if (window.location.hash === '#seguridad') {
+            setTimeout(cargarConfiguracionSeguridad, 100);
         }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modal-deposito')?.addEventListener('click', function(e) {
+            if (e.target.id === 'modal-deposito') {
+                cerrarModalDeposito();
+            }
+        });
+
+        // Prevenir cierre con ESC si está procesando
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('modal-deposito');
+                const procesando = document.getElementById('paso-procesando');
+                if (modal && modal.style.display === 'flex' && procesando.style.display !== 'block') {
+                    cerrarModalDeposito();
+                }
+            }
+        });
     </script>
 </body>
 </html>

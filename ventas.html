@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda - Nexos</title>
+    <link rel="icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="shortcut icon" href="images/favicon.svg?v=2" type="image/svg+xml">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .productos-container {
+            max-width: 1400px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .filtros-productos {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filtros-productos input,
+        .filtros-productos select {
+            padding: 0.8rem 1.2rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filtros-productos input:focus,
+        .filtros-productos select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .categoria-tags {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .categoria-tag {
+            padding: 0.6rem 1.5rem;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .categoria-tag:hover,
+        .categoria-tag.activa {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .productos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .producto-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .producto-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+
+        .producto-imagen {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: #f8f9fa;
+        }
+
+        .producto-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .producto-info {
+            padding: 1.5rem;
+        }
+
+        .producto-categoria {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: #e3f2fd;
+            color: #1976d2;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+
+        .producto-titulo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .producto-descripcion {
+            color: #666;
+            font-size: 0.95rem;
+            margin: 0.8rem 0;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .producto-empresa {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #999;
+            font-size: 0.9rem;
+            margin: 0.8rem 0;
+        }
+
+        .producto-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .producto-precio {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .producto-stock {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .stock-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .stock-badge.alto {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .stock-badge.medio {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .stock-badge.bajo {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .stock-badge.agotado {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .sin-productos {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #999;
+        }
+
+        .sin-productos i {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .filtros-productos {
+                flex-direction: column;
+            }
+            
+            .productos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="rifas.html">Rifas</a></li>
+                <li><a href="ventas.html" class="active">Ventas</a></li>
+                <li><a href="causas.html">Causas</a></li>
+                <li><a href="empresas.html">Empresas</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+            </ul>
+            <button class="cta-button" onclick="window.location.href='login.html'">Iniciar Sesión</button>
+        </nav>
+    </header>
+
+    <section class="hero" style="padding: 3rem 5%; min-height: 300px;">
+        <div class="hero-content">
+            <h1>Tienda Solidaria</h1>
+            <p>Compra productos de empresas comprometidas con causas sociales</p>
+        </div>
+    </section>
+
+    <div class="productos-container">
+        <!-- Filtros -->
+        <div class="filtros-productos">
+            <input type="text" id="buscarProducto" placeholder="🔍 Buscar productos..." onkeyup="filtrarProductos()">
+            <select id="ordenarPor" onchange="filtrarProductos()">
+                <option value="reciente">Más recientes</option>
+                <option value="precio-menor">Precio: Menor a Mayor</option>
+                <option value="precio-mayor">Precio: Mayor a Menor</option>
+                <option value="nombre">Nombre A-Z</option>
+                <option value="stock">Mayor stock</option>
+            </select>
+        </div>
+
+        <!-- Categorías -->
+        <div class="categoria-tags">
+            <div class="categoria-tag activa" onclick="filtrarCategoria('todas')">
+                <i class="fas fa-th"></i> Todas
+            </div>
+            <div class="categoria-tag" onclick="filtrarCategoria('Electrónica')">
+                <i class="fas fa-laptop"></i> Electrónica
+            </div>
+            <div class="categoria-tag" onclick="filtrarCategoria('Ropa')">
+                <i class="fas fa-tshirt"></i> Ropa
+            </div>
+            <div class="categoria-tag" onclick="filtrarCategoria('Hogar')">
+                <i class="fas fa-home"></i> Hogar
+            </div>
+            <div class="categoria-tag" onclick="filtrarCategoria('Alimentos')">
+                <i class="fas fa-utensils"></i> Alimentos
+            </div>
+            <div class="categoria-tag" onclick="filtrarCategoria('Libros')">
+                <i class="fas fa-book"></i> Libros
+            </div>
+            <div class="categoria-tag" onclick="filtrarCategoria('Artesanías')">
+                <i class="fas fa-palette"></i> Artesanías
+            </div>
+            <div class="categoria-tag" onclick="filtrarCategoria('Otros')">
+                <i class="fas fa-ellipsis-h"></i> Otros
+            </div>
+        </div>
+
+        <!-- Grid de productos -->
+        <div class="productos-grid" id="productosGrid">
+            <!-- Se llenan con JavaScript -->
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="notify.js"></script>
+    <script>
+        let productosOriginales = [];
+        let categoriaActual = 'todas';
+
+        // Cargar navbar dinámico
+        if (auth.isLoggedIn()) {
+            const session = auth.getSession();
+            const navbar = document.querySelector('.navbar');
+            const ctaButton = navbar.querySelector('.cta-button');
+            
+            if (session.role === 'admin') {
+                ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'admin.html\'">Panel Admin</button>';
+            } else if (session.role === 'empresa') {
+                ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil-empresa.html\'">Mi Perfil</button>';
+            } else {
+                ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil.html\'">Mi Perfil</button>';
+            }
+        }
+
+        function cargarProductos() {
+            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
+            productosOriginales = productos;
+            filtrarProductos();
+        }
+
+        function filtrarCategoria(categoria) {
+            categoriaActual = categoria;
+            
+            // Actualizar tags visuales
+            document.querySelectorAll('.categoria-tag').forEach(tag => {
+                tag.classList.remove('activa');
+            });
+            event.target.closest('.categoria-tag').classList.add('activa');
+            
+            filtrarProductos();
+        }
+
+        function filtrarProductos() {
+            const busqueda = document.getElementById('buscarProducto').value.toLowerCase();
+            const orden = document.getElementById('ordenarPor').value;
+            const grid = document.getElementById('productosGrid');
+
+            // Filtrar productos
+            let productosFiltrados = productosOriginales.filter(producto => {
+                const coincideBusqueda = producto.nombre.toLowerCase().includes(busqueda) || 
+                                        (producto.descripcion || '').toLowerCase().includes(busqueda) ||
+                                        (producto.empresaNombre || '').toLowerCase().includes(busqueda);
+                
+                const coincideCategoria = categoriaActual === 'todas' || producto.categoria === categoriaActual;
+                
+                return coincideBusqueda && coincideCategoria;
+            });
+
+            // Ordenar productos
+            switch(orden) {
+                case 'precio-menor':
+                    productosFiltrados.sort((a, b) => a.precio - b.precio);
+                    break;
+                case 'precio-mayor':
+                    productosFiltrados.sort((a, b) => b.precio - a.precio);
+                    break;
+                case 'nombre':
+                    productosFiltrados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                    break;
+                case 'stock':
+                    productosFiltrados.sort((a, b) => b.stock - a.stock);
+                    break;
+                case 'reciente':
+                default:
+                    productosFiltrados.sort((a, b) => new Date(b.fechaCreacion || 0) - new Date(a.fechaCreacion || 0));
+                    break;
+            }
+
+            // Mostrar productos
+            if (productosFiltrados.length === 0) {
+                grid.innerHTML = `
+                    <div class="sin-productos" style="grid-column: 1 / -1;">
+                        <i class="fas fa-shopping-bag"></i>
+                        <h2>No se encontraron productos</h2>
+                        <p>Intenta cambiar los filtros de búsqueda</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = productosFiltrados.map(producto => {
+                const stockInfo = getStockInfo(producto.stock);
+                const descuento = producto.precioOriginal ? Math.round(((producto.precioOriginal - producto.precio) / producto.precioOriginal) * 100) : 0;
+                
+                return `
+                    <div class="producto-card" onclick="window.location.href='detalle-producto.html?id=${producto.id}'">
+                        ${descuento > 0 ? `
+                            <div class="producto-badge" style="background: #e74c3c; color: white;">
+                                -${descuento}% OFF
+                            </div>
+                        ` : ''}
+                        
+                        ${producto.stock === 0 ? `
+                            <div class="producto-badge" style="background: #95a5a6; color: white; left: 1rem; right: auto;">
+                                AGOTADO
+                            </div>
+                        ` : ''}
+                        
+                        <img src="${producto.imagen || 'images/placeholder-producto.jpg'}" 
+                             alt="${producto.nombre}" 
+                             class="producto-imagen"
+                             onerror="this.src='images/placeholder-producto.jpg'">
+                        
+                        <div class="producto-info">
+                            <div class="producto-categoria">
+                                ${getCategoriaIcon(producto.categoria)} ${producto.categoria || 'General'}
+                            </div>
+                            
+                            <h3 class="producto-titulo">${producto.nombre}</h3>
+                            
+                            <p class="producto-descripcion">${producto.descripcion || 'Sin descripción disponible'}</p>
+                            
+                            <div class="producto-empresa">
+                                <i class="fas fa-store"></i>
+                                <span>${producto.empresaNombre || 'Empresa'}</span>
+                            </div>
+                            
+                            <div class="producto-footer">
+                                <div>
+                                    ${producto.precioOriginal ? `
+                                        <div style="text-decoration: line-through; color: #999; font-size: 0.9rem;">
+                                            $${producto.precioOriginal.toLocaleString('es-CL')}
+                                        </div>
+                                    ` : ''}
+                                    <div class="producto-precio">
+                                        $${producto.precio.toLocaleString('es-CL')}
+                                    </div>
+                                </div>
+                                
+                                <div class="producto-stock">
+                                    <span class="stock-badge ${stockInfo.clase}">
+                                        ${stockInfo.texto}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getStockInfo(stock) {
+            if (stock === 0) {
+                return { texto: 'Agotado', clase: 'agotado' };
+            } else if (stock <= 5) {
+                return { texto: `${stock} disponibles`, clase: 'bajo' };
+            } else if (stock <= 20) {
+                return { texto: `${stock} disponibles`, clase: 'medio' };
+            } else {
+                return { texto: 'Disponible', clase: 'alto' };
+            }
+        }
+
+        function getCategoriaIcon(categoria) {
+            const iconos = {
+                'Electrónica': '💻',
+                'Ropa': '👕',
+                'Hogar': '🏠',
+                'Alimentos': '🍕',
+                'Libros': '📚',
+                'Artesanías': '🎨',
+                'Otros': '📦'
+            };
+            return iconos[categoria] || '📦';
+        }
+
+        // Cargar productos al iniciar
+        cargarProductos();
+    </script>
+
+    <footer>
+        <div class="footer-content">
+            <div class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </div>
+            <p>Conectando empresas con causas que transforman vidas</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p class="copyright">© 2025 Nexos. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html>
