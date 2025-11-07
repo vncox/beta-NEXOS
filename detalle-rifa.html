@@ -260,8 +260,12 @@
         </div>
     </footer>
 
-    <script src="auth.js"></script>
-    <script src="notify.js"></script>
+    <script src="notifications.js?v=3"></script>
+    <script src="api-config.js?v=3"></script>
+    <script src="auth-backend.js?v=3"></script>
+    <script src="wallet-manager.js?v=3"></script>
+    <script src="rifas-manager.js?v=3"></script>
+    <script src="navbar-helper.js?v=3"></script>
     <script>
         let rifaActual = null;
         let boletosSeleccionados = [];
@@ -270,64 +274,61 @@
 
         // Cargar navbar dinámico
         if (auth.isLoggedIn()) {
-            const session = auth.getSession();
+            const currentUser = auth.getCurrentUser();
             const navbar = document.querySelector('.navbar');
             const ctaButton = navbar.querySelector('.cta-button');
             
-            if (session.role === 'admin') {
+            if (currentUser.role === 'admin') {
                 ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'admin.html\'">Panel Admin</button>';
-            } else if (session.role === 'empresa') {
+            } else if (currentUser.role === 'empresa') {
                 ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil-empresa.html\'">Mi Perfil</button>';
             } else {
                 ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil.html\'">Mi Perfil</button>';
             }
         }
 
-        function cargarRifa() {
+        async function cargarRifa() {
             if (!rifaId) {
                 notify.error('Rifa no encontrada');
                 setTimeout(() => window.location.href = 'rifas.html', 2000);
                 return;
             }
 
-            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
-            rifaActual = rifas.find(r => r.id === rifaId);
-
-            if (!rifaActual) {
+            const result = await rifasManager.getRifaById(rifaId);
+            
+            if (!result.success || !result.rifa) {
                 notify.error('Rifa no encontrada');
                 setTimeout(() => window.location.href = 'rifas.html', 2000);
                 return;
             }
 
-            // Inicializar boletos si no existen
-            if (!rifaActual.boletos) {
-                rifaActual.boletos = [];
-                for (let i = 0; i < rifaActual.totalBoletos; i++) {
-                    rifaActual.boletos.push({
-                        numero: i,
-                        comprado: false,
-                        userId: null,
-                        fechaCompra: null
-                    });
-                }
-                guardarRifas(rifas);
-            }
+            rifaActual = result.rifa;
 
             // Cargar información
             document.getElementById('rifaTitulo').textContent = rifaActual.titulo;
             document.getElementById('rifaDescripcion').textContent = rifaActual.descripcion;
-            document.getElementById('rifaEmpresa').querySelector('span').textContent = rifaActual.empresaNombre || 'Empresa';
+            
+            // Empresa
+            const empresaNombre = rifaActual.empresa?.razon_social || 'Empresa';
+            document.getElementById('rifaEmpresa').querySelector('span').textContent = empresaNombre;
+            
+            // Imagen
             document.getElementById('rifaImagen').src = rifaActual.imagen || 'images/placeholder-rifa.jpg';
-            document.getElementById('rifaFechaSorteo').textContent = new Date(rifaActual.fechaSorteo).toLocaleDateString('es-CL', {
+            
+            // Fecha sorteo
+            document.getElementById('rifaFechaSorteo').textContent = new Date(rifaActual.fecha_sorteo).toLocaleDateString('es-CL', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
             });
-            document.getElementById('rifaPrecio').textContent = '$' + rifaActual.precioBoleto.toLocaleString('es-CL');
+            
+            // Precio
+            const precio = parseFloat(rifaActual.precio_boleto || 0);
+            document.getElementById('rifaPrecio').textContent = '$' + precio.toLocaleString('es-CL');
 
             // Estado
-            const fechaSorteo = new Date(rifaActual.fechaSorteo);
+            const fechaSorteo = new Date(rifaActual.fecha_sorteo);
             const ahora = new Date();
             const estadoEl = document.getElementById('rifaEstado');
             
@@ -346,15 +347,17 @@
             }
 
             // Boletos vendidos
-            const vendidos = rifaActual.boletos.filter(b => b.comprado).length;
-            document.getElementById('rifaBoletosVendidos').textContent = vendidos + ' / ' + rifaActual.totalBoletos;
+            const vendidos = rifaActual.boletos_vendidos || 0;
+            const totales = rifaActual.boletos_totales || 0;
+            document.getElementById('rifaBoletosVendidos').textContent = vendidos + ' / ' + totales;
 
             // Premio info
+            const valorPremio = precio * totales;
             document.getElementById('rifaPremioInfo').innerHTML = `
-                <p style="margin-bottom: 0.8rem;"><strong>🎁 Premio:</strong> ${rifaActual.premio || rifaActual.titulo}</p>
-                <p style="margin-bottom: 0.8rem;"><strong>📊 Total de boletos:</strong> ${rifaActual.totalBoletos}</p>
-                <p style="margin-bottom: 0.8rem;"><strong>💰 Valor del premio:</strong> $${(rifaActual.valorPremio || rifaActual.precioBoleto * rifaActual.totalBoletos).toLocaleString('es-CL')}</p>
-                <p style="margin: 0;"><strong>🎲 Sorteo:</strong> ${new Date(rifaActual.fechaSorteo).toLocaleDateString('es-CL')}</p>
+                <p style="margin-bottom: 0.8rem;"><strong>🎁 Premio:</strong> ${rifaActual.titulo}</p>
+                <p style="margin-bottom: 0.8rem;"><strong>📊 Total de boletos:</strong> ${totales}</p>
+                <p style="margin-bottom: 0.8rem;"><strong>💰 Recaudación estimada:</strong> $${valorPremio.toLocaleString('es-CL')}</p>
+                <p style="margin: 0;"><strong>🎲 Sorteo:</strong> ${new Date(rifaActual.fecha_sorteo).toLocaleDateString('es-CL')}</p>
             `;
 
             cargarBoletos();
@@ -364,16 +367,33 @@
             const grid = document.getElementById('boletosGrid');
             grid.innerHTML = '';
 
-            const session = auth.getSession();
-            const miUserId = session ? session.id : null;
+            const currentUser = auth.getCurrentUser();
+            const miUserId = currentUser ? currentUser.id : null;
 
-            rifaActual.boletos.forEach(boleto => {
+            // Si no hay boletos en el backend, generar array temporal
+            const boletos = rifaActual.boletos || [];
+            const totales = rifaActual.boletos_totales || 0;
+            
+            // Crear array de boletos si no existe
+            const boletosList = [];
+            for (let i = 0; i < totales; i++) {
+                const boletoExistente = boletos.find(b => b.numero === i);
+                boletosList.push(boletoExistente || {
+                    numero: i,
+                    estado: 'disponible',
+                    user_id: null
+                });
+            }
+
+            boletosList.forEach(boleto => {
                 const div = document.createElement('div');
                 div.className = 'boleto-numero';
                 div.textContent = String(boleto.numero).padStart(2, '0');
 
-                if (boleto.comprado) {
-                    if (boleto.userId === miUserId) {
+                const estaVendido = boleto.estado === 'vendido' || boleto.estado === 'reservado';
+                
+                if (estaVendido) {
+                    if (boleto.user_id === miUserId) {
                         div.classList.add('mio');
                         div.title = 'Este boleto es tuyo';
                     } else {
@@ -396,8 +416,8 @@
                 return;
             }
 
-            const session = auth.getSession();
-            if (session.role === 'admin') {
+            const currentUser = auth.getCurrentUser();
+            if (currentUser.role === 'admin') {
                 notify.error('Los administradores no pueden comprar boletos');
                 return;
             }
@@ -478,7 +498,7 @@
                 return;
             }
 
-            const session = auth.getSession();
+            const currentUser = auth.getCurrentUser();
             const total = boletosSeleccionados.length * rifaActual.precioBoleto;
 
             // Procesar pago con Mercado Pago
@@ -501,12 +521,9 @@
             cargarRifa();
         }
 
-        function guardarRifas(rifas) {
-            const index = rifas.findIndex(r => r.id === rifaActual.id);
-            if (index !== -1) {
-                rifas[index] = rifaActual;
-                localStorage.setItem('nexos_rifas', JSON.stringify(rifas));
-            }
+        async function guardarRifas(rifas) {
+            // Ya no se usa localStorage, las rifas se actualizan automáticamente en el backend
+            console.log('guardarRifas: Los cambios se guardan automáticamente en el backend');
         }
 
         // Cargar rifa al iniciar

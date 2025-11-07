@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Click</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-heart"></i>
+                <span>Nexos</span>
+            </a>
+            <button class="cta-button" id="navAuthButton">Iniciar Sesión</button>
+        </nav>
+    </header>
+    
+    <div style="padding: 2rem;">
+        <h1>Test del Botón de Login</h1>
+        <p>Abre la consola (F12) y haz clic en "Iniciar Sesión"</p>
+    </div>
+
+    <script src="notifications.js"></script>
+    <script src="api-config.js"></script>
+    <script src="auth-backend.js"></script>
+    <script src="navbar-helper.js"></script>
+    <script>
+        console.log('🧪 Página de test cargada');
+        console.log('authBackend disponible:', typeof authBackend !== 'undefined');
+        console.log('Botón existe:', document.querySelector('.cta-button') !== null);
+    </script>
+</body>
+</html>

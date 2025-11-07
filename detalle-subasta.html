@@ -589,7 +589,7 @@
                 <li><a href="empresas.html">Empresas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
             </ul>
-            <button class="cta-button" onclick="window.location.href='login.html'">Iniciar Sesión</button>
+            <button class="cta-button" id="navAuthButton">Iniciar Sesión</button>
         </nav>
     </header>
 
@@ -723,13 +723,13 @@
                             <span id="saldo-usuario-display" style="font-size: 1.3em; font-weight: 700;">$0</span>
                         </div>
                         <div class="incrementos-sugeridos">
-                            <button class="btn-incremento" onclick="aplicarIncremento(1000)">+$1K</button>
-                            <button class="btn-incremento" onclick="aplicarIncremento(5000)">+$5K</button>
-                            <button class="btn-incremento" onclick="aplicarIncremento(10000)">+$10K</button>
+                            <button class="btn-incremento" onclick="detalleSubastaManager.aplicarIncremento(1000)">+$1K</button>
+                            <button class="btn-incremento" onclick="detalleSubastaManager.aplicarIncremento(5000)">+$5K</button>
+                            <button class="btn-incremento" onclick="detalleSubastaManager.aplicarIncremento(10000)">+$10K</button>
                         </div>
                         <div class="pujar-form">
                             <input type="number" id="monto-puja" class="pujar-input" placeholder="$0" min="0" step="1000">
-                            <button class="btn-pujar" onclick="realizarPuja()">
+                            <button id="btn-realizar-puja" class="btn-pujar">
                                 <i class="fas fa-gavel"></i> Pujar
                             </button>
                         </div>
@@ -784,70 +784,23 @@
     </footer>
 
     <script src="notifications.js"></script>
-    <script src="auth.js"></script>
+    <script src="api-config.js"></script>
+    <script src="auth-backend.js"></script>
+    <script src="subastas-manager.js"></script>
+    <script src="detalle-subasta-manager.js"></script>
+    <script src="navbar-helper.js"></script>
     <script src="config.js"></script>
     <script>
-        let subastaActual = null;
-        let intervaloCuenta = null;
-        let intervaloActualizacion = null;
-        let notificacionesActivas = false;
-        let ultimoPrecio = 0;
-
-        // Obtener ID de la subasta desde URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const subastaId = urlParams.get('id');
-
-        if (!subastaId) {
-            alert('No se especificó una subasta');
-            window.location.href = 'subastas.html';
+        // Configurar botón de puja
+        const btnPujar = document.getElementById('btn-realizar-puja');
+        if (btnPujar) {
+            btnPujar.addEventListener('click', () => {
+                detalleSubastaManager.realizarPuja();
+            });
         }
 
-        function cargarSubasta() {
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-            subastaActual = subastas.find(function(s) { return s.id === subastaId; });
-
-            if (!subastaActual) {
-                notify.error('Subasta no encontrada. Redirigiendo...');
-                setTimeout(function() {
-                    window.location.href = 'subastas.html';
-                }, 2000);
-                return;
-            }
-
-            // Inicializar propiedades faltantes para subastas antiguas
-            if (!subastaActual.imagen) {
-                subastaActual.imagen = 'images/placeholder.png';
-            }
-            if (!subastaActual.descripcion) {
-                subastaActual.descripcion = 'Sin descripción disponible.';
-            }
-            if (!subastaActual.precioInicial) {
-                subastaActual.precioInicial = subastaActual.precioActual || 50000;
-            }
-
-            // Si es primera carga, generar datos de prueba
-            if (!subastaActual.pujas || subastaActual.pujas.length === 0) {
-                generarDatosPrueba();
-            }
-
-            mostrarSubasta();
-            actualizarContador();
-            
-            // Notificar si cambió el precio
-            if (notificacionesActivas && ultimoPrecio > 0 && subastaActual.precioActual > ultimoPrecio) {
-                notificarCambioPrecio();
-            }
-            ultimoPrecio = subastaActual.precioActual;
-        }
-
-        function generarDatosPrueba() {
-            // Generar pujas de prueba basadas en el precio inicial
-            const usuarios = [
-                { nombre: 'Carlos Martínez', iniciales: 'CM' },
-                { nombre: 'Ana Silva', iniciales: 'AS' },
-                { nombre: 'Pedro González', iniciales: 'PG' },
-                { nombre: 'María López', iniciales: 'ML' },
-                { nombre: 'Juan Pérez', iniciales: 'JP' }
+        // El manager se auto-inicializa
+    </script>
             ];
 
             const ahora = new Date();
@@ -877,17 +830,10 @@
                 });
             }
 
-            subastaActual.pujas = pujas;
-            subastaActual.precioActual = precioActual;
-            subastaActual.participantes = usuarios.map(function(u) { return u.username || u.nombre; });
-
-            // Guardar en localStorage
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-            const index = subastas.findIndex(function(s) { return s.id === subastaId; });
-            if (index !== -1) {
-                subastas[index] = subastaActual;
-                localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
-            }
+        // FUNCIÓN DESHABILITADA - Solo para demo/testing
+        function generarPujasAleatorias() {
+            console.warn('generarPujasAleatorias: función de demo deshabilitada, usar backend real');
+            // Los datos vienen del backend ahora
         }
 
         function mostrarSubasta() {
@@ -1126,11 +1072,14 @@
             }, 1000);
         }
 
-        function finalizarSubasta() {
-            console.log('🏁 Finalizando subasta:', subastaActual.id);
+        async function finalizarSubasta() {
+            console.warn('finalizarSubasta: Función temporalmente deshabilitada - migración al backend pendiente');
+            notify.warning('Función en migración al backend - próximamente disponible');
             
-            // Marcar como finalizada
-            subastaActual.estado = 'finalizada';
+            // TODO: Implementar finalización de subasta con backend
+            // Debe incluir: transferencia al ganador, devolución a perdedores, transferencia a empresa
+            return;
+        }
             
             // Si hay pujas, transferir el dinero al creador de la subasta
             if (subastaActual.pujas && subastaActual.pujas.length > 0) {
@@ -1140,94 +1089,23 @@
                 
                 console.log('💰 Puja ganadora:', pujaGanadora.monto, 'por', pujaGanadora.usuario);
                 
-                // 1. Devolver dinero a los usuarios que NO ganaron
-                const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-                const pujasDevueltas = [];
+                // La finalización de subasta se maneja completamente en el backend
+                // El backend se encargará de:
+                // 1. Devolver dinero a pujas no ganadoras
+                // 2. Transferir el monto al ganador
+                // 3. Actualizar el estado de la subasta
+                // 4. Registrar todas las transacciones
                 
-                subastaActual.pujas.forEach(function(puja, index) {
-                    // Si no es la última puja (ganadora), devolver el dinero
-                    if (index < subastaActual.pujas.length - 1) {
-                        const indiceUsuario = usuarios.findIndex(function(u) {
-                            const nombreCompleto = u.nombre + ' ' + u.apellido;
-                            return nombreCompleto === puja.usuario;
-                        });
-                        
-                        if (indiceUsuario !== -1) {
-                            const usuario = usuarios[indiceUsuario];
-                            const saldoAnterior = usuario.saldo || 0;
-                            usuario.saldo = saldoAnterior + puja.monto;
-                            
-                            // Registrar transacción de devolución
-                            if (!usuario.transacciones) {
-                                usuario.transacciones = [];
-                            }
-                            
-                            usuario.transacciones.push({
-                                tipo: 'ingreso',
-                                concepto: 'devolucion',
-                                monto: puja.monto,
-                                descripcion: 'Devolución de puja no ganadora: ' + subastaActual.titulo,
-                                fecha: new Date().toISOString(),
-                                saldoAnterior: saldoAnterior,
-                                saldoFinal: usuario.saldo,
-                                subastaId: subastaActual.id
-                            });
-                            
-                            usuarios[indiceUsuario] = usuario;
-                            pujasDevueltas.push(puja.usuario + ': $' + puja.monto.toLocaleString('es-CL'));
-                            console.log('💸 Devuelto a', puja.usuario, ':', puja.monto);
-                        }
-                    }
-                });
-                
-                // Guardar usuarios actualizados
-                localStorage.setItem('nexos_users', JSON.stringify(usuarios));
-                
-                if (pujasDevueltas.length > 0) {
-                    console.log('✅ Pujas devueltas:', pujasDevueltas.length);
-                }
-                
-                // 2. Transferir el monto ganador a la empresa creadora
-                const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
-                const indiceEmpresa = empresas.findIndex(function(e) { return e.rut === empresaRut; });
-                
-                if (indiceEmpresa !== -1) {
-                    const empresa = empresas[indiceEmpresa];
-                    const saldoAnterior = empresa.saldo || 0;
-                    const nuevoSaldo = saldoAnterior + montoFinal;
-                    
-                    empresa.saldo = nuevoSaldo;
-                    
-                    // Registrar transacción de ingreso
-                    if (!empresa.transacciones) {
-                        empresa.transacciones = [];
-                    }
-                    
-                    empresa.transacciones.push({
-                        tipo: 'ingreso',
-                        concepto: 'subasta',
-                        monto: montoFinal,
-                        descripcion: 'Subasta finalizada: ' + subastaActual.titulo + ' - Ganador: ' + pujaGanadora.usuario,
-                        fecha: new Date().toISOString(),
-                        saldoAnterior: saldoAnterior,
-                        saldoFinal: nuevoSaldo,
-                        subastaId: subastaActual.id
-                    });
-                    
-                    // Guardar empresa actualizada
-                    empresas[indiceEmpresa] = empresa;
-                    localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
-                    console.log('✅ Transferido a empresa:', montoFinal);
+                try {
+                    await detalleSubastaManager.finalizarSubasta(subastaActual.id);
+                    console.log('✅ Subasta finalizada en el backend');
+                } catch (error) {
+                    console.error('❌ Error al finalizar subasta:', error);
+                    notify.error('Error al finalizar la subasta: ' + error.message);
                 }
             }
             
-            // Guardar subasta actualizada
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-            const index = subastas.findIndex(function(s) { return s.id === subastaId; });
-            if (index !== -1) {
-                subastas[index] = subastaActual;
-                localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
-            }
+            // La subasta actualizada se guarda en el backend automáticamente
             
             // Recargar la página para mostrar el estado finalizado
             cargarSubasta();
@@ -1282,14 +1160,11 @@
                 return;
             }
             
-            // Leer el saldo fresco desde localStorage
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const usuario = usuarios.find(function(u) {
-                return u.username === session.username || u.id === session.id;
-            });
-            
-            if (usuario) {
-                const saldo = usuario.saldo || 0;
+            try {
+                // Obtener saldo desde el backend
+                const saldoData = await walletManager.obtenerSaldo();
+                const saldo = saldoData.saldo || 0;
+                
                 saldoDisplay.textContent = '$' + saldo.toLocaleString('es-CL');
                 
                 // Cambiar color según el saldo
@@ -1301,6 +1176,9 @@
                 } else {
                     saldoInfo.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                 }
+            } catch (error) {
+                console.error('Error al obtener saldo:', error);
+                saldoDisplay.textContent = '$0';
             }
         }
 
@@ -1343,38 +1221,23 @@
                 return;
             }
 
-            // Obtener cuenta del usuario directamente desde localStorage
-            console.log('🔍 Buscando cuenta de usuario:', session.username, session.id);
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const cuenta = usuarios.find(function(u) {
-                return u.username === session.username || u.id === session.id || u.email === session.username;
-            });
-            
-            if (!cuenta) {
-                console.error('❌ No se encontró la cuenta del usuario en localStorage');
-                console.log('Session:', session);
-                console.log('Usuarios disponibles:', usuarios.map(function(u) { return u.username || u.email; }));
-                await notify.alert(
-                    'No se pudo encontrar tu cuenta de usuario.\n\nPor favor, cierra sesión e inicia sesión nuevamente.',
-                    'error',
-                    'Error de Cuenta'
-                );
-                return;
-            }
-            
-            console.log('✅ Cuenta encontrada:', cuenta.username, 'Saldo:', cuenta.saldo);
-            const saldoActual = cuenta.saldo || 0;
+            try {
+                // Obtener saldo actual desde el backend
+                console.log('🔍 Obteniendo saldo del usuario:', session.username, session.id);
+                const saldoData = await walletManager.obtenerSaldo();
+                const saldoActual = saldoData.saldo || 0;
+                console.log('✅ Saldo actual:', saldoActual);
 
-            const monto = parseInt(document.getElementById('monto-puja').value);
-            let minimoRequerido;
-            
-            // Si no hay pujas, el mínimo es el precio inicial
-            // Si hay pujas, el mínimo es el precio actual + incremento
-            if (!subastaActual.pujas || subastaActual.pujas.length === 0) {
-                minimoRequerido = subastaActual.precioInicial;
-            } else {
-                const incrementoMinimo = Math.max(1000, Math.floor(subastaActual.precioInicial * 0.05));
-                minimoRequerido = subastaActual.precioActual + incrementoMinimo;
+                const monto = parseInt(document.getElementById('monto-puja').value);
+                let minimoRequerido;
+                
+                // Si no hay pujas, el mínimo es el precio inicial
+                // Si hay pujas, el mínimo es el precio actual + incremento
+                if (!subastaActual.pujas || subastaActual.pujas.length === 0) {
+                    minimoRequerido = subastaActual.precioInicial;
+                } else {
+                    const incrementoMinimo = Math.max(1000, Math.floor(subastaActual.precioInicial * 0.05));
+                    minimoRequerido = subastaActual.precioActual + incrementoMinimo;
             }
 
             if (monto < minimoRequerido) {
@@ -1401,91 +1264,41 @@
             const nombre = session.type === 'user' ? cuenta.username : cuenta.razonSocial;
             const iniciales = nombre.substring(0, 2).toUpperCase();
 
-            // Inicializar arrays si no existen
-            if (!subastaActual.pujas) {
-                subastaActual.pujas = [];
-            }
-            if (!subastaActual.participantes) {
-                subastaActual.participantes = [];
-            }
-
-            // Agregar puja
-            const nuevaPuja = {
-                usuario: nombre,
-                iniciales: iniciales,
-                monto: monto,
-                fecha: new Date().toISOString()
-            };
-
-            subastaActual.pujas.push(nuevaPuja);
-            subastaActual.precioActual = monto;
-
-            // Agregar a participantes si no está
-            if (!subastaActual.participantes.includes(nombre)) {
-                subastaActual.participantes.push(nombre);
-            }
-
-            // Descontar el monto de la billetera del usuario
-            const nuevoSaldo = saldoActual - monto;
+            // Realizar la puja a través del backend
+            console.log('📤 Enviando puja al backend...');
+            const pujaResult = await detalleSubastaManager.realizarPuja(subastaId, monto);
             
-            // Registrar la transacción
-            if (!cuenta.transacciones) {
-                cuenta.transacciones = [];
-            }
+            console.log('✅ Puja registrada:', pujaResult);
             
-            cuenta.transacciones.push({
-                tipo: 'egreso',
-                concepto: 'puja',
-                monto: monto,
-                descripcion: 'Puja en subasta: ' + subastaActual.titulo,
-                fecha: new Date().toISOString(),
-                saldoAnterior: saldoActual,
-                saldoFinal: nuevoSaldo,
-                subastaId: subastaActual.id
-            });
-            
-            cuenta.saldo = nuevoSaldo;
-            
-            // Actualizar la cuenta en localStorage (ya tenemos usuarios cargado)
-            const indiceCuenta = usuarios.findIndex(function(c) { 
-                return c.username === cuenta.username || c.id === cuenta.id || c.email === cuenta.email;
-            });
-            
-            console.log('📝 Actualizando cuenta usuario:', cuenta.username, 'Índice:', indiceCuenta);
-            console.log('💰 Saldo anterior:', saldoActual, 'Nuevo saldo:', nuevoSaldo);
-            
-            if (indiceCuenta !== -1) {
-                usuarios[indiceCuenta].saldo = nuevoSaldo;
-                usuarios[indiceCuenta].transacciones = cuenta.transacciones;
-                localStorage.setItem('nexos_users', JSON.stringify(usuarios));
-                console.log('✅ Saldo actualizado en localStorage');
-            } else {
-                console.error('❌ Error crítico: No se pudo actualizar el saldo');
-                await notify.alert('Hubo un error al actualizar tu saldo. Por favor, recarga la página.', 'error');
-                return;
-            }
-
-            // Guardar subasta en localStorage
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-            const index = subastas.findIndex(function(s) { return s.id === subastaId; });
-            if (index !== -1) {
-                subastas[index] = subastaActual;
-                localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
-            }
+            // Actualizar la subasta local con los datos del backend
+            subastaActual = pujaResult.subasta;
 
             notify.success(
                 '¡Puja realizada exitosamente! 🎉\n\n' +
                 '💰 Tu oferta: $' + monto.toLocaleString('es-CL') + '\n' +
                 '💳 Saldo descontado: $' + monto.toLocaleString('es-CL') + '\n' +
                 '💵 Saldo anterior: $' + saldoActual.toLocaleString('es-CL') + '\n' +
-                '✅ Nuevo saldo: $' + nuevoSaldo.toLocaleString('es-CL') + '\n\n' +
+                '✅ Nuevo saldo: $' + pujaResult.nuevoSaldo.toLocaleString('es-CL') + '\n\n' +
                 'ℹ️ Si eres superado, se te devolverá automáticamente el monto de tu puja.'
             );
             
             // Limpiar el input
             document.getElementById('monto-puja').value = '';
             
+            // Recargar la página para mostrar la nueva puja
             cargarSubasta();
+            
+            // Actualizar saldo en pantalla
+            actualizarSaldoDisplay();
+            
+            } catch (error) {
+                console.error('❌ Error al realizar puja:', error);
+                await notify.alert(
+                    'Hubo un error al procesar tu puja:\n\n' + error.message + '\n\nPor favor, intenta nuevamente.',
+                    'error',
+                    'Error al Pujar'
+                );
+            }
         }
 
         function calcularTiempoAtras(fecha) {

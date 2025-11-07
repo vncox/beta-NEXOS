@@ -301,30 +301,39 @@
         </div>
     </div>
 
-    <script src="auth.js"></script>
-    <script src="notify.js"></script>
+    <script src="notifications.js?v=3"></script>
+    <script src="api-config.js?v=3"></script>
+    <script src="auth-backend.js?v=3"></script>
+    <script src="wallet-manager.js?v=3"></script>
+    <script src="productos-manager.js?v=3"></script>
+    <script src="navbar-helper.js?v=3"></script>
     <script>
         let productosOriginales = [];
         let categoriaActual = 'todas';
 
         // Cargar navbar dinámico
         if (auth.isLoggedIn()) {
-            const session = auth.getSession();
+            const currentUser = auth.getCurrentUser();
             const navbar = document.querySelector('.navbar');
             const ctaButton = navbar.querySelector('.cta-button');
             
-            if (session.role === 'admin') {
+            if (currentUser.role === 'admin') {
                 ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'admin.html\'">Panel Admin</button>';
-            } else if (session.role === 'empresa') {
+            } else if (currentUser.role === 'empresa') {
                 ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil-empresa.html\'">Mi Perfil</button>';
             } else {
                 ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil.html\'">Mi Perfil</button>';
             }
         }
 
-        function cargarProductos() {
-            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
-            productosOriginales = productos;
+        async function cargarProductos() {
+            const result = await productosManager.getProductos();
+            if (result.success && result.productos) {
+                productosOriginales = result.productos;
+            } else {
+                productosOriginales = [];
+                console.error('Error al cargar productos:', result.message);
+            }
             filtrarProductos();
         }
 

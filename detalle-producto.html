@@ -534,8 +534,12 @@
         </div>
     </footer>
 
-    <script src="auth.js"></script>
-    <script src="notify.js"></script>
+    <script src="notifications.js?v=3"></script>
+    <script src="api-config.js?v=3"></script>
+    <script src="auth-backend.js?v=3"></script>
+    <script src="wallet-manager.js?v=3"></script>
+    <script src="productos-manager.js?v=3"></script>
+    <script src="navbar-helper.js?v=3"></script>
     <script>
         let productoActual = null;
         let cantidadSeleccionada = 1;
@@ -544,38 +548,39 @@
 
         // Cargar navbar dinámico
         if (auth.isLoggedIn()) {
-            const session = auth.getSession();
+            const currentUser = auth.getCurrentUser();
             const navbar = document.querySelector('.navbar');
             const ctaButton = navbar.querySelector('.cta-button');
             
-            if (session.role === 'admin') {
+            if (currentUser.role === 'admin') {
                 ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'admin.html\'">Panel Admin</button>';
-            } else if (session.role === 'empresa') {
+            } else if (currentUser.role === 'empresa') {
                 ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil-empresa.html\'">Mi Perfil</button>';
             } else {
                 ctaButton.outerHTML = '<button class="cta-button" onclick="window.location.href=\'perfil.html\'">Mi Perfil</button>';
             }
         }
 
-        function cargarProducto() {
+        async function cargarProducto() {
             if (!productoId) {
                 notify.error('Producto no encontrado');
                 setTimeout(() => window.location.href = 'ventas.html', 2000);
                 return;
             }
 
-            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
-            productoActual = productos.find(p => p.id === productoId);
-
-            if (!productoActual) {
+            const result = await productosManager.getProductoById(productoId);
+            
+            if (!result.success || !result.producto) {
                 notify.error('Producto no encontrado');
                 setTimeout(() => window.location.href = 'ventas.html', 2000);
                 return;
             }
 
+            productoActual = result.producto;
+
             // Información básica
             document.getElementById('productoTitulo').textContent = productoActual.nombre;
-            document.getElementById('productoEmpresa').textContent = productoActual.empresaNombre || 'Empresa';
+            document.getElementById('productoEmpresa').textContent = productoActual.empresaNombre || productoActual.Empresa?.razon_social || 'Empresa';
             document.getElementById('productoCategoria').innerHTML = getCategoriaIcon(productoActual.categoria) + ' ' + (productoActual.categoria || 'General');
             
             // Imágenes
@@ -707,8 +712,8 @@
                 return;
             }
 
-            const session = auth.getSession();
-            if (session.role === 'admin') {
+            const currentUser = auth.getCurrentUser();
+            if (currentUser.role === 'admin') {
                 notify.error('Los administradores no pueden comprar productos');
                 return;
             }

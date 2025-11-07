@@ -25,7 +25,7 @@
                 <li><a href="empresas.html">Empresas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
             </ul>
-            <button class="cta-button" onclick="window.location.href='login.html'">Iniciar Sesión</button>
+            <button class="cta-button" id="navAuthButton">Iniciar Sesión</button>
         </nav>
     </header>
 
@@ -375,120 +375,171 @@
         });
     </script>
     <script src="notifications.js"></script>
-    <script src="auth.js"></script>
-    <script src="config.js"></script>
+    <script src="api-config.js"></script>
+    <script src="auth-backend.js"></script>
+    <script src="wallet-manager.js"></script>
+    <script src="subastas-manager.js"></script>
+    <script src="rifas-manager.js"></script>
+    <script src="navbar-helper.js"></script>
     <script>
-        // Función para inicializar subastas de ejemplo si no existen
-        function inicializarSubastasEjemplo() {
-            console.log('=== INICIALIZANDO SUBASTAS DE EJEMPLO (INDEX) ===');
-            let subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-            console.log('Subastas actuales en localStorage:', subastas.length);
-            
-            // IDs de las subastas de ejemplo que se muestran en index
-            const idsEjemplo = ['prueba_2', 'prueba_3', 'prueba_6', 'prueba_7'];
-            console.log('Buscando IDs:', idsEjemplo);
-            
-            // Verificar cuáles faltan
-            const idsFaltantes = idsEjemplo.filter(function(id) {
-                return !subastas.find(function(s) { return s.id === id; });
-            });
-            
-            console.log('IDs faltantes:', idsFaltantes);
-            
-            if (idsFaltantes.length === 0) {
-                console.log('Todas las subastas de ejemplo ya existen');
-                return;
-            } // Ya existen todas
-            
-            const fechaInicio = new Date();
-            const fechaFin = new Date();
-            fechaFin.setDate(fechaFin.getDate() + 7);
-            
-            const subastasEjemplo = {
-                'prueba_2': {
-                    id: 'prueba_2',
-                    tipo: 'subasta',
-                    titulo: 'Figura Coleccionable Limitada',
-                    descripcion: 'Pieza única de colección, edición limitada para apoyar a niños con enfermedades raras. Esta figura representa esperanza y solidaridad.',
-                    imagen: 'images/coleccionable.png',
-                    precioInicial: 80000,
-                    precioActual: 80000,
-                    fechaInicio: fechaInicio.toISOString(),
-                    fechaFin: fechaFin.toISOString(),
-                    estado: 'activa',
-                    empresaId: '76543210-9',
-                    empresaNombre: 'Asociación Duchenne',
-                    pujas: [],
-                    participantes: []
-                },
-                'prueba_3': {
-                    id: 'prueba_3',
-                    tipo: 'subasta',
-                    titulo: 'Experiencia VIP en Evento',
-                    descripcion: 'Acceso exclusivo a evento deportivo con meet & greet, entradas preferenciales y experiencia inolvidable. Todo lo recaudado va para Coaniquem.',
-                    imagen: 'images/evento.png',
-                    precioInicial: 150000,
-                    precioActual: 150000,
-                    fechaInicio: fechaInicio.toISOString(),
-                    fechaFin: fechaFin.toISOString(),
-                    estado: 'activa',
-                    empresaId: '87654321-0',
-                    empresaNombre: 'Coaniquem',
-                    pujas: [],
-                    participantes: []
-                },
-                'prueba_6': {
-                    id: 'prueba_6',
-                    tipo: 'subasta',
-                    titulo: 'Equipo Tecnológico Última Generación',
-                    descripcion: 'Laptop gaming de alta gama, perfecta para estudios y entretenimiento. Apoya la educación de niños en situación vulnerable.',
-                    imagen: 'images/laptop.png',
-                    precioInicial: 500000,
-                    precioActual: 500000,
-                    fechaInicio: fechaInicio.toISOString(),
-                    fechaFin: fechaFin.toISOString(),
-                    estado: 'activa',
-                    empresaId: '98765432-1',
-                    empresaNombre: 'Techo para Chile',
-                    pujas: [],
-                    participantes: []
-                },
-                'prueba_7': {
-                    id: 'prueba_7',
-                    tipo: 'subasta',
-                    titulo: 'Clase de Música con Músico Nacional',
-                    descripcion: 'Experiencia única de aprender música con reconocido artista nacional. Sesión privada de 2 horas incluyendo técnicas y consejos profesionales.',
-                    imagen: 'images/pintura.png',
-                    precioInicial: 120000,
-                    precioActual: 120000,
-                    fechaInicio: fechaInicio.toISOString(),
-                    fechaFin: fechaFin.toISOString(),
-                    estado: 'activa',
-                    empresaId: '11223344-5',
-                    empresaNombre: 'Fundación Musical',
-                    pujas: [],
-                    participantes: []
+        // Cargar subastas destacadas desde el backend
+        async function cargarSubastasDestacadas() {
+            try {
+                const result = await subastasManager.getSubastas({ 
+                    estado: 'activa', 
+                    limit: 6 
+                });
+                
+                if (result.success && result.subastas.length > 0) {
+                    // Cargar en carrusel
+                    const carousel = document.querySelector('.carousel');
+                    if (carousel) {
+                        carousel.innerHTML = result.subastas.map(subasta => {
+                            const img = subasta.imagen || 'images/placeholder.png';
+                            const tiempoRestante = calcularTiempoRestante(subasta.fecha_fin);
+                            const diasRestantes = calcularDiasRestantes(subasta.fecha_fin);
+                            const numPujas = subasta.num_pujas || 0;
+                            
+                            // Determinar badge según estado
+                            let badgeClass = 'badge-new';
+                            let badgeText = '✨ Activa';
+                            if (diasRestantes <= 1) {
+                                badgeClass = 'badge-ending';
+                                badgeText = '⏰ Termina Pronto';
+                            } else if (numPujas > 10) {
+                                badgeClass = 'badge-hot';
+                                badgeText = '🔥 Popular';
+                            }
+                            
+                            return `
+                                <div class="grid-card" onclick="window.location.href='detalle-subasta.html?id=${subasta.id}'" style="cursor: pointer;">
+                                    <div class="grid-image" style="background-image: url('${img}');"></div>
+                                    <span class="card-badge ${badgeClass}">${badgeText}</span>
+                                    <div class="grid-content">
+                                        <h3>${subasta.titulo}</h3>
+                                        <p>${(subasta.descripcion || '').substring(0, 100)}...</p>
+                                        <div class="beneficiary">
+                                            <i class="fas fa-heart"></i>
+                                            <span>${subasta.causa_nombre || subasta.empresa_razon_social || 'Sin beneficiario'}</span>
+                                        </div>
+                                        <div class="card-meta">
+                                            <div class="card-price">
+                                                <span class="price-label">Precio actual</span>
+                                                <span class="price-value">$${(subasta.precio_actual || 0).toLocaleString('es-CL')}</span>
+                                            </div>
+                                            <div class="pujas-info">
+                                                <i class="fas fa-gavel"></i>
+                                                <span>${numPujas} ${numPujas === 1 ? 'puja' : 'pujas'}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-time">
+                                            <i class="far fa-clock"></i>
+                                            <span>${tiempoRestante}</span>
+                                        </div>
+                                        <div class="card-actions">
+                                            <button class="card-button card-button-primary">
+                                                <i class="fas fa-gavel"></i> Ver Subasta
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+
+                    // Cargar en "Otras Subastas"
+                    const grid = document.querySelector('.auctions-grid');
+                    if (grid) {
+                        const subastas = result.subastas.slice(0, 6);
+                        grid.innerHTML = subastas.map(subasta => {
+                            const img = subasta.imagen || 'images/placeholder.png';
+                            const tiempoRestante = calcularTiempoRestante(subasta.fecha_fin);
+                            const diasRestantes = calcularDiasRestantes(subasta.fecha_fin);
+                            const numPujas = subasta.num_pujas || 0;
+                            
+                            // Determinar badge según estado
+                            let badgeClass = 'badge-new';
+                            let badgeText = '✨ Activa';
+                            if (diasRestantes <= 1) {
+                                badgeClass = 'badge-ending';
+                                badgeText = '⏰ Termina Pronto';
+                            } else if (numPujas > 10) {
+                                badgeClass = 'badge-hot';
+                                badgeText = '🔥 Popular';
+                            }
+                            
+                            return `
+                                <div class="grid-card" onclick="window.location.href='detalle-subasta.html?id=${subasta.id}'" style="cursor: pointer;">
+                                    <div class="grid-image" style="background-image: url('${img}');"></div>
+                                    <span class="card-badge ${badgeClass}">${badgeText}</span>
+                                    <div class="grid-content">
+                                        <h3>${subasta.titulo}</h3>
+                                        <p>${(subasta.descripcion || '').substring(0, 100)}...</p>
+                                        <div class="beneficiary">
+                                            <i class="fas fa-heart"></i>
+                                            <span>${subasta.causa_nombre || subasta.empresa_razon_social || 'Sin beneficiario'}</span>
+                                        </div>
+                                        <div class="card-meta">
+                                            <div class="card-price">
+                                                <span class="price-label">Precio actual</span>
+                                                <span class="price-value">$${(subasta.precio_actual || 0).toLocaleString('es-CL')}</span>
+                                            </div>
+                                            <div class="pujas-info">
+                                                <i class="fas fa-gavel"></i>
+                                                <span>${numPujas} ${numPujas === 1 ? 'puja' : 'pujas'}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-time">
+                                            <i class="far fa-clock"></i>
+                                            <span>${tiempoRestante}</span>
+                                        </div>
+                                        <div class="card-actions">
+                                            <button class="card-button card-button-primary">
+                                                <i class="fas fa-gavel"></i> Ver Subasta
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
                 }
-            };
+            } catch (error) {
+                console.error('Error cargando subastas:', error);
+            }
+        }
+
+        // Calcular tiempo restante
+        function calcularTiempoRestante(fechaFin) {
+            const ahora = new Date();
+            const fin = new Date(fechaFin);
+            const diff = fin - ahora;
             
-            // Agregar solo las que faltan
-            idsFaltantes.forEach(function(id) {
-                if (subastasEjemplo[id]) {
-                    console.log('Agregando subasta:', id, subastasEjemplo[id].titulo);
-                    subastas.push(subastasEjemplo[id]);
-                }
-            });
+            if (diff <= 0) return 'Finalizada';
             
-            localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
-            console.log('✅ Subastas de ejemplo guardadas en localStorage:', idsFaltantes);
-            console.log('Total de subastas ahora:', subastas.length);
+            const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            
+            if (dias > 0) return `${dias}d ${horas}h`;
+            return `${horas}h`;
         }
         
-        // Inicializar al cargar la página
+        // Calcular días restantes
+        function calcularDiasRestantes(fechaFin) {
+            const ahora = new Date();
+            const fin = new Date(fechaFin);
+            const diff = fin - ahora;
+            
+            if (diff <= 0) return 0;
+            
+            return Math.floor(diff / (1000 * 60 * 60 * 24));
+        }
+        
+        // Cargar subastas destacadas al iniciar
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', inicializarSubastasEjemplo);
+            document.addEventListener('DOMContentLoaded', cargarSubastasDestacadas);
         } else {
-            inicializarSubastasEjemplo();
+            cargarSubastasDestacadas();
         }
     </script>
 </body>

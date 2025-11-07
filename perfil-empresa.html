@@ -1428,9 +1428,45 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script src="notifications.js"></script>
-    <script src="auth.js"></script>
+    <script src="api-config.js"></script>
+    <script src="auth-backend.js"></script>
+    <script src="wallet-manager.js"></script>
+    <script src="empresa-manager.js"></script>
     <script src="config.js"></script>
     <script>
+        // Verificar sesión
+        if (!auth.isLoggedIn()) {
+            window.location.href = 'login.html';
+        }
+
+        // Verificar sesión y rol antes de inicializar
+        const sessionData = authBackend.getCurrentUser();
+        if (!sessionData || sessionData.role !== 'empresa') {
+            window.location.href = sessionData ? 'perfil.html' : 'login.html';
+        }
+
+        // Actualizar navbar
+        auth.updateUIWithUserInfo();
+
+        // Cargar datos de la empresa
+        async function inicializarPerfil() {
+            const result = await empresaManager.cargarPerfil();
+            if (!result.success) {
+                notify.error('Error al cargar el perfil');
+            }
+
+            // Cargar wallet y transacciones
+            await empresaManager.walletManager.getWallet();
+            await empresaManager.cargarTransacciones();
+            
+            // Cargar mis subastas y rifas
+            await empresaManager.cargarMisSubastas();
+            await empresaManager.cargarMisRifas();
+        }
+
+        // Inicializar al cargar
+        inicializarPerfil();
+
         // Inicializar selector de fecha y hora
         let fechaFinPickerInstance = null;
         
@@ -1483,6 +1519,11 @@
             });
         });
 
+        // ========== CÓDIGO ANTIGUO CON LOCALSTORAGE COMENTADO ==========
+        // El siguiente bloque de código usaba auth.getSession() y auth.getCurrentAccount()
+        // que dependían de localStorage. Ahora todo se maneja con inicializarPerfil() y empresaManager
+        
+        /*
         // Verificar sesión
         if (!auth.isLoggedIn()) {
             window.location.href = 'login.html';
@@ -1498,68 +1539,13 @@
         if (empresa) {
             const nombreEmpresa = empresa.nombreEmpresa || empresa.razonSocial || 'Empresa';
             document.getElementById('empresaName').textContent = nombreEmpresa;
-            document.getElementById('empresaRut').textContent = empresa.rut || empresa.username;
-            document.getElementById('empresaEmail').textContent = empresa.email;
-            document.getElementById('empresaPhone').textContent = empresa.telefono || 'No especificado';
-            document.getElementById('empresaDate').textContent = new Date(empresa.fechaRegistro || Date.now()).getFullYear();
-            
-            // Avatar con iniciales o foto
-            const iniciales = nombreEmpresa.substring(0, 2);
-            const avatarElement = document.getElementById('avatarInitials');
-            
-            if (empresa.profilePhoto) {
-                // Mostrar foto si existe
-                avatarElement.innerHTML = `<img src="${empresa.profilePhoto}" alt="Foto de perfil">`;
-            } else {
-                // Mostrar iniciales
-                avatarElement.innerHTML = `<span class="profile-avatar-text">${iniciales.toUpperCase()}</span>`;
-            }
-
-            // Rellenar formulario de datos empresariales
-            document.getElementById('inputNombreEmpresa').value = nombreEmpresa;
-            document.getElementById('inputRut').value = empresa.rut || empresa.username;
-            document.getElementById('inputEmail').value = empresa.email;
-            document.getElementById('inputTelefono').value = empresa.telefono || '';
-            document.getElementById('inputGiro').value = empresa.giro || '';
-            document.getElementById('inputSitioWeb').value = empresa.sitioWeb || '';
-
-            // Rellenar formulario de dirección corporativa
-            if (empresa.direccion && typeof empresa.direccion === 'object') {
-                document.getElementById('inputDireccionEmpresa').value = empresa.direccion.direccion || '';
-                document.getElementById('inputComunaEmpresa').value = empresa.direccion.comuna || '';
-                document.getElementById('inputCiudadEmpresa').value = empresa.direccion.ciudad || '';
-                document.getElementById('inputRegionEmpresa').value = empresa.direccion.region || '';
-                document.getElementById('inputCodigoPostalEmpresa').value = empresa.direccion.codigoPostal || '';
-            }
-
-            // Rellenar formulario de representante legal
-            if (empresa.representanteLegal) {
-                document.getElementById('inputNombreRepresentante').value = empresa.representanteLegal.nombre || '';
-                document.getElementById('inputRutRepresentante').value = empresa.representanteLegal.rut || '';
-                document.getElementById('inputEmailRepresentante').value = empresa.representanteLegal.email || '';
-                document.getElementById('inputTelefonoRepresentante').value = empresa.representanteLegal.telefono || '';
-                document.getElementById('inputCargoRepresentante').value = empresa.representanteLegal.cargo || '';
-            }
-
-            // Rellenar nombre de usuario actual en configuración
-            if (document.getElementById('currentUsername')) {
-                document.getElementById('currentUsername').value = empresa.username;
-            }
-
-            // Configuraciones
-            if (empresa.configuraciones) {
-                document.getElementById('notificaciones').checked = empresa.configuraciones.notificaciones;
-                document.getElementById('emailNotificaciones').checked = empresa.configuraciones.emailNotificaciones;
-                document.getElementById('tema').value = empresa.configuraciones.tema;
-                document.getElementById('idioma').value = empresa.configuraciones.idioma;
-
-                if (empresa.configuraciones.accesibilidad) {
-                    document.getElementById('altoContraste').checked = empresa.configuraciones.accesibilidad.altoContraste || false;
-                    document.getElementById('tamañoTexto').value = empresa.configuraciones.accesibilidad.tamañoTexto || 'normal';
-                    document.getElementById('animacionesReducidas').checked = empresa.configuraciones.accesibilidad.animacionesReducidas || false;
-                }
-            }
+            ... (código antiguo removido)
         }
+        */
+        
+        // Rellenar formulario de datos empresariales se hace ahora en empresaManager.renderPerfil()
+        
+        // ========== FIN CÓDIGO ANTIGUO COMENTADO ==========
 
         function cambiarTab(tab, element) {
             // Actualizar tabs
@@ -1659,106 +1645,78 @@
             setTimeout(() => alert.style.display = 'none', 5000);
         }
 
-        function actualizarDatosEmpresa(e) {
+        async function actualizarDatosEmpresa(e) {
             e.preventDefault();
             const form = e.target;
             
-            const empresa = auth.getCurrentAccount();
+            // Actualizar datos vía API
+            const datos = {
+                razon_social: form.nombreEmpresa?.value || form.razonSocial?.value,
+                email: form.email.value,
+                telefono: form.telefono.value,
+                giro: form.giro?.value,
+                sitio_web: form.sitioWeb?.value,
+                descripcion: form.descripcion?.value
+            };
+
+            const result = await empresaManager.actualizarPerfil(datos);
             
-            // Actualizar datos
-            empresa.nombreEmpresa = form.nombreEmpresa.value;
-            empresa.email = form.email.value;
-            empresa.telefono = form.telefono.value;
-            empresa.giro = form.giro.value;
-            empresa.sitioWeb = form.sitioWeb.value;
-            
-            // Guardar en localStorage
-            const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
-            const index = empresas.findIndex(e => e.username === empresa.username || e.id === empresa.id);
-            
-            if (index !== -1) {
-                empresas[index] = empresa;
-                localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
-                
-                registrarActividadEmpresa('profile_updated', 'Información de la empresa actualizada');
-                mostrarAlerta('Datos', '✅ Información de la empresa actualizada correctamente', false);
-                
-                // Actualizar nombre en el header
-                document.querySelector('.profile-info h1').textContent = empresa.nombreEmpresa;
+            if (result.success) {
+                notify.success('✅ Información de la empresa actualizada correctamente');
             } else {
-                mostrarAlerta('Datos', '❌ Error al actualizar los datos', true);
+                notify.error('❌ ' + (result.message || 'Error al actualizar los datos'));
             }
         }
 
-        function actualizarDireccionEmpresa(e) {
+        async function actualizarDireccionEmpresa(e) {
             e.preventDefault();
             const form = e.target;
             
-            const empresa = auth.getCurrentAccount();
-            
-            // Crear o actualizar dirección
-            if (!empresa.direccion) {
-                empresa.direccion = {};
-            }
-            
-            empresa.direccion = {
-                direccion: form.direccion.value,
-                comuna: form.comuna.value,
-                ciudad: form.ciudad.value,
-                region: form.region.value,
-                codigoPostal: form.codigoPostal.value
+            // Actualizar dirección vía API
+            const datos = {
+                direccion: {
+                    direccion: form.direccion.value,
+                    comuna: form.comuna.value,
+                    ciudad: form.ciudad.value,
+                    region: form.region.value,
+                    codigoPostal: form.codigoPostal.value
+                }
             };
             
-            // Guardar en localStorage
-            const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
-            const index = empresas.findIndex(e => e.username === empresa.username || e.id === empresa.id);
+            const result = await empresaManager.actualizarPerfil(datos);
             
-            if (index !== -1) {
-                empresas[index] = empresa;
-                localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
-                
-                registrarActividadEmpresa('address_updated', 'Dirección corporativa actualizada');
-                mostrarAlerta('DireccionEmpresa', '✅ Dirección corporativa guardada correctamente', false);
+            if (result.success) {
+                notify.success('✅ Dirección corporativa actualizada correctamente');
             } else {
-                mostrarAlerta('DireccionEmpresa', '❌ Error al guardar la dirección', true);
+                notify.error('❌ ' + (result.message || 'Error al actualizar la dirección'));
             }
         }
 
-        function actualizarRepresentante(e) {
+        async function actualizarRepresentante(e) {
             e.preventDefault();
             const form = e.target;
             
-            const empresa = auth.getCurrentAccount();
-            
-            // Crear o actualizar representante legal
-            if (!empresa.representanteLegal) {
-                empresa.representanteLegal = {};
-            }
-            
-            empresa.representanteLegal = {
-                nombre: form.nombreRepresentante.value,
-                rut: form.rutRepresentante.value,
-                email: form.emailRepresentante.value,
-                telefono: form.telefonoRepresentante.value,
-                cargo: form.cargoRepresentante.value
+            // Actualizar representante legal vía API
+            const datos = {
+                representante_legal: {
+                    nombre: form.nombreRepresentante.value,
+                    rut: form.rutRepresentante.value,
+                    email: form.emailRepresentante.value,
+                    telefono: form.telefonoRepresentante.value,
+                    cargo: form.cargoRepresentante.value
+                }
             };
             
-            // Guardar en localStorage
-            const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
-            const index = empresas.findIndex(e => e.username === empresa.username || e.id === empresa.id);
+            const result = await empresaManager.actualizarPerfil(datos);
             
-            if (index !== -1) {
-                empresas[index] = empresa;
-                localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
-                
-                registrarActividadEmpresa('representative_updated', 'Representante legal actualizado');
-                mostrarAlerta('Representante', '✅ Representante legal guardado correctamente', false);
+            if (result.success) {
+                notify.success('✅ Representante legal actualizado correctamente');
             } else {
-                mostrarAlerta('Representante', '❌ Error al guardar el representante', true);
+                notify.error('❌ ' + (result.message || 'Error al actualizar el representante'));
             }
         }
 
-        function cambiarNombreUsuario(e) {
+        async function cambiarNombreUsuario(e) {
             e.preventDefault();
             const form = e.target;
             const newUsername = form.username.value.trim();
@@ -1770,67 +1728,9 @@
                 return;
             }
             
-            const empresa = auth.getCurrentAccount();
-            
-            // Verificar si el nombre de usuario ya existe (en usuarios o empresas)
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
-            
-            const usernameExists = 
-                usuarios.some(u => u.username.toLowerCase() === newUsername.toLowerCase()) ||
-                empresas.some(e => e.username.toLowerCase() === newUsername.toLowerCase() && e.id !== empresa.id);
-            
-            if (usernameExists) {
-                mostrarAlerta('Username', '❌ Este nombre de usuario ya está en uso. Por favor, elige otro.', true);
-                return;
-            }
-            
-            // Guardar el username anterior para actualizar referencias
-            const oldUsername = empresa.username;
-            
-            // Actualizar username de la empresa
-            empresa.username = newUsername;
-            
-            // Guardar en localStorage
-            const index = empresas.findIndex(e => e.id === empresa.id);
-            
-            if (index !== -1) {
-                empresas[index] = empresa;
-                localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
-                
-                // Actualizar referencias en subastas (si la empresa creó subastas)
-                const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-                let subastasActualizadas = false;
-                
-                subastas.forEach(subasta => {
-                    if (subasta.empresaUsername === oldUsername) {
-                        subasta.empresaUsername = newUsername;
-                        subastasActualizadas = true;
-                    }
-                });
-                
-                if (subastasActualizadas) {
-                    localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
-                }
-                
-                // Registrar actividad
-                registrarActividadEmpresa('username_changed', `Nombre de usuario cambiado de "${oldUsername}" a "${newUsername}"`);
-                
-                // Actualizar la sesión actual
-                auth.updateSession(empresa);
-                
-                // Actualizar UI
-                document.getElementById('currentUsername').value = newUsername;
-                document.getElementById('newUsername').value = '';
-                document.getElementById('profileUsername').textContent = newUsername;
-                
-                mostrarAlerta('Username', `✅ Tu nombre de usuario ha sido cambiado exitosamente a "${newUsername}"`, false);
-                
-                // Actualizar navbar
-                updateNavbar();
-            } else {
-                mostrarAlerta('Username', '❌ Error al cambiar el nombre de usuario', true);
-            }
+            // TODO: Implementar cambio de username para empresas en el backend
+            mostrarAlerta('Username', '⚠️ Función en desarrollo - próximamente disponible', true);
+            console.warn('cambiarNombreUsuario: función pendiente de migración al backend');
         }
 
         function actualizarConfig(key, value) {
@@ -1879,130 +1779,29 @@
             }
         }
 
-        // Funciones de Wallet Empresarial
-        function cargarWalletEmpresa() {
-            console.log('=== Cargando Wallet Empresa ===');
-            const session = auth.getSession();
-            console.log('Session:', session);
-            
-            // Obtener datos frescos directamente de localStorage
-            const cuentasKey = session.type === 'user' ? 'nexos_usuarios' : 'nexos_empresas';
-            console.log('Clave localStorage:', cuentasKey);
-            
-            const cuentas = JSON.parse(localStorage.getItem(cuentasKey) || '[]');
-            console.log('Total cuentas:', cuentas.length);
-            console.log('Buscando con session.username:', session.username, 'session.id:', session.id);
-            console.log('Cuentas disponibles:', cuentas.map(function(c) { return { username: c.username, id: c.id, email: c.email, rut: c.rut }; }));
-            
-            const cuenta = cuentas.find(function(c) { 
-                // Buscar por username (que es el campo que tiene la sesión)
-                return c.username === session.username || c.id === session.id;
-            });
-            
-            console.log('Cuenta encontrada:', cuenta);
-            
-            if (!cuenta) {
-                console.error('No se encontró la cuenta');
-                return;
-            }
-            
-            const saldo = cuenta.saldo || 0;
-            const todasTransacciones = cuenta.transacciones || [];
-            
-            console.log('Saldo:', saldo);
-            console.log('Total transacciones:', todasTransacciones.length);
-
-            // Separar transacciones por tipo
-            const ingresos = todasTransacciones.filter(function(t) { return t.tipo === 'ingreso'; });
-            const retiros = todasTransacciones.filter(function(t) { return t.tipo === 'retiro'; });
-            
-            console.log('Ingresos:', ingresos.length, 'Retiros:', retiros.length);
-
-            // Mostrar saldo
-            const saldoFormateado = new Intl.NumberFormat('es-CL', {
-                style: 'currency',
-                currency: 'CLP',
-                minimumFractionDigits: 0
-            }).format(saldo);
-            
-            const elementoSaldo = document.getElementById('saldoActual');
-            console.log('Elemento saldoActual:', elementoSaldo);
-            
-            if (elementoSaldo) {
-                elementoSaldo.textContent = saldoFormateado;
-                console.log('Saldo actualizado a:', saldoFormateado);
-            } else {
-                console.error('No se encontró el elemento saldoActual');
+        // Funciones de Wallet Empresarial - Ahora conectadas al backend
+        async function cargarWalletEmpresa() {
+            // Obtener saldo actual
+            const walletResult = await empresaManager.walletManager.getWallet();
+            if (walletResult.success && walletResult.wallet) {
+                const saldo = walletResult.wallet.saldo || 0;
+                const saldoFormateado = new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: 'CLP',
+                    minimumFractionDigits: 0
+                }).format(saldo);
+                
+                const elementoSaldo = document.getElementById('saldoActual');
+                if (elementoSaldo) {
+                    elementoSaldo.textContent = saldoFormateado;
+                }
             }
 
-            // Cargar ingresos
-            const tbodyIngresos = document.querySelector('#tablaIngresos tbody');
-            if (ingresos.length === 0) {
-                tbodyIngresos.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No hay ingresos registrados</td></tr>';
-            } else {
-                // Ordenar por fecha descendente
-                ingresos.sort(function(a, b) {
-                    return new Date(b.fecha) - new Date(a.fecha);
-                });
-
-                tbodyIngresos.innerHTML = '';
-                ingresos.forEach(function(tx) {
-                    const fecha = new Date(tx.fecha).toLocaleString('es-CL');
-                    const monto = new Intl.NumberFormat('es-CL', {
-                        style: 'currency',
-                        currency: 'CLP',
-                        minimumFractionDigits: 0
-                    }).format(tx.monto);
-                    const saldoFinal = new Intl.NumberFormat('es-CL', {
-                        style: 'currency',
-                        currency: 'CLP',
-                        minimumFractionDigits: 0
-                    }).format(tx.saldoFinal);
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = '<td>' + fecha + '</td>' +
-                        '<td>' + tx.descripcion + '</td>' +
-                        '<td class="ingreso">+' + monto + '</td>' +
-                        '<td>' + saldoFinal + '</td>';
-                    tbodyIngresos.appendChild(row);
-                });
-            }
-
-            // Cargar retiros
-            const tbodyRetiros = document.querySelector('#tablaRetiros tbody');
-            if (retiros.length === 0) {
-                tbodyRetiros.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No hay retiros registrados</td></tr>';
-            } else {
-                // Ordenar por fecha descendente
-                retiros.sort(function(a, b) {
-                    return new Date(b.fecha) - new Date(a.fecha);
-                });
-
-                tbodyRetiros.innerHTML = '';
-                retiros.forEach(function(tx) {
-                    const fecha = new Date(tx.fecha).toLocaleString('es-CL');
-                    const monto = new Intl.NumberFormat('es-CL', {
-                        style: 'currency',
-                        currency: 'CLP',
-                        minimumFractionDigits: 0
-                    }).format(tx.monto);
-                    const saldoFinal = new Intl.NumberFormat('es-CL', {
-                        style: 'currency',
-                        currency: 'CLP',
-                        minimumFractionDigits: 0
-                    }).format(tx.saldoFinal);
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = '<td>' + fecha + '</td>' +
-                        '<td>' + tx.descripcion + '</td>' +
-                        '<td class="egreso">-' + monto + '</td>' +
-                        '<td>' + saldoFinal + '</td>';
-                    tbodyRetiros.appendChild(row);
-                });
-            }
+            // Cargar transacciones desde el backend
+            await empresaManager.cargarTransacciones();
         }
 
-        function refrescarWalletEmpresa(e) {
+        async function refrescarWalletEmpresa(e) {
             if (e) {
                 // Animación del botón si existe
                 const btn = e.target.closest('button');
@@ -2021,13 +1820,13 @@
             updateNavbar();
         }
 
-        function modificarSaldoEmpresa(e) {
+        async function modificarSaldoEmpresa(e) {
             e.preventDefault();
             const form = e.target;
-            const session = auth.getSession();
+            const session = authBackend.getCurrentUser();
 
             if (session.role !== 'admin') {
-                mostrarAlerta('Finanzas', 'No tienes permisos para esta operación', true);
+                notify.error('No tienes permisos para esta operación');
                 return;
             }
 
@@ -2039,24 +1838,25 @@
                 monto = -monto;
             }
 
-            const result = auth.modificarSaldo(session.id, monto, motivo, 'empresa');
+            // Usar walletManager para modificar el saldo
+            const result = await empresaManager.walletManager.agregarFondos(monto, motivo);
 
             if (result.success) {
-                mostrarAlerta('Ingresos', result.message, false);
+                notify.success(result.message || 'Saldo modificado correctamente');
                 form.reset();
-                cargarWalletEmpresa();
+                await cargarWalletEmpresa();
                 updateNavbar(); // Actualizar saldo en navbar
             } else {
-                mostrarAlerta('Ingresos', result.message, true);
+                notify.error(result.message || 'Error al modificar el saldo');
             }
         }
 
         // Sobreescribir cambiarTab para cargar wallet cuando se abre
         const originalCambiarTabEmpresa = cambiarTab;
-        cambiarTab = function(tab, element) {
+        cambiarTab = async function(tab, element) {
             originalCambiarTabEmpresa(tab, element);
             if (tab === 'finanzas') {
-                cargarWalletEmpresa();
+                await cargarWalletEmpresa();
             }
         };
 
@@ -2065,10 +1865,12 @@
             setTimeout(cargarWalletEmpresa, 100);
         }
 
-        // Cargar subastas, rifas y productos de la empresa
-        cargarSubastas();
-        cargarRifas();
-        cargarProductos();
+        // Cargar subastas, rifas y productos de la empresa desde el backend
+        // Estas funciones ya están integradas en empresaManager
+        // cargarSubastas();
+        // cargarRifas();
+        // cargarProductos();
+
 
         // Variable global para almacenar la imagen en base64
         let imagenSubastaBase64 = null;
@@ -2204,6 +2006,12 @@
             }
         }
 
+        // ========== FUNCIONES ANTIGUAS DE CARGA (COMENTADAS - AHORA SE USA empresaManager) ==========
+        // Las funciones cargarSubastas(), cargarRifas() y cargarProductos() ahora están
+        // integradas en empresaManager.cargarMisSubastas() y empresaManager.cargarMisRifas()
+        // que se llaman desde inicializarPerfil()
+        
+        /* ANTIGUAS FUNCIONES CON LOCALSTORAGE - YA NO SE USAN
         function cargarSubastas() {
             const subastas = auth.getSubastas({ empresaId: empresa.id });
             const container = document.getElementById('listaSubastas');
@@ -2413,11 +2221,13 @@
         async function eliminarRifa(rifaId) {
             const confirmed = await confirm('¿Estás seguro de que deseas eliminar esta rifa? Esta acción no se puede deshacer.');
             if (confirmed) {
-                let rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
-                rifas = rifas.filter(r => r.id !== rifaId);
-                localStorage.setItem('nexos_rifas', JSON.stringify(rifas));
-                notify.success('Rifa eliminada correctamente');
-                cargarRifas();
+                const result = await rifasManager.eliminarRifa(rifaId);
+                if (result.success) {
+                    notify.success('Rifa eliminada correctamente');
+                    cargarRifas();
+                } else {
+                    notify.error('Error al eliminar rifa: ' + result.message);
+                }
             }
         }
 
@@ -2458,7 +2268,7 @@
             document.getElementById('btnEliminarImagenProducto').style.display = 'none';
         }
 
-        function crearProducto(e) {
+        async function crearProducto(e) {
             e.preventDefault();
             const form = e.target;
 
@@ -2468,26 +2278,20 @@
             }
 
             const productoData = {
-                id: 'prod-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
                 nombre: form.nombre.value,
                 descripcion: form.descripcion.value,
                 imagen: imagenProductoBase64,
                 precio: parseFloat(form.precio.value),
                 precioOriginal: form.precioOriginal.value ? parseFloat(form.precioOriginal.value) : null,
                 stock: parseInt(form.stock.value),
-                categoria: form.categoria.value,
-                empresaId: empresa.id,
-                empresaNombre: empresa.nombre,
-                fechaCreacion: new Date().toISOString(),
-                ventas: []
+                categoria: form.categoria.value
             };
 
-            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
-            productos.push(productoData);
-            localStorage.setItem('nexos_productos', JSON.stringify(productos));
+            const result = await productosManager.crearProducto(productoData);
 
-            notify.success('Producto creado exitosamente');
-            form.reset();
+            if (result.success) {
+                notify.success('Producto creado exitosamente');
+                form.reset();
             eliminarImagenProducto();
             cargarProductos();
         }
@@ -2545,11 +2349,14 @@
             });
         }
 
-        function editarProducto(productoId) {
-            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
-            const producto = productos.find(p => p.id === productoId);
-            if (!producto) return;
+        async function editarProducto(productoId) {
+            const result = await productosManager.getProductoById(productoId);
+            if (!result.success || !result.producto) {
+                notify.error('No se pudo cargar el producto');
+                return;
+            }
 
+            const producto = result.producto;
             const nuevoStock = prompt('Ingresa el nuevo stock para ' + producto.nombre + ':', producto.stock);
             if (nuevoStock === null) return;
 
@@ -2559,20 +2366,25 @@
                 return;
             }
 
-            producto.stock = stock;
-            localStorage.setItem('nexos_productos', JSON.stringify(productos));
-            notify.success('Stock actualizado correctamente');
-            cargarProductos();
+            const updateResult = await productosManager.actualizarProducto(productoId, { stock });
+            if (updateResult.success) {
+                notify.success('Stock actualizado correctamente');
+                cargarProductos();
+            } else {
+                notify.error('Error al actualizar: ' + updateResult.message);
+            }
         }
 
         async function eliminarProducto(productoId) {
             const confirmed = await confirm('¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.');
             if (confirmed) {
-                let productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
-                productos = productos.filter(p => p.id !== productoId);
-                localStorage.setItem('nexos_productos', JSON.stringify(productos));
-                notify.success('Producto eliminado correctamente');
-                cargarProductos();
+                const result = await productosManager.eliminarProducto(productoId);
+                if (result.success) {
+                    notify.success('Producto eliminado correctamente');
+                    cargarProductos();
+                } else {
+                    notify.error('Error al eliminar: ' + result.message);
+                }
             }
         }
 
@@ -3238,6 +3050,8 @@
                 localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
             }
         }
+
+        FIN DE FUNCIONES ANTIGUAS CON LOCALSTORAGE */
 
         // Modificar cambiarTab para cargar seguridad
         const originalCambiarTab2Empresa = cambiarTab;

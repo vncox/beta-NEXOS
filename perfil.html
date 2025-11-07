@@ -1244,20 +1244,41 @@
     </footer>
 
     <script src="notifications.js"></script>
-    <script src="auth.js"></script>
+    <script src="api-config.js"></script>
+    <script src="auth-backend.js"></script>
+    <script src="wallet-manager.js"></script>
+    <script src="perfil-manager.js"></script>
     <script src="config.js"></script>
     <script>
         // Verificar sesión
-        if (!auth.isLoggedIn()) {
+        if (!authBackend.isLoggedIn()) {
             window.location.href = 'login.html';
         }
 
-        const session = auth.getSession();
-        if (session.type !== 'user') {
+        const session = authBackend.getCurrentUser();
+        if (session.role === 'empresa') {
             window.location.href = 'perfil-empresa.html';
         }
 
-        // Cargar datos del usuario
+        // Actualizar navbar con info del usuario
+        authBackend.updateUIWithUserInfo();
+
+        // Cargar datos del perfil desde el backend
+        async function inicializarPerfil() {
+            const result = await perfilManager.cargarPerfil();
+            if (!result.success) {
+                notify.error('Error al cargar el perfil');
+            }
+
+            // Cargar wallet y transacciones
+            await perfilManager.walletManager.getWallet();
+            await perfilManager.cargarTransacciones();
+        }
+
+        // Inicializar al cargar la página
+        inicializarPerfil();
+
+        // Cargar datos del usuario (función legacy - ahora usa backend)
         const usuario = auth.getCurrentAccount();
         if (usuario) {
             // Mostrar nombre de usuario en vez de nombre real
@@ -1404,48 +1425,31 @@
             setTimeout(() => alert.style.display = 'none', 5000);
         }
 
-        function actualizarDatos(e) {
+        async function actualizarDatos(e) {
             e.preventDefault();
             const form = e.target;
             
-            const usuario = auth.getCurrentAccount();
+            // Actualizar datos vía API
+            const datos = {
+                nombre: form.nombre.value,
+                email: form.email.value,
+                telefono: form.telefono.value
+            };
+
+            const result = await perfilManager.actualizarPerfil(datos);
             
-            // Actualizar datos
-            usuario.nombre = form.nombre.value;
-            usuario.email = form.email.value;
-            usuario.telefono = form.telefono.value;
-            usuario.fechaNacimiento = form.fechaNacimiento.value;
-            
-            // Guardar en localStorage
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const index = usuarios.findIndex(u => u.username === usuario.username || u.id === usuario.id);
-            
-            if (index !== -1) {
-                usuarios[index] = usuario;
-                localStorage.setItem('nexos_users', JSON.stringify(usuarios));
-                
-                registrarActividad('profile_updated', 'Información personal actualizada');
-                mostrarAlerta('Datos', '✅ Información personal actualizada correctamente', false);
-                
-                // Actualizar navbar (no el header del perfil, ya que muestra username que no cambia)
-                updateNavbar();
+            if (result.success) {
+                notify.success('✅ Información personal actualizada correctamente');
             } else {
-                mostrarAlerta('Datos', '❌ Error al actualizar los datos', true);
+                notify.error('❌ ' + (result.message || 'Error al actualizar los datos'));
             }
         }
 
-        function actualizarDireccion(e) {
+        async function actualizarDireccion(e) {
             e.preventDefault();
             const form = e.target;
             
-            const usuario = auth.getCurrentAccount();
-            
-            // Crear o actualizar dirección
-            if (!usuario.direccionEnvio) {
-                usuario.direccionEnvio = {};
-            }
-            
-            usuario.direccionEnvio = {
+            const datos = {
                 direccion: form.direccion.value,
                 comuna: form.comuna.value,
                 ciudad: form.ciudad.value,
@@ -1454,22 +1458,16 @@
                 referencia: form.referencia.value
             };
             
-            // Guardar en localStorage
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const index = usuarios.findIndex(u => u.username === usuario.username || u.id === usuario.id);
+            const result = await perfilManager.actualizarPerfil(datos);
             
-            if (index !== -1) {
-                usuarios[index] = usuario;
-                localStorage.setItem('nexos_users', JSON.stringify(usuarios));
-                
-                registrarActividad('address_updated', 'Dirección de envío actualizada');
+            if (result.success) {
                 mostrarAlerta('Direccion', '✅ Dirección de envío guardada correctamente', false);
             } else {
-                mostrarAlerta('Direccion', '❌ Error al guardar la dirección', true);
+                mostrarAlerta('Direccion', '❌ ' + (result.message || 'Error al guardar la dirección'), true);
             }
         }
 
-        function cambiarNombreUsuario(e) {
+        async function cambiarNombreUsuario(e) {
             e.preventDefault();
             const form = e.target;
             const newUsername = form.username.value.trim();
@@ -1481,66 +1479,17 @@
                 return;
             }
             
-            const usuario = auth.getCurrentAccount();
+            const datos = { username: newUsername };
+            const result = await perfilManager.actualizarPerfil(datos);
             
-            // Verificar si el nombre de usuario ya existe
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const usernameExists = usuarios.some(u => u.username.toLowerCase() === newUsername.toLowerCase() && u.id !== usuario.id);
-            
-            if (usernameExists) {
-                mostrarAlerta('Username', '❌ Este nombre de usuario ya está en uso. Por favor, elige otro.', true);
-                return;
-            }
-            
-            // Guardar el username anterior para actualizar referencias
-            const oldUsername = usuario.username;
-            
-            // Actualizar username del usuario
-            usuario.username = newUsername;
-            
-            // Guardar en localStorage
-            const index = usuarios.findIndex(u => u.id === usuario.id);
-            
-            if (index !== -1) {
-                usuarios[index] = usuario;
-                localStorage.setItem('nexos_users', JSON.stringify(usuarios));
-                
-                // Actualizar referencias en subastas (pujas)
-                const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-                let subastasActualizadas = false;
-                
-                subastas.forEach(subasta => {
-                    if (subasta.pujas && subasta.pujas.length > 0) {
-                        subasta.pujas.forEach(puja => {
-                            if (puja.username === oldUsername) {
-                                puja.username = newUsername;
-                                subastasActualizadas = true;
-                            }
-                        });
-                    }
-                });
-                
-                if (subastasActualizadas) {
-                    localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
-                }
-                
-                // Registrar actividad
-                registrarActividad('username_changed', `Nombre de usuario cambiado de "${oldUsername}" a "${newUsername}"`);
-                
-                // Actualizar la sesión actual
-                auth.updateSession(usuario);
-                
-                // Actualizar UI
+            if (result.success) {
                 document.getElementById('currentUsername').value = newUsername;
                 document.getElementById('newUsername').value = '';
                 document.getElementById('profileUsername').textContent = newUsername;
-                
                 mostrarAlerta('Username', `✅ Tu nombre de usuario ha sido cambiado exitosamente a "${newUsername}"`, false);
-                
-                // Actualizar navbar
                 updateNavbar();
             } else {
-                mostrarAlerta('Username', '❌ Error al cambiar el nombre de usuario', true);
+                mostrarAlerta('Username', '❌ ' + (result.message || 'Error al cambiar el nombre de usuario'), true);
             }
         }
 
@@ -1676,56 +1625,61 @@
         }
 
         // Autenticación de dos factores
-        function toggle2FA(enabled) {
+        async function toggle2FA(enabled) {
             const disabledDiv = document.getElementById('2fa-disabled');
             const setupDiv = document.getElementById('2fa-setup');
             const enabledDiv = document.getElementById('2fa-enabled');
             
-            const session = auth.getSession();
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const usuario = usuarios.find(u => u.username === session.username || u.id === session.id);
-            
-            if (!usuario) return;
-            
-            if (enabled) {
-                // Mostrar configuración de 2FA
-                disabledDiv.style.display = 'none';
-                setupDiv.style.display = 'block';
-                enabledDiv.style.display = 'none';
+            try {
+                const session = auth.getSession();
+                const data = await perfilManager.obtenerPerfil();
+                const usuario = data.usuario;
                 
-                // Generar clave secreta
-                const secretKey = generateSecretKey();
-                document.getElementById('secret-key').textContent = secretKey;
-                
-                // En una implementación real, aquí generarías un QR code real
-                // Por ahora simulamos
-                
-            } else {
-                // Si ya estaba activado, pedir confirmación
-                if (usuario.twoFactorEnabled) {
-                    if (!confirm('¿Estás seguro de que deseas desactivar la autenticación de dos factores? Esto reducirá la seguridad de tu cuenta.')) {
-                        document.getElementById('toggle-2fa').checked = true;
-                        return;
-                    }
-                    
-                    usuario.twoFactorEnabled = false;
-                    usuario.twoFactorSecret = null;
-                    usuario.backupCodes = null;
-                    
-                    // Guardar
-                    const indice = usuarios.findIndex(u => u.id === usuario.id);
-                    usuarios[indice] = usuario;
-                    localStorage.setItem('nexos_users', JSON.stringify(usuarios));
-                    
-                    registrarActividad('2FA Desactivado', 'Se desactivó la autenticación de dos factores');
+                if (!usuario) {
+                    notify.error('Error al obtener datos del usuario');
+                    return;
                 }
                 
-                disabledDiv.style.display = 'block';
-                setupDiv.style.display = 'none';
-                enabledDiv.style.display = 'none';
+                if (enabled) {
+                    // Mostrar configuración de 2FA
+                    disabledDiv.style.display = 'none';
+                    setupDiv.style.display = 'block';
+                    enabledDiv.style.display = 'none';
+                    
+                    // Generar clave secreta
+                    const secretKey = generateSecretKey();
+                    document.getElementById('secret-key').textContent = secretKey;
+                    
+                    // En una implementación real, aquí generarías un QR code real
+                    // Por ahora simulamos
+                    
+                } else {
+                    // Si ya estaba activado, pedir confirmación
+                    if (usuario.twoFactorEnabled) {
+                        if (!confirm('¿Estás seguro de que deseas desactivar la autenticación de dos factores? Esto reducirá la seguridad de tu cuenta.')) {
+                            document.getElementById('toggle-2fa').checked = true;
+                            return;
+                        }
+                        
+                        await perfilManager.actualizarPerfil({
+                            twoFactorEnabled: false,
+                            twoFactorSecret: null,
+                            backupCodes: null
+                        });
+                        
+                        registrarActividad('2FA Desactivado', 'Se desactivó la autenticación de dos factores');
+                    }
+                    
+                    disabledDiv.style.display = 'block';
+                    setupDiv.style.display = 'none';
+                    enabledDiv.style.display = 'none';
+                }
+                
+                calcularNivelSeguridad();
+            } catch (error) {
+                console.error('Error al gestionar 2FA:', error);
+                notify.error(error.message || 'Error al gestionar la autenticación de dos factores');
             }
-            
-            calcularNivelSeguridad();
         }
 
         function generateSecretKey() {
@@ -1753,41 +1707,30 @@
                 return;
             }
             
-            // Simulación: cualquier código funciona en esta demo
-            // En producción, validarías contra el código TOTP real
+            // TODO: Implementar verificación real de 2FA con backend
+            // Por ahora solo actualiza en el perfil
             
-            const session = auth.getSession();
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const indice = usuarios.findIndex(u => u.username === session.username || u.id === session.id);
-            
-            if (indice === -1) return;
-            
-            const usuario = usuarios[indice];
             const secretKey = document.getElementById('secret-key').textContent;
+            const backupCodes = generateBackupCodes();
             
-            // Activar 2FA
-            usuario.twoFactorEnabled = true;
-            usuario.twoFactorSecret = secretKey;
-            usuario.twoFactorActivatedDate = new Date().toISOString();
+            const datos = {
+                twoFactorEnabled: true,
+                twoFactorSecret: secretKey,
+                backupCodes: backupCodes
+            };
             
-            // Generar códigos de respaldo
-            usuario.backupCodes = generateBackupCodes();
+            const result = await perfilManager.actualizarPerfil(datos);
             
-            // Guardar
-            usuarios[indice] = usuario;
-            localStorage.setItem('nexos_users', JSON.stringify(usuarios));
-            
-            // Mostrar vista de 2FA activado
-            document.getElementById('2fa-setup').style.display = 'none';
-            document.getElementById('2fa-enabled').style.display = 'block';
-            document.getElementById('2fa-activated-date').textContent = new Date().toLocaleString('es-CL');
-            
-            // Mostrar códigos de respaldo
-            mostrarCodigosRespaldo(usuario.backupCodes);
-            
-            notify.success('¡Autenticación de dos factores activada correctamente!');
-            registrarActividad('2FA Activado', 'Se activó la autenticación de dos factores');
-            calcularNivelSeguridad();
+            if (result.success) {
+                document.getElementById('2fa-setup').style.display = 'none';
+                document.getElementById('2fa-enabled').style.display = 'block';
+                document.getElementById('2fa-activated-date').textContent = new Date().toLocaleString('es-CL');
+                mostrarCodigosRespaldo(backupCodes);
+                notify.success('¡Autenticación de dos factores activada correctamente!');
+                calcularNivelSeguridad();
+            } else {
+                notify.error('Error al activar 2FA: ' + result.message);
+            }
         }
 
         function generateBackupCodes() {
@@ -1815,33 +1758,29 @@
             });
         }
 
-        function regenerateBackupCodes() {
+        async function regenerateBackupCodes() {
             if (!confirm('¿Estás seguro? Los códigos anteriores dejarán de funcionar.')) return;
             
-            const session = auth.getSession();
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const indice = usuarios.findIndex(u => u.username === session.username || u.id === session.id);
+            const backupCodes = generateBackupCodes();
+            const result = await perfilManager.actualizarPerfil({ backupCodes });
             
-            if (indice === -1) return;
-            
-            const usuario = usuarios[indice];
-            usuario.backupCodes = generateBackupCodes();
-            
-            usuarios[indice] = usuario;
-            localStorage.setItem('nexos_users', JSON.stringify(usuarios));
-            
-            mostrarCodigosRespaldo(usuario.backupCodes);
-            notify.success('Códigos de respaldo regenerados');
-            registrarActividad('Códigos de respaldo regenerados', 'Se generaron nuevos códigos de respaldo para 2FA');
+            if (result.success) {
+                mostrarCodigosRespaldo(backupCodes);
+                notify.success('Códigos de respaldo regenerados');
+            } else {
+                notify.error('Error al regenerar códigos: ' + result.message);
+            }
         }
 
-        function downloadBackupCodes() {
-            const session = auth.getSession();
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const usuario = usuarios.find(u => u.username === session.username || u.id === session.id);
+        async function downloadBackupCodes() {
+            const result = await perfilManager.cargarPerfil();
             
-            if (!usuario || !usuario.backupCodes) return;
+            if (!result.success || !result.user || !result.user.backupCodes) {
+                notify.error('No se pudieron cargar los códigos');
+                return;
+            }
             
+            const usuario = result.user;
             const content = `NEXOS - Códigos de Respaldo 2FA
 Usuario: ${usuario.username}
 Fecha: ${new Date().toLocaleString('es-CL')}
@@ -1876,31 +1815,17 @@ IMPORTANTE: Mantén estos códigos seguros y privados.`;
         }
 
         // Privacidad
-        function actualizarPrivacidad(setting, value) {
-            const session = auth.getSession();
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const indice = usuarios.findIndex(u => u.username === session.username || u.id === session.id);
+        async function actualizarPrivacidad(setting, value) {
+            const privacidad = {};
+            privacidad[setting] = value;
             
-            if (indice === -1) return;
+            const result = await perfilManager.actualizarPerfil({ privacidad });
             
-            const usuario = usuarios[indice];
-            if (!usuario.privacidad) {
-                usuario.privacidad = {};
+            if (result.success) {
+                notify.success('Configuración de privacidad actualizada');
+            } else {
+                notify.error('Error al actualizar privacidad: ' + result.message);
             }
-            
-            usuario.privacidad[setting] = value;
-            
-            usuarios[indice] = usuario;
-            localStorage.setItem('nexos_users', JSON.stringify(usuarios));
-            
-            const messages = {
-                perfilPublico: value ? 'Tu perfil ahora es público' : 'Tu perfil ahora es privado',
-                mostrarEmail: value ? 'Tu email ahora es visible' : 'Tu email ahora está oculto',
-                historialActividad: value ? 'Tu historial de actividad ahora es visible' : 'Tu historial de actividad ahora está oculto'
-            };
-            
-            notify.success(messages[setting]);
-            registrarActividad('Configuración de privacidad', `Se ${value ? 'activó' : 'desactivó'} ${setting}`);
         }
 
         // Zona de peligro
@@ -1925,33 +1850,30 @@ IMPORTANTE: Mantén estos códigos seguros y privados.`;
                 );
                 
                 if (password) {
-                    const result = auth.verifyPassword(password);
+                    const result = await perfilManager.eliminarCuenta(password);
                     
                     if (result.success) {
-                        // Eliminar cuenta
-                        const session = auth.getSession();
-                        const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-                        const nuevosUsuarios = usuarios.filter(u => u.id !== session.id);
-                        localStorage.setItem('nexos_users', JSON.stringify(nuevosUsuarios));
-                        
-                        auth.logout();
+                        authBackend.clearSession();
                         notify.success('Tu cuenta ha sido eliminada permanentemente');
                         setTimeout(() => {
                             window.location.href = 'index.html';
                         }, 2000);
                     } else {
-                        notify.error('Contraseña incorrecta');
+                        notify.error('Error: ' + result.message);
                     }
                 }
             }
         }
 
-        function descargarMisDatos() {
-            const session = auth.getSession();
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const usuario = usuarios.find(u => u.username === session.username || u.id === session.id);
+        async function descargarMisDatos() {
+            const result = await perfilManager.cargarPerfil();
             
-            if (!usuario) return;
+            if (!result.success || !result.user) {
+                notify.error('No se pudieron cargar los datos');
+                return;
+            }
+            
+            const usuario = result.user;
             
             // Preparar datos para descarga
             const datosDescarga = {
@@ -1965,8 +1887,7 @@ IMPORTANTE: Mantén estos códigos seguros y privados.`;
                     fechaRegistro: usuario.createdAt
                 },
                 finanzas: {
-                    saldoActual: usuario.saldo || 0,
-                    transacciones: usuario.transacciones || []
+                    saldoActual: usuario.saldo || 0
                 },
                 seguridad: {
                     twoFactorEnabled: usuario.twoFactorEnabled || false,
@@ -1990,103 +1911,73 @@ IMPORTANTE: Mantén estos códigos seguros y privados.`;
         }
 
         // Calcular nivel de seguridad
-        function calcularNivelSeguridad() {
-            const session = auth.getSession();
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const usuario = usuarios.find(u => u.username === session.username || u.id === session.id);
-            
-            if (!usuario) return;
-            
-            let puntos = 0;
-            
-            // Contraseña fuerte (25 puntos)
-            if (usuario.password && usuario.password.length >= 8) puntos += 25;
-            
-            // 2FA activado (50 puntos)
-            if (usuario.twoFactorEnabled) puntos += 50;
-            
-            // Email verificado (25 puntos)
-            puntos += 25; // Asumimos que todos tienen email verificado
-            
-            // Actualizar UI
-            const porcentaje = document.getElementById('nivel-seguridad-porcentaje');
-            const texto = document.getElementById('nivel-seguridad-texto');
-            const icono2fa = document.getElementById('icono-2fa');
-            const texto2fa = document.getElementById('texto-2fa');
-            
-            porcentaje.textContent = puntos + '%';
-            
-            if (puntos === 100) {
-                texto.textContent = 'Excelente';
-            } else if (puntos >= 75) {
-                texto.textContent = 'Bueno';
-            } else if (puntos >= 50) {
-                texto.textContent = 'Medio';
-            } else {
-                texto.textContent = 'Básico';
-            }
-            
-            // Actualizar ícono 2FA
-            if (usuario.twoFactorEnabled) {
-                icono2fa.className = 'fas fa-check-circle';
-                icono2fa.style.opacity = '1';
-                texto2fa.textContent = 'Autenticación 2FA';
-                texto2fa.style.opacity = '1';
-            } else {
-                icono2fa.className = 'fas fa-times-circle';
-                icono2fa.style.opacity = '0.5';
-                texto2fa.textContent = 'Autenticación 2FA';
-                texto2fa.style.opacity = '0.7';
+        async function calcularNivelSeguridad() {
+            try {
+                const session = auth.getSession();
+                const data = await perfilManager.obtenerPerfil();
+                const usuario = data.usuario;
+                
+                if (!usuario) return;
+                
+                let puntos = 0;
+                
+                // Contraseña fuerte (25 puntos)
+                if (usuario.password && usuario.password.length >= 8) puntos += 25;
+                
+                // 2FA activado (50 puntos)
+                if (usuario.twoFactorEnabled) puntos += 50;
+                
+                // Email verificado (25 puntos)
+                puntos += 25; // Asumimos que todos tienen email verificado
+                
+                // Actualizar UI
+                const porcentaje = document.getElementById('nivel-seguridad-porcentaje');
+                const texto = document.getElementById('nivel-seguridad-texto');
+                const icono2fa = document.getElementById('icono-2fa');
+                const texto2fa = document.getElementById('texto-2fa');
+                
+                porcentaje.textContent = puntos + '%';
+                
+                if (puntos === 100) {
+                    texto.textContent = 'Excelente';
+                } else if (puntos >= 75) {
+                    texto.textContent = 'Bueno';
+                } else if (puntos >= 50) {
+                    texto.textContent = 'Medio';
+                } else {
+                    texto.textContent = 'Básico';
+                }
+                
+                // Actualizar ícono 2FA
+                if (usuario.twoFactorEnabled) {
+                    icono2fa.className = 'fas fa-check-circle';
+                    icono2fa.style.opacity = '1';
+                    texto2fa.textContent = 'Autenticación 2FA';
+                    texto2fa.style.opacity = '1';
+                } else {
+                    icono2fa.className = 'fas fa-times-circle';
+                    icono2fa.style.opacity = '0.5';
+                    texto2fa.textContent = 'Autenticación 2FA';
+                    texto2fa.style.opacity = '0.7';
+                }
+            } catch (error) {
+                console.error('Error al calcular nivel de seguridad:', error);
             }
         }
 
-        // Registrar actividad
+        // Registrar actividad - simplificado para migración
         function registrarActividad(tipo, descripcion) {
-            const session = auth.getSession();
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const indice = usuarios.findIndex(u => u.username === session.username || u.id === session.id);
-            
-            if (indice === -1) return;
-            
-            const usuario = usuarios[indice];
-            if (!usuario.actividadReciente) {
-                usuario.actividadReciente = [];
-            }
-            
-            // Obtener info del dispositivo
-            const dispositivo = navigator.userAgent.includes('Windows') ? 'Windows' : 
-                               navigator.userAgent.includes('Mac') ? 'Mac' :
-                               navigator.userAgent.includes('Linux') ? 'Linux' : 'Otro';
-            
-            const navegador = navigator.userAgent.includes('Chrome') ? 'Chrome' :
-                             navigator.userAgent.includes('Firefox') ? 'Firefox' :
-                             navigator.userAgent.includes('Safari') ? 'Safari' : 'Otro';
-            
-            usuario.actividadReciente.unshift({
-                tipo: tipo,
-                descripcion: descripcion,
-                dispositivo: navegador + ' • ' + dispositivo,
-                ubicacion: 'Santiago, Chile', // En producción usarías geolocalización
-                fecha: new Date().toISOString(),
-                timestamp: Date.now()
-            });
-            
-            // Mantener solo las últimas 50 actividades
-            if (usuario.actividadReciente.length > 50) {
-                usuario.actividadReciente = usuario.actividadReciente.slice(0, 50);
-            }
-            
-            usuarios[indice] = usuario;
-            localStorage.setItem('nexos_users', JSON.stringify(usuarios));
+            // TODO: Implementar registro de actividad en backend si es necesario
+            console.log(`Actividad registrada: ${tipo} - ${descripcion}`);
         }
 
         // Cargar configuración de seguridad al abrir la pestaña
-        function cargarConfiguracionSeguridad() {
-            const session = auth.getSession();
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
-            const usuario = usuarios.find(u => u.username === session.username || u.id === session.id);
+        async function cargarConfiguracionSeguridad() {
+            const result = await perfilManager.cargarPerfil();
             
-            if (!usuario) return;
+            if (!result.success || !result.user) return;
+            
+            const usuario = result.user;
             
             // Calcular nivel de seguridad
             calcularNivelSeguridad();
@@ -2167,66 +2058,25 @@ IMPORTANTE: Mantén estos códigos seguros y privados.`;
             }
         }
 
-        // Funciones de Wallet
-        function cargarWallet() {
-            const session = auth.getSession();
-            const saldo = auth.getSaldo(session.id, 'user');
-            const transacciones = auth.getTransacciones(session.id, 'user');
-
-            // Mostrar saldo
-            const saldoFormateado = new Intl.NumberFormat('es-CL', {
-                style: 'currency',
-                currency: 'CLP',
-                minimumFractionDigits: 0
-            }).format(saldo);
-            document.getElementById('saldoActual').textContent = saldoFormateado;
-
-            // Mostrar controles de admin si es admin
-            if (session.role === 'admin') {
-                document.getElementById('adminControls').style.display = 'block';
-            }
-
-            // Cargar transacciones
-            const tbody = document.querySelector('#tablaTransacciones tbody');
-            if (transacciones.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">No hay transacciones registradas</td></tr>';
-                return;
-            }
-
-            // Ordenar por fecha descendente
-            transacciones.sort(function(a, b) {
-                return new Date(b.fecha) - new Date(a.fecha);
-            });
-
-            tbody.innerHTML = '';
-            transacciones.forEach(function(tx) {
-                const fecha = new Date(tx.fecha).toLocaleString('es-CL');
-                const monto = new Intl.NumberFormat('es-CL', {
+        // Funciones de Wallet - Ahora conectadas al backend
+        async function cargarWallet() {
+            // Obtener saldo actual
+            const walletResult = await perfilManager.walletManager.getWallet();
+            if (walletResult.success && walletResult.wallet) {
+                const saldo = walletResult.wallet.saldo || 0;
+                const saldoFormateado = new Intl.NumberFormat('es-CL', {
                     style: 'currency',
                     currency: 'CLP',
                     minimumFractionDigits: 0
-                }).format(tx.monto);
-                const saldoFinal = new Intl.NumberFormat('es-CL', {
-                    style: 'currency',
-                    currency: 'CLP',
-                    minimumFractionDigits: 0
-                }).format(tx.saldoNuevo);
+                }).format(saldo);
+                document.getElementById('saldoActual').textContent = saldoFormateado;
+            }
 
-                const tipoClass = tx.tipo === 'ingreso' ? 'ingreso' : 'egreso';
-                const tipoIcon = tx.tipo === 'ingreso' ? '↑' : '↓';
-                const tipoLabel = tx.tipo === 'ingreso' ? 'Ingreso' : 'Egreso';
-
-                const row = document.createElement('tr');
-                row.innerHTML = '<td>' + fecha + '</td>' +
-                    '<td><span class="tipo-badge ' + tipoClass + '">' + tipoIcon + ' ' + tipoLabel + '</span></td>' +
-                    '<td>' + tx.descripcion + '</td>' +
-                    '<td class="' + tipoClass + '">' + (tx.tipo === 'ingreso' ? '+' : '-') + monto + '</td>' +
-                    '<td>' + saldoFinal + '</td>';
-                tbody.appendChild(row);
-            });
+            // Cargar transacciones desde el backend
+            await perfilManager.cargarTransacciones();
         }
 
-        function refrescarWallet(e) {
+        async function refrescarWallet(e) {
             console.log('Refrescando wallet...');
             
             // Animación del botón

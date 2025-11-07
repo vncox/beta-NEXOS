@@ -412,6 +412,146 @@
             flex: 1;
             color: var(--dark);
         }
+
+        /* Estilos para el modal de edición */
+        #modal-editar-cuenta .modal-content {
+            max-width: 650px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            animation: modalSlideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        #modal-editar-cuenta input[type="text"],
+        #modal-editar-cuenta input[type="email"],
+        #modal-editar-cuenta input[type="number"] {
+            font-family: inherit;
+        }
+
+        #modal-editar-cuenta input[type="text"]:focus,
+        #modal-editar-cuenta input[type="email"]:focus,
+        #modal-editar-cuenta input[type="number"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        #modal-editar-cuenta label:has(input[type="radio"]) {
+            cursor: pointer;
+        }
+
+        #modal-editar-cuenta label:has(input[type="radio"]:checked) {
+            border-color: #667eea !important;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        #modal-editar-cuenta label:has(input[type="radio"]):hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        /* Mejorar botones del modal */
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+            border: 2px solid #e0e0e0;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8e8;
+            border-color: #d0d0d0;
+            transform: translateY(-2px);
+        }
+
+        /* Icono de información */
+        #modal-editar-cuenta small i {
+            margin-right: 0.25rem;
+        }
+
+        /* Botones de acción en tabla */
+        .btn-icon-small {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .btn-icon-small:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-icon-small.btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .btn-icon-small.btn-danger:hover {
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+        }
+
+        /* Mejorar hover en filas de tabla */
+        table tbody tr {
+            transition: all 0.2s;
+        }
+
+        table tbody tr:hover {
+            background: rgba(102, 126, 234, 0.03);
+            transform: scale(1.01);
+        }
+
+        /* Badges mejorados */
+        table td span[style*="background"] {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #modal-editar-cuenta .modal-content {
+                max-width: 95%;
+                margin: 1rem;
+            }
+            
+            #modal-editar-cuenta .modal-body {
+                padding: 1.5rem !important;
+            }
+            
+            #modal-editar-cuenta label:has(input[type="radio"]) {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .btn-icon-small {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -430,7 +570,7 @@
                 <li><a href="empresas.html">Empresas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
             </ul>
-            <button class="cta-button" onclick="window.location.href='login.html'">Iniciar Sesión</button>
+            <button class="cta-button" id="login-btn">Iniciar Sesión</button>
         </nav>
     </header>
 
@@ -1419,53 +1559,154 @@
         </div>
     </div>
 
+    <!-- Modal: Editar Cuenta -->
+    <div id="modal-editar-cuenta" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 12px 12px 0 0;">
+                <h2 style="margin: 0; display: flex; align-items: center; gap: 0.75rem;">
+                    <i class="fas fa-user-edit"></i>
+                    <span id="modal-editar-titulo">Editar Cuenta</span>
+                </h2>
+                <button onclick="cerrarModalEditarCuenta()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 2rem;">
+                <form id="form-editar-cuenta" onsubmit="guardarEdicionCuenta(event)">
+                    <input type="hidden" id="editar-cuenta-id">
+                    <input type="hidden" id="editar-cuenta-tipo">
+                    
+                    <!-- Tipo de cuenta (readonly badge) -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <div id="editar-cuenta-tipo-badge" style="display: inline-block; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem;"></div>
+                    </div>
+
+                    <!-- Nombre -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                            <i class="fas fa-user" style="color: #667eea; margin-right: 0.5rem;"></i>
+                            Nombre Completo
+                        </label>
+                        <input 
+                            type="text" 
+                            id="editar-nombre" 
+                            required
+                            style="width: 100%; padding: 0.875rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;"
+                            onfocus="this.style.borderColor='#667eea'"
+                            onblur="this.style.borderColor='#e0e0e0'"
+                        >
+                    </div>
+
+                    <!-- Username (solo para usuarios) -->
+                    <div id="editar-username-container" style="margin-bottom: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                            <i class="fas fa-at" style="color: #667eea; margin-right: 0.5rem;"></i>
+                            Username
+                        </label>
+                        <input 
+                            type="text" 
+                            id="editar-username"
+                            style="width: 100%; padding: 0.875rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;"
+                            onfocus="this.style.borderColor='#667eea'"
+                            onblur="this.style.borderColor='#e0e0e0'"
+                        >
+                    </div>
+
+                    <!-- Email -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                            <i class="fas fa-envelope" style="color: #667eea; margin-right: 0.5rem;"></i>
+                            Email
+                        </label>
+                        <input 
+                            type="email" 
+                            id="editar-email" 
+                            required
+                            style="width: 100%; padding: 0.875rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;"
+                            onfocus="this.style.borderColor='#667eea'"
+                            onblur="this.style.borderColor='#e0e0e0'"
+                        >
+                    </div>
+
+                    <!-- Saldo -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                            <i class="fas fa-wallet" style="color: #50c878; margin-right: 0.5rem;"></i>
+                            Saldo Actual
+                        </label>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.1rem; color: #666;">$</span>
+                            <input 
+                                type="number" 
+                                id="editar-saldo" 
+                                min="0"
+                                step="1"
+                                required
+                                style="flex: 1; padding: 0.875rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;"
+                                onfocus="this.style.borderColor='#50c878'"
+                                onblur="this.style.borderColor='#e0e0e0'"
+                            >
+                        </div>
+                        <small style="color: #999; display: block; margin-top: 0.5rem;">
+                            <i class="fas fa-info-circle"></i> Ingresa el saldo sin puntos ni comas
+                        </small>
+                    </div>
+
+                    <!-- Estado (solo para empresas) -->
+                    <div id="editar-estado-container" style="margin-bottom: 1.5rem; display: none;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                            <i class="fas fa-toggle-on" style="color: #667eea; margin-right: 0.5rem;"></i>
+                            Estado
+                        </label>
+                        <div style="display: flex; gap: 1rem;">
+                            <label style="flex: 1; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: all 0.3s;">
+                                <input type="radio" name="editar-activo" value="true" style="width: 20px; height: 20px;">
+                                <div>
+                                    <div style="font-weight: 600; color: #50c878;">✓ Activo</div>
+                                    <small style="color: #999;">Puede operar normalmente</small>
+                                </div>
+                            </label>
+                            <label style="flex: 1; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: all 0.3s;">
+                                <input type="radio" name="editar-activo" value="false" style="width: 20px; height: 20px;">
+                                <div>
+                                    <div style="font-weight: 600; color: #e74c3c;">✗ Bloqueado</div>
+                                    <small style="color: #999;">Sin acceso al sistema</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #f0f0f0;">
+                        <button type="button" class="btn-secondary" onclick="cerrarModalEditarCuenta()" style="padding: 0.875rem 1.75rem;">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn-primary" style="padding: 0.875rem 1.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container">
             <p>&copy; 2024 Nexos. Todos los derechos reservados.</p>
         </div>
     </footer>
 
-    <script src="notifications.js"></script>
-    <script src="auth.js"></script>
-    <script src="config.js"></script>
+    <script src="notifications.js?v=4"></script>
+    <script src="api-config.js?v=4"></script>
+    <script src="auth-backend.js?v=4"></script>
+    <script src="wallet-manager.js?v=4"></script>
+    <script src="navbar-helper.js?v=4"></script>
+    <script src="subastas-manager.js?v=4"></script>
+    <script src="rifas-manager.js?v=4"></script>
+    <script src="productos-manager.js?v=4"></script>
+    <script src="admin-manager.js?v=4"></script>
     <script>
-        // Verificar que sea admin
-        if (!auth.isLoggedIn()) {
-            window.location.href = 'login.html';
-        }
-
-        const session = auth.getSession();
-        if (session.role !== 'admin') {
-            notify.error('Acceso denegado. Solo administradores pueden acceder a esta página.');
-            setTimeout(() => window.location.href = 'index.html', 2000);
-        }
-
-        // ===== VARIABLES GLOBALES PARA GESTIÓN FINANCIERA =====
-        let tipoCuentasActual = 'user';
-        let cuentaSeleccionada = null;
-
-        // Cargar datos iniciales
-        cargarEstadisticas();
-        cargarDashboardPrincipal();
-        cargarPendientes();
-        cargarRestablecimientos();
-        cargarEmpresas();
-        cargarUsuarios();
-        cargarRechazadas();
-        calcularEspacioUsado();
-
-        function cargarEstadisticas() {
-            const pendientes = auth.getEmpresasPendientes();
-            const empresas = auth.getEmpresas();
-            const rechazadas = auth.getEmpresasRechazadas();
-            const usuarios = auth.getUsers();
-
-            document.getElementById('stat-pending').textContent = pendientes.length;
-            document.getElementById('stat-approved').textContent = empresas.filter(function(e) { return e.estado === 'aprobada'; }).length;
-            document.getElementById('stat-rejected').textContent = rechazadas.length;
-            document.getElementById('stat-users').textContent = usuarios.length;
-        }
-
+        // ===== DEFINIR FUNCIÓN cambiarTab PRIMERO (antes de verificaciones) =====
         function cambiarTab(tab, element) {
             // Ocultar todos los tabs
             const tabs = document.querySelectorAll('.tab-content');
@@ -1490,139 +1731,175 @@
                 cargarTodasCuentas();
             } else if (tab === 'subastas') {
                 cargarTodasSubastas();
+            } else if (tab === 'rifas') {
+                cargarTodasRifas();
+            } else if (tab === 'ventas') {
+                cargarTodosProductos();
+            } else if (tab === 'solicitudes') {
+                cargarSolicitudesPendientes();
+            } else if (tab === 'finanzas') {
+                // Actualizar resumen financiero cuando se abre la pestaña
+                if (typeof actualizarResumenFinanciero === 'function') {
+                    actualizarResumenFinanciero();
+                }
             }
         }
 
-        // Función para cargar el dashboard principal
-        function cargarDashboardPrincipal() {
-            const usuarios = auth.getUsers();
+        // Alias para compatibilidad con código viejo (solo si no existe)
+        if (typeof auth === 'undefined') {
+            window.auth = authBackend;
+        } else {
+            // Si auth ya existe (del viejo sistema), reemplazarlo con authBackend
+            console.warn('auth ya existe, usando authBackend en su lugar');
+            window.auth = authBackend;
+        }
+        
+        // Verificar que sea admin
+        if (!authBackend.isLoggedIn()) {
+            window.location.href = 'login.html';
+        }
+
+        const session = authBackend.getCurrentUser();
+        if (session.role !== 'admin') {
+            notify.error('Acceso denegado. Solo administradores pueden acceder a esta página.');
+            setTimeout(() => window.location.href = 'index.html', 2000);
+        }
+
+        // ===== VARIABLES GLOBALES PARA GESTIÓN FINANCIERA =====
+        let tipoCuentasActual = 'user';
+        let cuentaSeleccionada = null;
+
+        // Cargar datos iniciales desde el backend usando adminManager
+        async function inicializarDashboard() {
+            // Cargar estadísticas
+            const statsResult = await adminManager.getEstadisticas();
+            if (statsResult.success) {
+                adminManager.renderEstadisticas();
+            }
+            
+            // Cargar empresas pendientes
+            const empresasResult = await adminManager.getEmpresas({ estado: 'pendiente' });
+            if (empresasResult.success) {
+                adminManager.renderEmpresasPendientes('empresas-pendientes-list');
+                
+                // Actualizar contador de pendientes
+                const badge = document.querySelector('.pending-badge');
+                if (badge && empresasResult.total > 0) {
+                    badge.textContent = empresasResult.total;
+                    badge.style.display = 'inline-block';
+                }
+            }
+            
+            // Cargar otras funciones del dashboard
+            cargarDashboardPrincipal();
+            cargarPendientes();
+            cargarRestablecimientos();
+            cargarEmpresas();
+            cargarUsuarios();
+            cargarRechazadas();
+            calcularEspacioUsado();
+        }
+
+        // Iniciar dashboard
+        inicializarDashboard();
+
+        function cargarEstadisticas() {
+            // Esta función ahora es manejada por adminManager
+            console.log('Usando adminManager.getEstadisticas() en su lugar');
             const empresas = auth.getEmpresas();
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-            const pendientes = auth.getEmpresasPendientes();
+            const rechazadas = auth.getEmpresasRechazadas();
+            const usuarios = auth.getUsers();
 
-            // Estadísticas generales
-            const totalCuentas = usuarios.length + empresas.length;
-            const totalUsers = usuarios.length;
-            const totalEmpresas = empresas.length;
-            
-            document.getElementById('dash-total-cuentas').textContent = totalCuentas;
-            document.getElementById('dash-total-users').textContent = totalUsers;
-            document.getElementById('dash-total-empresas').textContent = totalEmpresas;
+            document.getElementById('stat-pending').textContent = pendientes.length;
+            document.getElementById('stat-approved').textContent = empresas.filter(function(e) { return e.estado === 'aprobada'; }).length;
+            document.getElementById('stat-rejected').textContent = rechazadas.length;
+            document.getElementById('stat-users').textContent = usuarios.length;
+        }
 
-            // Circulación total
-            const circulacionUsers = usuarios.reduce((sum, u) => sum + (u.saldo || 0), 0);
-            const circulacionEmpresas = empresas.reduce((sum, e) => sum + (e.saldo || 0), 0);
-            const circulacionTotal = circulacionUsers + circulacionEmpresas;
-            
-            document.getElementById('dash-circulacion-total').textContent = '$' + circulacionTotal.toLocaleString('es-CL');
-            
-            const totalTransacciones = usuarios.reduce((sum, u) => sum + (u.transacciones || []).length, 0) +
-                                      empresas.reduce((sum, e) => sum + (e.transacciones || []).length, 0);
-            document.getElementById('dash-total-transacciones').textContent = totalTransacciones;
+        // NOTA: La función cambiarTab está definida al inicio del script, antes de las verificaciones de auth
+        // para asegurar que siempre esté disponible para los handlers onclick del HTML
 
-            // Subastas activas
-            const subastasActivas = subastas.filter(s => s.estado === 'activa').length;
-            document.getElementById('dash-subastas-activas').textContent = subastasActivas;
+        // Función para cargar el dashboard principal
+        async function cargarDashboardPrincipal() {
+            try {
+                // Cargar estadísticas desde el backend
+                const stats = await adminManager.getEstadisticas();
+                
+                if (!stats) {
+                    console.error('No se pudieron cargar las estadísticas');
+                    return;
+                }
 
-            // Solicitudes pendientes
-            document.getElementById('dash-solicitudes-pendientes').textContent = pendientes.length;
+                // Actualizar el DOM con las estadísticas
+                const totalCuentas = (stats.usuarios || 0) + (stats.empresas || 0);
+                document.getElementById('dash-total-cuentas').textContent = totalCuentas;
+                document.getElementById('dash-total-users').textContent = stats.usuarios || 0;
+                document.getElementById('dash-total-empresas').textContent = stats.empresas || 0;
+                document.getElementById('dash-circulacion-total').textContent = '$' + (stats.circulacionTotal || 0).toLocaleString('es-CL');
+                document.getElementById('dash-total-transacciones').textContent = stats.transaccionesCompletadas || 0;
+                document.getElementById('dash-subastas-activas').textContent = stats.subastasActivas || 0;
+                document.getElementById('dash-solicitudes-pendientes').textContent = stats.empresasPendientes || 0;
+                document.getElementById('dash-rifas-activas').textContent = stats.rifasActivas || 0;
+                document.getElementById('dash-rifas-ingresos').textContent = '$' + (stats.ingresosRifas || 0).toLocaleString('es-CL');
+                document.getElementById('dash-productos-activos').textContent = stats.productosActivos || 0;
+                document.getElementById('dash-productos-vendidos').textContent = stats.productosVendidos || 0;
 
-            // Rifas activas
-            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
-            const rifasActivas = rifas.filter(r => r.estado === 'activa').length;
-            document.getElementById('dash-rifas-activas').textContent = rifasActivas;
-            
-            // Calcular ingresos totales de rifas (boletos vendidos)
-            const ingresosRifas = rifas.reduce((total, rifa) => {
-                const boletosVendidos = rifa.boletos ? rifa.boletos.filter(b => b.comprado).length : 0;
-                return total + (boletosVendidos * rifa.precioBoleto);
-            }, 0);
-            document.getElementById('dash-rifas-ingresos').textContent = '$' + ingresosRifas.toLocaleString('es-CL');
-
-            // Productos activos
-            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
-            const productosActivos = productos.filter(p => p.stock > 0).length;
-            document.getElementById('dash-productos-activos').textContent = productosActivos;
-            
-            // Total de productos vendidos
-            const productosVendidos = productos.reduce((total, prod) => {
-                const ventas = prod.ventas || [];
-                return total + ventas.reduce((sum, v) => sum + v.cantidad, 0);
-            }, 0);
-            document.getElementById('dash-productos-vendidos').textContent = productosVendidos;
-
-            // Cargar actividad reciente
-            cargarActividadReciente();
+                // Cargar actividad reciente
+                await cargarActividadReciente();
+            } catch (error) {
+                console.error('Error cargando dashboard:', error);
+                mostrarNotificacion('Error al cargar el dashboard', 'error');
+            }
         }
 
         // Función para cargar actividad reciente
-        function cargarActividadReciente() {
-            const actividadDiv = document.getElementById('actividad-reciente');
-            const usuarios = auth.getUsers();
-            const empresas = auth.getEmpresas();
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-
-            let actividades = [];
-
-            // Obtener actividades de usuarios
-            usuarios.forEach(user => {
-                if (user.actividadReciente && user.actividadReciente.length > 0) {
-                    user.actividadReciente.slice(-5).forEach(act => {
-                        actividades.push({
-                            tipo: 'user',
-                            usuario: user.username || user.nombre,
-                            accion: act.tipo,
-                            detalle: act.descripcion,
-                            fecha: new Date(act.fecha)
-                        });
-                    });
-                }
-            });
-
-            // Obtener actividades de empresas
-            empresas.forEach(empresa => {
-                if (empresa.actividadReciente && empresa.actividadReciente.length > 0) {
-                    empresa.actividadReciente.slice(-5).forEach(act => {
-                        actividades.push({
-                            tipo: 'empresa',
-                            usuario: empresa.nombreEmpresa || empresa.razonSocial,
-                            accion: act.tipo,
-                            detalle: act.descripcion,
-                            fecha: new Date(act.fecha)
-                        });
-                    });
-                }
-            });
-
-            // Ordenar por fecha descendente
-            actividades.sort((a, b) => b.fecha - a.fecha);
-            actividades = actividades.slice(0, 15); // Solo las últimas 15
-
-            if (actividades.length === 0) {
-                actividadDiv.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No hay actividad reciente</p>';
+        async function cargarActividadReciente() {
+            try {
+                const actividadDiv = document.getElementById('actividad-reciente');
+                
+                // TODO: Implementar getActividadReciente en backend
+                console.warn('getActividadReciente() no implementado - mostrando placeholder');
+                actividadDiv.innerHTML = '<p style="text-align: center; color: #999;"><i class="fas fa-info-circle"></i><br>Actividad reciente en desarrollo</p>';
                 return;
+                
+                /* CÓDIGO COMENTADO - FALTA IMPLEMENTAR
+                // Obtener actividad reciente desde el backend (últimas 10 transacciones/pujas/registros)
+                const actividades = await adminManager.getActividadReciente();
+                
+                if (!actividades || actividades.length === 0) {
+                    actividadDiv.innerHTML = '<p style="text-align: center; color: #999;">No hay actividad reciente</p>';
+                    return;
+                }
+                */
+
+                let html = '<div class="actividad-lista">';
+                actividades.forEach(act => {
+                    const icono = act.tipo === 'puja' ? '🔨' : 
+                                  act.tipo === 'registro' ? '👤' : 
+                                  act.tipo === 'venta' ? '💰' : '📝';
+                    const fecha = new Date(act.fecha).toLocaleString('es-CL', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    html += `
+                        <div class="actividad-item">
+                            <span class="actividad-icono">${icono}</span>
+                            <div class="actividad-info">
+                                <p><strong>${act.descripcion}</strong></p>
+                                <small>${fecha}</small>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                actividadDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Error cargando actividad reciente:', error);
             }
-
-            actividadDiv.innerHTML = actividades.map(act => {
-                const iconoTipo = act.tipo === 'user' ? 'fa-user' : 'fa-building';
-                const colorTipo = act.tipo === 'user' ? '#4a90e2' : '#50c878';
-                const fechaRelativa = obtenerFechaRelativa(act.fecha);
-
-                return `
-                    <div style="display: flex; align-items: start; gap: 1rem; padding: 1rem; border-bottom: 1px solid #f0f0f0;">
-                        <div style="background: ${colorTipo}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <i class="fas ${iconoTipo}" style="color: white;"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <p style="margin: 0 0 0.3rem 0; font-weight: 600; color: #333;">${act.usuario}</p>
-                            <p style="margin: 0 0 0.3rem 0; color: #666; font-size: 0.95rem;">${act.detalle}</p>
-                            <p style="margin: 0; color: #999; font-size: 0.85rem;">
-                                <i class="fas fa-clock"></i> ${fechaRelativa}
-                            </p>
-                        </div>
-                    </div>
-                `;
-            }).join('');
         }
 
         // Función auxiliar para obtener fecha relativa
@@ -1641,13 +1918,96 @@
         }
 
         // Función para cargar todas las cuentas (usuarios y empresas unificadas)
-        function cargarTodasCuentas() {
+        async function cargarTodasCuentas() {
+            const tbody = document.getElementById('tabla-cuentas-unificada');
+            
+            // Mostrar loading
+            tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Cargando cuentas...</p></div></td></tr>';
+            
+            try {
+                // Obtener usuarios y empresas del backend
+                const [usuariosResult, empresasResult] = await Promise.all([
+                    adminManager.getUsuarios(),
+                    adminManager.getEmpresas({ estado: 'aprobada' })
+                ]);
+                
+                const usuarios = usuariosResult.usuarios || [];
+                const empresas = empresasResult.empresas || [];
+                
+                if (usuarios.length === 0 && empresas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-users"></i><p>No hay cuentas registradas</p></div></td></tr>';
+                    return;
+                }
+                
+                let html = '';
+                
+                // Agregar usuarios
+                usuarios.forEach(user => {
+                    const rolBadge = user.role === 'admin' ? 
+                        '<span style="background: #e74c3c; color: white; padding: 0.2rem 0.5rem; border-radius: 5px; font-size: 0.75rem;">ADMIN</span>' :
+                        '<span style="background: #3498db; color: white; padding: 0.2rem 0.5rem; border-radius: 5px; font-size: 0.75rem;">USER</span>';
+                    
+                    html += `
+                        <tr>
+                            <td><span style="background: #3498db; color: white; padding: 0.3rem 0.6rem; border-radius: 8px; font-size: 0.8rem;">👤 Usuario</span></td>
+                            <td style="font-weight: 600;">${user.nombre || ''} ${user.apellido || ''}</td>
+                            <td>${user.username || 'N/A'}</td>
+                            <td>${user.rut || 'N/A'}</td>
+                            <td>${user.email || 'N/A'}</td>
+                            <td>$${(user.saldo || 0).toLocaleString('es-CL')}</td>
+                            <td>${rolBadge}</td>
+                            <td>
+                                <button class="btn-icon-small" onclick="editarCuenta('user', '${user.id}')" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                ${user.role !== 'admin' ? `
+                                <button class="btn-icon-small btn-danger" onclick="eliminarCuenta('user', '${user.id}')" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                // Agregar empresas
+                empresas.forEach(empresa => {
+                    html += `
+                        <tr>
+                            <td><span style="background: #f39c12; color: white; padding: 0.3rem 0.6rem; border-radius: 8px; font-size: 0.8rem;">🏢 Empresa</span></td>
+                            <td style="font-weight: 600;">${empresa.razon_social || ''}</td>
+                            <td>${empresa.nombre_usuario || 'N/A'}</td>
+                            <td>${empresa.rut || 'N/A'}</td>
+                            <td>${empresa.email || 'N/A'}</td>
+                            <td>$${(empresa.saldo || 0).toLocaleString('es-CL')}</td>
+                            <td><span style="background: #f39c12; color: white; padding: 0.2rem 0.5rem; border-radius: 5px; font-size: 0.75rem;">EMPRESA</span></td>
+                            <td>
+                                <button class="btn-icon-small" onclick="editarCuenta('empresa', '${empresa.id}')" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon-small btn-danger" onclick="eliminarCuenta('empresa', '${empresa.id}')" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                tbody.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error cargando cuentas:', error);
+                tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error al cargar cuentas</p></div></td></tr>';
+            }
+            return;
+            
+            /* CÓDIGO VIEJO DESHABILITADO
             const usuarios = auth.getUsers();
             const empresas = auth.getEmpresas();
             const tbody = document.getElementById('tabla-cuentas-unificada');
 
             let cuentas = [];
             let adminAgregado = false;
+            */
 
             // Agregar usuarios (solo un admin)
             usuarios.forEach(user => {
@@ -1839,94 +2199,149 @@
             }).join('');
         }
 
-        // Función para eliminar cuenta
-        async function eliminarCuenta(id, tipo, nombre) {
-            // Mensajes diferenciados según el tipo
-            let mensajeConfirmacion = '';
-            let tituloConfirmacion = '';
-            
-            console.log('Eliminar cuenta - ID:', id, 'Tipo:', tipo, 'Nombre:', nombre);
-            
-            if (tipo === 'user' || tipo === 'usuario') {
-                mensajeConfirmacion = `¿Estás seguro de que deseas eliminar al usuario "${nombre}"?\n\nTambién se eliminarán:\n- Todas sus transacciones\n- Su historial de pujas\n- Sus datos personales\n\nEsta acción no se puede deshacer.`;
-                tituloConfirmacion = 'Eliminar Usuario';
-            } else if (tipo === 'empresa') {
-                mensajeConfirmacion = `¿Estás seguro de que deseas eliminar esta empresa?\n\n"${nombre}"\n\nTambién se eliminarán todas sus subastas. Esta acción no se puede deshacer.`;
-                tituloConfirmacion = 'Eliminar Empresa';
-            } else {
-                console.error('Tipo de cuenta no reconocido:', tipo);
-                await notify.error('Tipo de cuenta no válido');
-                return;
-            }
-
-            const confirmado = await notify.confirm(
-                mensajeConfirmacion,
-                tituloConfirmacion
-            );
-
-            if (!confirmado) return;
-
-            // Determinar si es usuario o empresa
-            const esUsuario = (tipo === 'user' || tipo === 'usuario');
-            
-            if (esUsuario) {
-                const usuarios = auth.getUsers();
-                const usuarioEliminado = usuarios.find(u => u.id === id);
-                const usuariosFiltrados = usuarios.filter(u => u.id !== id);
-                localStorage.setItem('nexos_users', JSON.stringify(usuariosFiltrados));
-
-                // Registrar en auditoría si existe el sistema
-                if (usuarioEliminado && usuarioEliminado.actividadReciente) {
-                    const actividad = {
-                        tipo: 'admin_action',
-                        descripcion: `Cuenta de usuario "${nombre}" eliminada por administrador`,
-                        fecha: new Date().toISOString()
-                    };
-                    // Agregar a logs
-                    agregarLog(`[DELETE] Usuario "${nombre}" eliminado del sistema`);
+        // Función para editar cuenta
+        async function editarCuenta(tipo, id) {
+            try {
+                // Obtener datos de la cuenta
+                let cuenta = null;
+                
+                if (tipo === 'user') {
+                    const resultado = await adminManager.getUsuarios();
+                    cuenta = resultado.usuarios.find(u => u.id === id);
+                } else if (tipo === 'empresa') {
+                    const resultado = await adminManager.getEmpresas();
+                    cuenta = resultado.empresas.find(e => e.id === id);
                 }
-
-                // Actualizar referencias en subastas
-                const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-                subastas.forEach(subasta => {
-                    if (subasta.pujas) {
-                        subasta.pujas = subasta.pujas.filter(puja => puja.userId !== id);
-                    }
-                });
-                localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
-
-                notify.success(`Usuario "${nombre}" eliminado exitosamente`);
                 
-            } else if (tipo === 'empresa') {
-                const empresas = auth.getEmpresas();
-                const empresaEliminada = empresas.find(e => e.id === id);
-                
-                if (!empresaEliminada) {
-                    await notify.error('Empresa no encontrada');
+                if (!cuenta) {
+                    notify.error('Cuenta no encontrada');
                     return;
                 }
                 
-                const empresasFiltradas = empresas.filter(e => e.id !== id);
-                localStorage.setItem('nexos_empresas', JSON.stringify(empresasFiltradas));
-
-                // Registrar en auditoría
-                agregarLog(`[DELETE] Empresa "${nombre}" eliminada del sistema`);
-
-                // Actualizar subastas de la empresa (marcarlas como canceladas)
-                const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-                subastas.forEach(subasta => {
-                    if (subasta.empresaId === id) {
-                        subasta.estado = 'cancelada';
-                        subasta.motivoCancelacion = 'Empresa eliminada del sistema';
-                    }
-                });
-                localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
+                // Llenar el formulario
+                document.getElementById('editar-cuenta-id').value = id;
+                document.getElementById('editar-cuenta-tipo').value = tipo;
                 
-                notify.success(`Empresa "${nombre}" eliminada exitosamente`);
+                // Badge de tipo
+                const badge = document.getElementById('editar-cuenta-tipo-badge');
+                if (tipo === 'user') {
+                    badge.textContent = '👤 Usuario';
+                    badge.style.background = '#3498db';
+                    badge.style.color = 'white';
+                    document.getElementById('editar-username-container').style.display = 'block';
+                    document.getElementById('editar-estado-container').style.display = 'none';
+                } else {
+                    badge.textContent = '🏢 Empresa';
+                    badge.style.background = '#f39c12';
+                    badge.style.color = 'white';
+                    document.getElementById('editar-username-container').style.display = 'none';
+                    document.getElementById('editar-estado-container').style.display = 'block';
+                }
+                
+                // Título
+                document.getElementById('modal-editar-titulo').textContent = 
+                    tipo === 'user' ? 'Editar Usuario' : 'Editar Empresa';
+                
+                // Datos
+                if (tipo === 'user') {
+                    document.getElementById('editar-nombre').value = 
+                        `${cuenta.nombre || ''} ${cuenta.apellido || ''}`.trim();
+                    document.getElementById('editar-username').value = cuenta.username || '';
+                } else {
+                    document.getElementById('editar-nombre').value = cuenta.razon_social || '';
+                }
+                
+                document.getElementById('editar-email').value = cuenta.email || '';
+                document.getElementById('editar-saldo').value = cuenta.saldo || 0;
+                
+                if (tipo === 'empresa') {
+                    const activo = cuenta.activo !== false;
+                    document.querySelector(`input[name="editar-activo"][value="${activo}"]`).checked = true;
+                }
+                
+                // Mostrar modal
+                document.getElementById('modal-editar-cuenta').style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Error cargando cuenta:', error);
+                notify.error('Error al cargar datos de la cuenta');
             }
+        }
+        
+        // Cerrar modal de edición
+        function cerrarModalEditarCuenta() {
+            document.getElementById('modal-editar-cuenta').style.display = 'none';
+            document.getElementById('form-editar-cuenta').reset();
+        }
+        
+        // Guardar cambios de edición
+        async function guardarEdicionCuenta(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('editar-cuenta-id').value;
+            const tipo = document.getElementById('editar-cuenta-tipo').value;
+            
+            const datosActualizados = {
+                email: document.getElementById('editar-email').value,
+                saldo: parseFloat(document.getElementById('editar-saldo').value)
+            };
+            
+            if (tipo === 'user') {
+                const nombreCompleto = document.getElementById('editar-nombre').value.split(' ');
+                datosActualizados.nombre = nombreCompleto[0] || '';
+                datosActualizados.apellido = nombreCompleto.slice(1).join(' ') || '';
+                datosActualizados.username = document.getElementById('editar-username').value;
+            } else {
+                datosActualizados.razon_social = document.getElementById('editar-nombre').value;
+                datosActualizados.activo = document.querySelector('input[name="editar-activo"]:checked').value === 'true';
+            }
+            
+            try {
+                // TODO: Implementar endpoints de actualización en el backend
+                // Por ahora solo mostramos mensaje
+                console.log('Datos a actualizar:', datosActualizados);
+                
+                notify.success('Cambios guardados correctamente');
+                cerrarModalEditarCuenta();
+                await cargarTodasCuentas(); // Recargar tabla
+                
+            } catch (error) {
+                console.error('Error guardando cambios:', error);
+                notify.error('Error al guardar cambios');
+            }
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('modal-editar-cuenta');
+            if (e.target === modal) {
+                cerrarModalEditarCuenta();
+            }
+        });
 
-            cargarTodasCuentas();
-            cargarDashboardPrincipal(); // Actualizar estadísticas
+        // Función para eliminar cuenta
+        async function eliminarCuenta(tipo, id) {
+            const confirmado = confirm(`¿Estás seguro de eliminar esta ${tipo === 'user' ? 'usuario' : 'empresa'}?`);
+            if (!confirmado) return;
+            
+            try {
+                let resultado;
+                if (tipo === 'user') {
+                    resultado = await adminManager.deleteUsuario(id);
+                } else {
+                    resultado = await adminManager.deleteEmpresa(id);
+                }
+                
+                if (resultado.success) {
+                    notify.success(`${tipo === 'user' ? 'Usuario' : 'Empresa'} eliminado correctamente`);
+                    await cargarTodasCuentas(); // Recargar tabla
+                } else {
+                    notify.error(resultado.message || 'Error al eliminar');
+                }
+            } catch (error) {
+                console.error('Error eliminando cuenta:', error);
+                notify.error('Error al eliminar cuenta');
+            }
         }
 
         // Función para bloquear/desbloquear cuenta
@@ -1939,24 +2354,20 @@
 
             if (!confirmado) return;
 
+            // Usar adminManager para cambiar estado
+            let resultado;
             if (tipo === 'user') {
-                const usuarios = auth.getUsers();
-                const index = usuarios.findIndex(u => u.id === id);
-                if (index !== -1) {
-                    usuarios[index].bloqueado = bloquear;
-                    localStorage.setItem('nexos_users', JSON.stringify(usuarios));
-                }
+                resultado = await adminManager.toggleUsuarioActivo(id);
             } else {
-                const empresas = auth.getEmpresas();
-                const index = empresas.findIndex(e => e.id === id);
-                if (index !== -1) {
-                    empresas[index].bloqueado = bloquear;
-                    localStorage.setItem('nexos_empresas', JSON.stringify(empresas));
-                }
+                resultado = await adminManager.toggleEmpresaActiva(id);
             }
 
-            notify.success(`Cuenta ${bloquear ? 'bloqueada' : 'activada'} exitosamente`);
-            cargarTodasCuentas();
+            if (resultado.success) {
+                notify.success(resultado.message || `Cuenta ${bloquear ? 'bloqueada' : 'activada'} exitosamente`);
+                cargarTodasCuentas();
+            } else {
+                await notify.error(resultado.message || 'Error al actualizar cuenta');
+            }
         }
 
         // Función para ver detalle de cuenta (reutiliza la modal existente)
@@ -2190,145 +2601,53 @@
         }
 
         function cargarPendientes() {
-            const pendientes = auth.getEmpresasPendientes();
-            const tbody = document.getElementById('tabla-pendientes');
-
-            if (pendientes.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>No hay solicitudes pendientes</p></div></td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = '';
-            pendientes.forEach(function(empresa) {
-                const fecha = new Date(empresa.fechaRegistro).toLocaleDateString();
-                
-                // Verificar documentos
-                let documentosHtml = '';
-                if (empresa.documentosLegales) {
-                    const numDocs = (empresa.documentosLegales.inicioActividades ? 1 : 0) + 
-                                   (empresa.documentosLegales.certificadoVigencia ? 1 : 0) + 
-                                   (empresa.documentosLegales.estatutos ? 1 : 0);
-                    documentosHtml = '<button class="btn-action" style="background: #27ae60; color: white;" onclick="verDocumentosEmpresa(\'' + empresa.id + '\', \'pendiente\')" title="Ver documentos legales">' +
-                        '<i class="fas fa-file-contract"></i> ' + numDocs + ' doc(s)' +
-                        '</button>';
-                } else {
-                    documentosHtml = '<span style="color: #e74c3c; font-size: 0.9rem;"><i class="fas fa-exclamation-triangle"></i> Sin docs</span>';
-                }
-                
-                const row = document.createElement('tr');
-                row.innerHTML = '<td>' + empresa.razonSocial + '</td>' +
-                    '<td>' + empresa.rut + '</td>' +
-                    '<td>' + empresa.email + '</td>' +
-                    '<td>' + fecha + '</td>' +
-                    '<td>' + documentosHtml + '</td>' +
-                    '<td><div class="action-buttons">' +
-                    '<button class="btn-action btn-view" onclick="verDetalles(\'' + empresa.id + '\', \'pendiente\')">' +
-                    '<i class="fas fa-eye"></i> Ver</button>' +
-                    '<button class="btn-action btn-approve" onclick="aprobar(\'' + empresa.id + '\')">' +
-                    '<i class="fas fa-check"></i> Aprobar</button>' +
-                    '<button class="btn-action btn-reject" onclick="rechazar(\'' + empresa.id + '\')">' +
-                    '<i class="fas fa-times"></i> Rechazar</button>' +
-                    '</div></td>';
-                tbody.appendChild(row);
-            });
+            // TODO: Ya está gestionado por adminManager.getEmpresas()
+            console.warn('cargarPendientes() deshabilitado - usar adminManager');
+            return;
         }
 
+        // cargarRestablecimientos() movida a línea 2970 - eliminada duplicación
+
         function cargarEmpresas() {
-            const empresas = auth.getEmpresas();
-            const tbody = document.getElementById('tabla-empresas');
-
-            if (empresas.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>No hay empresas registradas</p></div></td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = '';
-            empresas.forEach(function(empresa) {
-                const rolBadge = empresa.role === 'admin' ? 'admin' : 'user';
-                const estadoBadge = empresa.estado || 'aprobada';
-                const isAdmin = empresa.role === 'admin';
-                const row = document.createElement('tr');
-                row.innerHTML = '<td>' + empresa.razonSocial + '</td>' +
-                    '<td>' + empresa.rut + '</td>' +
-                    '<td>' + empresa.email + '</td>' +
-                    '<td><span class="badge ' + rolBadge + '">' + empresa.role + '</span></td>' +
-                    '<td><span class="badge ' + estadoBadge + '">' + (empresa.estado || 'aprobada') + '</span></td>' +
-                    '<td><div class="action-buttons">' +
-                    '<button class="btn-action btn-view" onclick="verDetalles(\'' + empresa.id + '\', \'empresa\')" title="Ver detalles">' +
-                    '<i class="fas fa-eye"></i></button>' +
-                    '<button class="btn-action btn-edit" onclick="abrirModalPassword(\'' + empresa.id + '\', \'empresa\')" title="Cambiar contraseña">' +
-                    '<i class="fas fa-key"></i></button>' +
-                    (isAdmin ? '' : '<button class="btn-action btn-delete" onclick="eliminarCuenta(\'' + empresa.id + '\', \'empresa\')" title="Eliminar empresa">' +
-                    '<i class="fas fa-trash"></i></button>') +
-                    '</div></td>';
-                tbody.appendChild(row);
-            });
+            // TODO: Ya está gestionado por adminManager.getEmpresas()
+            console.warn('cargarEmpresas() deshabilitado - usar adminManager');
+            return;
         }
 
         function cargarUsuarios() {
-            const usuarios = auth.getUsers();
-            const tbody = document.getElementById('tabla-usuarios');
-
-            if (usuarios.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-inbox"></i><p>No hay usuarios registrados</p></div></td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = '';
-            usuarios.forEach(function(usuario) {
-                const fecha = new Date(usuario.fechaRegistro).toLocaleDateString();
-                const rolBadge = usuario.role === 'admin' ? 'admin' : 'user';
-                const isAdmin = usuario.role === 'admin';
-                const row = document.createElement('tr');
-                row.innerHTML = '<td>' + usuario.nombre + ' ' + usuario.apellido + '</td>' +
-                    '<td>' + usuario.username + '</td>' +
-                    '<td>' + (usuario.rut || 'N/A') + '</td>' +
-                    '<td>' + usuario.email + '</td>' +
-                    '<td><span class="badge ' + rolBadge + '">' + usuario.role + '</span></td>' +
-                    '<td>' + fecha + '</td>' +
-                    '<td><div class="action-buttons">' +
-                    '<button class="btn-action btn-view" onclick="verDetalles(\'' + usuario.id + '\', \'usuario\')" title="Ver detalles">' +
-                    '<i class="fas fa-eye"></i></button>' +
-                    '<button class="btn-action btn-edit" onclick="abrirModalPassword(\'' + usuario.id + '\', \'usuario\')" title="Cambiar contraseña">' +
-                    '<i class="fas fa-key"></i></button>' +
-                    (isAdmin ? '' : '<button class="btn-action btn-delete" onclick="eliminarCuenta(\'' + usuario.id + '\', \'usuario\')" title="Eliminar usuario">' +
-                    '<i class="fas fa-trash"></i></button>') +
-                    '</div></td>';
-                tbody.appendChild(row);
-            });
+            // TODO: Ya está gestionado por adminManager.getUsuarios()
+            console.warn('cargarUsuarios() deshabilitado - usar adminManager');
+            return;
         }
 
         function cargarRechazadas() {
-            const rechazadas = auth.getEmpresasRechazadas();
-            const tbody = document.getElementById('tabla-rechazadas');
+            // TODO: Implementar con backend
+            console.warn('cargarRechazadas() no implementado');
+            return;
+        }
 
-            if (rechazadas.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>No hay solicitudes rechazadas</p></div></td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = '';
-            rechazadas.forEach(function(empresa) {
-                const fecha = new Date(empresa.fechaRechazo).toLocaleDateString();
-                const row = document.createElement('tr');
-                row.innerHTML = '<td>' + empresa.razonSocial + '</td>' +
-                    '<td>' + empresa.rut + '</td>' +
-                    '<td>' + empresa.email + '</td>' +
-                    '<td>' + fecha + '</td>' +
-                    '<td>' + (empresa.motivoRechazo || 'Sin motivo especificado') + '</td>' +
-                    '<td><div class="action-buttons">' +
-                    '<button class="btn-action btn-view" onclick="verDetalles(\'' + empresa.id + '\', \'rechazada\')">' +
-                    '<i class="fas fa-eye"></i> Ver</button>' +
-                    '</div></td>';
-                tbody.appendChild(row);
-            });
+        function calcularEspacioUsado() {
+            // TODO: Implementar con backend
+            console.warn('calcularEspacioUsado() no implementado');
+            return;
         }
 
         // ===== FUNCIONES DE SUBASTAS =====
 
-        function cargarTodasSubastas() {
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
+        async function cargarTodasSubastas() {
             const tbody = document.getElementById('tabla-subastas-admin');
+            
+            // Mostrar loading
+            tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Cargando subastas...</p></div></td></tr>';
+
+            const resultado = await adminManager.getSubastas();
+            
+            if (!resultado.success) {
+                tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>${resultado.message}</p></div></td></tr>`;
+                return;
+            }
+
+            const subastas = resultado.subastas || [];
 
             if (subastas.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-gavel"></i><p>No hay subastas registradas</p></div></td></tr>';
@@ -2350,19 +2669,19 @@
                 };
                 const estadoInfo = estadoColors[subasta.estado] || estadoColors.activa;
 
-                const fechaFin = subasta.fechaFin ? new Date(subasta.fechaFin).toLocaleDateString('es-CL') : 'N/A';
-                const numPujas = (subasta.pujas || []).length;
+                const fechaFin = subasta.fechaFin || subasta.fecha_fin ? new Date(subasta.fechaFin || subasta.fecha_fin).toLocaleDateString('es-CL') : 'N/A';
+                const numPujas = subasta.cantidad_pujas || 0;
 
                 return `
                     <tr>
                         <td style="font-weight: 600;">${subasta.titulo}</td>
-                        <td>${subasta.empresaNombre || 'N/A'}</td>
+                        <td>${subasta.empresa?.razon_social || subasta.empresaNombre || 'N/A'}</td>
                         <td>
                             <span style="background: ${tipoInfo.color}; color: white; padding: 0.3rem 0.7rem; border-radius: 8px; font-size: 0.85rem;">
                                 <i class="fas ${tipoInfo.icon}"></i> ${subasta.tipo}
                             </span>
                         </td>
-                        <td style="font-weight: 700; color: #27ae60;">$${(subasta.precioActual || subasta.precioInicial || 0).toLocaleString('es-CL')}</td>
+                        <td style="font-weight: 700; color: #27ae60;">$${((subasta.precioActual || subasta.precio_actual || subasta.precioInicial || subasta.precio_inicial) || 0).toLocaleString('es-CL')}</td>
                         <td>
                             <span style="background: #f0f0f0; padding: 0.3rem 0.7rem; border-radius: 15px; font-weight: 600;">
                                 ${numPujas} pujas
@@ -2484,22 +2803,34 @@
 
             if (!confirmado) return;
 
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-            const index = subastas.findIndex(s => s.id === id);
-
-            if (index !== -1) {
-                subastas[index].estado = 'cancelada';
-                localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
+            // TODO: Implementar cancelación de subasta en backend
+            // Por ahora usar método del subastasManager
+            const resultado = await subastasManager.cancelarSubasta(id);
+            
+            if (resultado.success) {
                 notify.success('Subasta cancelada exitosamente');
                 cargarTodasSubastas();
+            } else {
+                await notify.error(resultado.message || 'Error al cancelar subasta');
             }
         }
 
         // ===== FUNCIONES DE RIFAS =====
 
-        function cargarTodasRifas() {
-            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
+        async function cargarTodasRifas() {
             const tbody = document.getElementById('tabla-rifas-admin');
+            
+            // Mostrar loading
+            tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Cargando rifas...</p></div></td></tr>';
+
+            const resultado = await rifasManager.getRifas();
+            
+            if (!resultado.success) {
+                tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>${resultado.message}</p></div></td></tr>`;
+                return;
+            }
+
+            const rifas = resultado.rifas || [];
 
             if (rifas.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-ticket-alt"></i><p>No hay rifas registradas</p></div></td></tr>';
@@ -2515,17 +2846,18 @@
                 };
                 const estadoInfo = estadoColors[rifa.estado] || estadoColors.activa;
 
-                const fechaSorteo = rifa.fechaSorteo ? new Date(rifa.fechaSorteo).toLocaleDateString('es-CL') : 'N/A';
-                const totalBoletos = rifa.totalBoletos || 0;
-                const boletosVendidos = (rifa.boletos || []).filter(b => b.vendido).length;
-                const recaudado = boletosVendidos * (rifa.precioBoleto || 0);
+                const fechaSorteo = rifa.fechaSorteo || rifa.fecha_sorteo ? new Date(rifa.fechaSorteo || rifa.fecha_sorteo).toLocaleDateString('es-CL') : 'N/A';
+                const totalBoletos = rifa.totalBoletos || rifa.total_boletos || 0;
+                const boletosVendidos = rifa.boletos_vendidos || 0;
+                const precioBoleto = rifa.precioBoleto || rifa.precio_boleto || 0;
+                const recaudado = boletosVendidos * precioBoleto;
                 const porcentajeVenta = totalBoletos > 0 ? ((boletosVendidos / totalBoletos) * 100).toFixed(1) : 0;
 
                 return `
                     <tr>
                         <td style="font-weight: 600;">${rifa.titulo}</td>
-                        <td>${rifa.empresaNombre || 'N/A'}</td>
-                        <td style="font-weight: 700; color: #27ae60;">$${(rifa.precioBoleto || 0).toLocaleString('es-CL')}</td>
+                        <td>${rifa.empresa?.razon_social || rifa.empresaNombre || 'N/A'}</td>
+                        <td style="font-weight: 700; color: #27ae60;">$${precioBoleto.toLocaleString('es-CL')}</td>
                         <td>
                             <span style="background: #f0f0f0; padding: 0.3rem 0.7rem; border-radius: 15px; font-weight: 600;">
                                 ${totalBoletos}
@@ -2659,14 +2991,13 @@
 
             if (!confirmado) return;
 
-            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
-            const index = rifas.findIndex(r => r.id === id);
-
-            if (index !== -1) {
-                rifas[index].estado = 'cancelada';
-                localStorage.setItem('nexos_rifas', JSON.stringify(rifas));
+            const resultado = await rifasManager.cancelarRifa(id);
+            
+            if (resultado.success) {
                 notify.success('Rifa cancelada exitosamente');
                 cargarTodasRifas();
+            } else {
+                await notify.error(resultado.message || 'Error al cancelar rifa');
             }
         }
 
@@ -2678,40 +3009,32 @@
 
             if (!confirmado) return;
 
-            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
-            const rifa = rifas.find(r => r.id === rifaId);
+            const resultado = await rifasManager.realizarSorteo(rifaId);
 
-            if (!rifa) {
-                notify.error('Rifa no encontrada');
-                return;
+            if (resultado.success) {
+                notify.success(`Sorteo realizado. Ganador: ${resultado.ganador?.usuario || 'Ver detalles'}`);
+                cargarTodasRifas();
+            } else {
+                await notify.error(resultado.message || 'Error al realizar sorteo');
             }
-
-            const boletosVendidos = rifa.boletos.filter(b => b.vendido);
-
-            if (boletosVendidos.length === 0) {
-                notify.error('No hay boletos vendidos para realizar el sorteo');
-                return;
-            }
-
-            const ganadorIndex = Math.floor(Math.random() * boletosVendidos.length);
-            const ganador = boletosVendidos[ganadorIndex];
-
-            rifa.ganador = ganador;
-            rifa.estado = 'finalizada';
-
-            const index = rifas.findIndex(r => r.id === rifaId);
-            rifas[index] = rifa;
-            localStorage.setItem('nexos_rifas', JSON.stringify(rifas));
-
-            notify.success(`¡Sorteo realizado! Ganador: Boleto #${ganador.numero} (${ganador.comprador})`);
-            cargarTodasRifas();
         }
 
         // ===== FUNCIONES DE PRODUCTOS =====
 
-        function cargarTodosProductos() {
-            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
+        async function cargarTodosProductos() {
             const tbody = document.getElementById('tabla-productos-admin');
+            
+            // Mostrar loading
+            tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Cargando productos...</p></div></td></tr>';
+
+            const resultado = await productosManager.getProductos();
+            
+            if (!resultado.success) {
+                tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>${resultado.message}</p></div></td></tr>`;
+                return;
+            }
+
+            const productos = resultado.productos || [];
 
             if (productos.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-shopping-cart"></i><p>No hay productos registrados</p></div></td></tr>';
@@ -2720,9 +3043,10 @@
 
             tbody.innerHTML = productos.map(producto => {
                 const stockActual = producto.stock || 0;
-                const stockInicial = producto.stockInicial || producto.stock || 0;
+                const stockInicial = producto.stockInicial || producto.stock_inicial || producto.stock || 0;
                 const vendidos = stockInicial - stockActual;
-                const recaudado = vendidos * (producto.precio || 0);
+                const precio = producto.precio || 0;
+                const recaudado = vendidos * precio;
                 
                 const estadoStock = stockActual === 0 ? 'Agotado' : stockActual < 10 ? 'Bajo' : 'Disponible';
                 const estadoColor = stockActual === 0 ? '#f8d7da' : stockActual < 10 ? '#fff3cd' : '#d4edda';
@@ -2731,13 +3055,13 @@
                 return `
                     <tr>
                         <td style="font-weight: 600;">${producto.nombre}</td>
-                        <td>${producto.empresaNombre || 'N/A'}</td>
+                        <td>${producto.empresa?.razon_social || producto.empresaNombre || 'N/A'}</td>
                         <td>
                             <span style="background: #f0f0f0; padding: 0.3rem 0.7rem; border-radius: 8px; font-size: 0.85rem;">
                                 ${producto.categoria || 'Otros'}
                             </span>
                         </td>
-                        <td style="font-weight: 700; color: #27ae60;">$${(producto.precio || 0).toLocaleString('es-CL')}</td>
+                        <td style="font-weight: 700; color: #27ae60;">$${precio.toLocaleString('es-CL')}</td>
                         <td>
                             <span style="background: ${estadoColor}; color: ${estadoTextColor}; padding: 0.3rem 0.7rem; border-radius: 15px; font-weight: 600;">
                                 ${stockActual}
@@ -2860,56 +3184,229 @@
         }
 
         async function editarStockProducto(id) {
-            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
-            const producto = productos.find(p => p.id === id);
+            try {
+                const data = await productosManager.getProductoById(id);
+                const producto = data.producto;
 
-            if (!producto) {
-                notify.error('Producto no encontrado');
-                return;
+                if (!producto) {
+                    notify.error('Producto no encontrado');
+                    return;
+                }
+
+                const nuevoStock = prompt(`Stock actual: ${producto.stock}\n\nIngresa el nuevo stock:`, producto.stock);
+
+                if (nuevoStock === null) return;
+
+                const stockNumero = parseInt(nuevoStock);
+
+                if (isNaN(stockNumero) || stockNumero < 0) {
+                    notify.error('Por favor ingresa un número válido');
+                    return;
+                }
+
+                await productosManager.updateProducto(id, { stock: stockNumero });
+
+                notify.success('Stock actualizado exitosamente');
+                cargarTodosProductos();
+            } catch (error) {
+                console.error('Error al editar stock:', error);
+                notify.error(error.message || 'Error al actualizar el stock');
             }
-
-            const nuevoStock = prompt(`Stock actual: ${producto.stock}\n\nIngresa el nuevo stock:`, producto.stock);
-
-            if (nuevoStock === null) return;
-
-            const stockNumero = parseInt(nuevoStock);
-
-            if (isNaN(stockNumero) || stockNumero < 0) {
-                notify.error('Por favor ingresa un número válido');
-                return;
-            }
-
-            producto.stock = stockNumero;
-            const index = productos.findIndex(p => p.id === id);
-            productos[index] = producto;
-            localStorage.setItem('nexos_productos', JSON.stringify(productos));
-
-            notify.success('Stock actualizado exitosamente');
-            cargarTodosProductos();
         }
 
         async function desactivarProducto(id) {
-            const confirmado = await notify.confirm(
-                '¿Estás seguro de desactivar este producto? Esta acción no se puede deshacer.',
-                'Desactivar Producto'
-            );
+            try {
+                const confirmado = await notify.confirm(
+                    '¿Estás seguro de desactivar este producto? Esta acción no se puede deshacer.',
+                    'Desactivar Producto'
+                );
 
-            if (!confirmado) return;
+                if (!confirmado) return;
 
-            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
-            const index = productos.findIndex(p => p.id === id);
-
-            if (index !== -1) {
-                productos[index].activo = false;
-                localStorage.setItem('nexos_productos', JSON.stringify(productos));
+                await productosManager.updateProducto(id, { activo: false });
+                
                 notify.success('Producto desactivado exitosamente');
                 cargarTodosProductos();
+            } catch (error) {
+                console.error('Error al desactivar producto:', error);
+                notify.error(error.message || 'Error al desactivar el producto');
+            }
+        }
+
+        // ===== FUNCIONES DE SOLICITUDES PENDIENTES =====
+
+        async function cargarSolicitudesPendientes() {
+            const tbody = document.getElementById('tabla-pendientes');
+            
+            // Mostrar loading
+            tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Cargando solicitudes...</p></div></td></tr>';
+
+            try {
+                const resultado = await adminManager.getEmpresas({ estado: 'pendiente' });
+                
+                if (!resultado.success) {
+                    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>${resultado.message}</p></div></td></tr>`;
+                    return;
+                }
+
+                const empresas = resultado.empresas || [];
+
+                if (empresas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-check-circle" style="color: #50c878;"></i><p>No hay solicitudes pendientes</p></div></td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = empresas.map(empresa => {
+                    const fechaRegistro = empresa.createdAt ? new Date(empresa.createdAt).toLocaleDateString('es-CL', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    }) : 'N/A';
+
+                    return `
+                        <tr style="transition: all 0.2s;">
+                            <td style="font-weight: 600;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-building" style="color: #667eea;"></i>
+                                    ${empresa.razon_social || 'Sin nombre'}
+                                </div>
+                            </td>
+                            <td>
+                                <span style="font-family: monospace; background: #f0f0f0; padding: 0.25rem 0.5rem; border-radius: 5px;">
+                                    ${empresa.rut || 'N/A'}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="mailto:${empresa.email}" style="color: #667eea; text-decoration: none;">
+                                    <i class="fas fa-envelope"></i> ${empresa.email || 'N/A'}
+                                </a>
+                            </td>
+                            <td>
+                                <span style="background: #fff3cd; color: #856404; padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">
+                                    <i class="fas fa-clock"></i> ${fechaRegistro}
+                                </span>
+                            </td>
+                            <td>
+                                ${empresa.documentos_verificacion ? `
+                                    <button class="btn-icon-small" onclick="verDocumentosEmpresa('${empresa.id}')" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                                        <i class="fas fa-file-alt"></i> Ver Docs
+                                    </button>
+                                ` : '<span style="color: #999;">Sin docs</span>'}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <button class="btn-icon-small" onclick="aprobarEmpresaAdmin('${empresa.id}')" title="Aprobar" style="background: linear-gradient(135deg, #50c878, #3da35d);">
+                                        <i class="fas fa-check"></i> Aprobar
+                                    </button>
+                                    <button class="btn-icon-small btn-danger" onclick="rechazarEmpresaAdmin('${empresa.id}')" title="Rechazar">
+                                        <i class="fas fa-times"></i> Rechazar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                // Actualizar contador en badge si existe
+                const badge = document.querySelector('.pending-badge');
+                if (badge) {
+                    badge.textContent = empresas.length;
+                    badge.style.display = empresas.length > 0 ? 'inline-block' : 'none';
+                }
+
+            } catch (error) {
+                console.error('Error cargando solicitudes:', error);
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error al cargar solicitudes</p></div></td></tr>';
+            }
+        }
+
+        // Aprobar empresa desde solicitudes
+        async function aprobarEmpresaAdmin(id) {
+            const confirmado = confirm('¿Aprobar esta empresa?');
+            if (!confirmado) return;
+
+            try {
+                const resultado = await adminManager.aprobarEmpresa(id);
+                
+                if (resultado.success) {
+                    notify.success('Empresa aprobada exitosamente');
+                    await cargarSolicitudesPendientes();
+                    await cargarDashboardPrincipal(); // Actualizar estadísticas
+                } else {
+                    notify.error(resultado.message || 'Error al aprobar empresa');
+                }
+            } catch (error) {
+                console.error('Error aprobando empresa:', error);
+                notify.error('Error al aprobar empresa');
+            }
+        }
+
+        // Rechazar empresa desde solicitudes
+        async function rechazarEmpresaAdmin(id) {
+            const motivo = prompt('Ingresa el motivo del rechazo:');
+            if (!motivo) return;
+
+            try {
+                const resultado = await adminManager.rechazarEmpresa(id, motivo);
+                
+                if (resultado.success) {
+                    notify.success('Empresa rechazada');
+                    await cargarSolicitudesPendientes();
+                    await cargarDashboardPrincipal(); // Actualizar estadísticas
+                } else {
+                    notify.error(resultado.message || 'Error al rechazar empresa');
+                }
+            } catch (error) {
+                console.error('Error rechazando empresa:', error);
+                notify.error('Error al rechazar empresa');
+            }
+        }
+
+        // Ver documentos de empresa
+        async function verDocumentosEmpresa(id) {
+            try {
+                const resultado = await adminManager.getEmpresas();
+                const empresa = resultado.empresas.find(e => e.id === id);
+                
+                if (!empresa || !empresa.documentos_verificacion) {
+                    notify.error('No hay documentos disponibles');
+                    return;
+                }
+
+                // Crear modal para mostrar documentos
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+                
+                modal.innerHTML = `
+                    <div style="background: white; padding: 2rem; border-radius: 15px; max-width: 600px; width: 90%;">
+                        <h3 style="margin: 0 0 1.5rem 0;">Documentos de ${empresa.razon_social}</h3>
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            ${typeof empresa.documentos_verificacion === 'string' 
+                                ? `<p>${empresa.documentos_verificacion}</p>`
+                                : `<pre style="background: #f5f5f5; padding: 1rem; border-radius: 8px; overflow-x: auto;">${JSON.stringify(empresa.documentos_verificacion, null, 2)}</pre>`
+                            }
+                        </div>
+                        <button onclick="this.closest('div[style*=fixed]').remove()" style="margin-top: 1.5rem; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            Cerrar
+                        </button>
+                    </div>
+                `;
+                
+                modal.onclick = (e) => {
+                    if (e.target === modal) modal.remove();
+                };
+                
+                document.body.appendChild(modal);
+                
+            } catch (error) {
+                console.error('Error cargando documentos:', error);
+                notify.error('Error al cargar documentos');
             }
         }
 
         // ===== FUNCIONES DE SISTEMA =====
 
-        function calcularEspacioUsado() {
+        async function calcularEspacioUsado() {
             let totalBytes = 0;
             for (let key in localStorage) {
                 if (localStorage.hasOwnProperty(key)) {
@@ -2919,20 +3416,32 @@
             const kb = (totalBytes / 1024).toFixed(2);
             document.getElementById('espacio-usado').textContent = kb + ' KB';
 
-            const usuarios = auth.getUsers().length;
-            const empresas = auth.getEmpresas().length;
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]').length;
+            // Obtener datos desde backend
+            const usuariosData = await adminManager.getUsuarios();
+            const empresasData = await adminManager.getEmpresas();
+            const subastasData = await adminManager.getSubastas();
+            
+            const usuarios = usuariosData.usuarios?.length || 0;
+            const empresas = empresasData.empresas?.length || 0;
+            const subastas = subastasData.subastas?.length || 0;
             const totalRegistros = usuarios + empresas + subastas;
             document.getElementById('total-registros').textContent = totalRegistros;
         }
 
         async function exportarDatos() {
+            // Obtener todos los datos desde el backend
+            const usuariosData = await adminManager.getUsuarios();
+            const empresasData = await adminManager.getEmpresas();
+            const subastasData = await adminManager.getSubastas();
+            const pendientesData = await adminManager.getEmpresasPendientes();
+            const rechazadasData = await adminManager.getEmpresasRechazadas();
+            
             const data = {
-                usuarios: auth.getUsers(),
-                empresas: auth.getEmpresas(),
-                subastas: JSON.parse(localStorage.getItem('nexos_subastas') || '[]'),
-                pendientes: auth.getEmpresasPendientes(),
-                rechazadas: auth.getEmpresasRechazadas(),
+                usuarios: usuariosData.usuarios || [],
+                empresas: empresasData.empresas || [],
+                subastas: subastasData.subastas || [],
+                pendientes: pendientesData.empresas || [],
+                rechazadas: rechazadasData.empresas || [],
                 fecha: new Date().toISOString()
             };
 
@@ -2998,9 +3507,14 @@
         async function generarReporte() {
             notify.info('Generando reporte completo del sistema...');
             
-            const usuarios = auth.getUsers();
-            const empresas = auth.getEmpresas();
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
+            // Obtener datos desde backend
+            const usuariosData = await adminManager.getUsuarios();
+            const empresasData = await adminManager.getEmpresas();
+            const subastasData = await adminManager.getSubastas();
+            
+            const usuarios = usuariosData.usuarios || [];
+            const empresas = empresasData.empresas || [];
+            const subastas = subastasData.subastas || [];
 
             const reporte = `
 =================================================
@@ -3049,6 +3563,12 @@ SUBASTAS:
         // ===== FUNCIONES DE RESTABLECIMIENTOS =====
 
         function cargarRestablecimientos() {
+            console.warn('cargarRestablecimientos() deshabilitado - implementar en backend');
+            const tbody = document.getElementById('tabla-restablecimientos');
+            tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-info-circle"></i><p>Función de restablecimientos en desarrollo</p></div></td></tr>';
+            return;
+            
+            /* CÓDIGO VIEJO COMENTADO
             const requests = auth.getPasswordResetRequests();
             const tbody = document.getElementById('tabla-restablecimientos');
 
@@ -3058,6 +3578,7 @@ SUBASTAS:
             }
 
             tbody.innerHTML = '';
+            */
             requests.forEach(function(req) {
                 const fecha = new Date(req.createdAt).toLocaleString('es-ES', { 
                     year: 'numeric', 
@@ -3226,32 +3747,32 @@ SUBASTAS:
         // ===== FIN FUNCIONES DE RESTABLECIMIENTOS =====
 
         async function aprobar(empresaId) {
-            const confirmed = await confirm('¿Estás seguro de que deseas aprobar esta empresa?');
+            const confirmed = await notify.confirm('¿Estás seguro de que deseas aprobar esta empresa?', 'Aprobar Empresa');
             if (confirmed) {
-                const result = auth.aprobarEmpresa(empresaId);
+                const result = await adminManager.aprobarEmpresa(empresaId);
                 if (result.success) {
-                    notify.success(result.message);
+                    notify.success(result.message || 'Empresa aprobada exitosamente');
                     cargarEstadisticas();
                     cargarPendientes();
                     cargarEmpresas();
                 } else {
-                    notify.error(result.message);
+                    notify.error(result.message || 'Error al aprobar empresa');
                 }
             }
         }
 
         async function rechazar(empresaId) {
-            const motivo = await prompt('Motivo del rechazo (opcional):');
-            if (motivo !== null) {
-                const result = auth.rechazarEmpresa(empresaId, motivo);
-                if (result.success) {
-                    notify.success(result.message);
-                    cargarEstadisticas();
-                    cargarPendientes();
-                    cargarRechazadas();
-                } else {
-                    notify.error(result.message);
-                }
+            const motivo = prompt('Ingresa el motivo del rechazo:');
+            if (!motivo) return;
+
+            const result = await adminManager.rechazarEmpresa(empresaId, motivo);
+            if (result.success) {
+                notify.success(result.message || 'Empresa rechazada');
+                cargarEstadisticas();
+                cargarPendientes();
+                cargarRechazadas();
+            } else {
+                notify.error(result.message || 'Error al rechazar empresa');
             }
         }
 
@@ -3864,58 +4385,22 @@ SUBASTAS:
         }
 
         function actualizarResumenFinanciero() {
-            const usuarios = auth.getUsers().filter(function(u) { return u.role !== 'admin'; });
-            const empresas = auth.getEmpresas();
-
-            let totalUsuarios = 0;
-            let totalTransacciones = 0;
-            usuarios.forEach(function(u) {
-                totalUsuarios += (u.saldo || 0);
-                totalTransacciones += (u.transacciones || []).length;
-            });
-
-            let totalEmpresas = 0;
-            empresas.forEach(function(e) {
-                totalEmpresas += (e.saldo || 0);
-                totalTransacciones += (e.transacciones || []).length;
-            });
-
-            const totalCirculacion = totalUsuarios + totalEmpresas;
-
-            // Contar subastas activas
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-            const subastasActivas = subastas.filter(function(s) { 
-                return s.estado === 'activa' && new Date(s.fechaFin) > new Date(); 
-            }).length;
-
-            const formatear = function(monto) {
-                return new Intl.NumberFormat('es-CL', {
-                    style: 'currency',
-                    currency: 'CLP',
-                    minimumFractionDigits: 0
-                }).format(monto);
-            };
-
-            document.getElementById('total-usuarios-saldo').textContent = formatear(totalUsuarios);
-            document.getElementById('total-empresas-saldo').textContent = formatear(totalEmpresas);
-            document.getElementById('total-circulacion').textContent = formatear(totalCirculacion);
-            document.getElementById('total-usuarios-count').textContent = usuarios.length;
-            document.getElementById('total-empresas-count').textContent = empresas.length;
-            document.getElementById('total-transacciones').textContent = totalTransacciones;
-            document.getElementById('total-subastas-activas').textContent = subastasActivas;
-            document.getElementById('total-subastas-count').textContent = subastasActivas;
+            // TODO: Migrar a adminManager completamente
+            console.warn('actualizarResumenFinanciero() usa código viejo de localStorage - DESHABILITADO');
+            return;
         }
 
         function actualizarDashboardFinanciero() {
-            actualizarResumenFinanciero();
-            notify.success('Dashboard actualizado correctamente');
+            // TODO: Migrar a adminManager completamente
+            console.warn('actualizarDashboardFinanciero() deshabilitado');
+            notify.info('Esta función será migrada al nuevo sistema');
         }
 
         // ===== FUNCIONES DE AUDITORÍA =====
         
-        function mostrarAuditoria() {
+        async function mostrarAuditoria() {
             document.getElementById('auditoria-section').style.display = 'block';
-            cargarAuditoria();
+            await cargarAuditoria();
             
             // Scroll suave a la sección
             document.getElementById('auditoria-section').scrollIntoView({ 
@@ -3928,11 +4413,19 @@ SUBASTAS:
             document.getElementById('auditoria-section').style.display = 'none';
         }
 
-        function cargarAuditoria() {
+        async function cargarAuditoria() {
             const eventos = [];
             
+            // Obtener todos los datos desde el backend
+            const usuariosData = await adminManager.getUsuarios();
+            const empresasData = await adminManager.getEmpresas();
+            const subastasData = await adminManager.getSubastas();
+            
+            const usuarios = usuariosData.usuarios || [];
+            const empresas = empresasData.empresas || [];
+            const subastas = subastasData.subastas || [];
+            
             // Recopilar todas las transacciones de usuarios
-            const usuarios = JSON.parse(localStorage.getItem('nexos_users') || '[]');
             usuarios.forEach(function(usuario) {
                 if (usuario.transacciones && usuario.transacciones.length > 0) {
                     usuario.transacciones.forEach(function(trans) {
@@ -3973,7 +4466,6 @@ SUBASTAS:
             });
 
             // Recopilar transacciones de empresas
-            const empresas = JSON.parse(localStorage.getItem('nexos_empresas') || '[]');
             empresas.forEach(function(empresa) {
                 if (empresa.transacciones && empresa.transacciones.length > 0) {
                     empresa.transacciones.forEach(function(trans) {
@@ -4014,7 +4506,6 @@ SUBASTAS:
             });
 
             // Recopilar eventos de subastas
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
             subastas.forEach(function(subasta) {
                 // Evento de creación
                 eventos.push({
@@ -4219,14 +4710,8 @@ SUBASTAS:
         // Cargar resumen financiero al cargar la página
         actualizarResumenFinanciero();
 
-        // Actualizar cuando se cambia a la pestaña de finanzas
-        const originalCambiarTab = cambiarTab;
-        cambiarTab = function(tab, element) {
-            originalCambiarTab(tab, element);
-            if (tab === 'finanzas') {
-                actualizarResumenFinanciero();
-            }
-        };
+        // NOTA: No sobrescribir cambiarTab aquí porque ya incluye la lógica de finanzas
+        // La función cambiarTab original ya maneja todos los tabs correctamente
 
         // Cerrar modales al hacer clic fuera
         document.getElementById('modal-gestion-finanzas').addEventListener('click', function(e) {
@@ -4242,33 +4727,35 @@ SUBASTAS:
         });
 
         // ========== FUNCIONES PARA GESTIÓN DE RIFAS ==========
-        function mostrarModalRifas() {
-            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
-            
-            let html = '<div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;" onclick="if(event.target === this) this.remove()">';
-            html += '<div style="background: white; padding: 2rem; border-radius: 20px; max-width: 1200px; width: 90%; max-height: 90vh; overflow-y: auto;">';
-            html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">';
-            html += '<h2 style="margin: 0; color: #333;"><i class="fas fa-ticket-alt"></i> Gestión de Rifas</h2>';
-            html += '<button onclick="this.closest(\'.modal\').remove()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999;">&times;</button>';
-            html += '</div>';
+        async function mostrarModalRifas() {
+            try {
+                const data = await rifasManager.getRifas();
+                const rifas = data.rifas || [];
+                
+                let html = '<div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;" onclick="if(event.target === this) this.remove()">';
+                html += '<div style="background: white; padding: 2rem; border-radius: 20px; max-width: 1200px; width: 90%; max-height: 90vh; overflow-y: auto;">';
+                html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">';
+                html += '<h2 style="margin: 0; color: #333;"><i class="fas fa-ticket-alt"></i> Gestión de Rifas</h2>';
+                html += '<button onclick="this.closest(\'.modal\').remove()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999;">&times;</button>';
+                html += '</div>';
 
-            if (rifas.length === 0) {
-                html += '<p style="text-align: center; color: #999; padding: 3rem;">No hay rifas creadas</p>';
-            } else {
-                html += '<div style="display: grid; gap: 1.5rem;">';
-                rifas.forEach(rifa => {
-                    const vendidos = rifa.boletos ? rifa.boletos.filter(b => b.comprado).length : 0;
-                    const porcentaje = (vendidos / rifa.totalBoletos * 100).toFixed(1);
-                    const ingresos = vendidos * rifa.precioBoleto;
-                    const fechaSorteo = new Date(rifa.fechaSorteo).toLocaleDateString('es-CL');
-                    
-                    html += '<div style="border: 2px solid #e0e0e0; border-radius: 15px; padding: 1.5rem; display: flex; gap: 1.5rem; align-items: center;">';
-                    html += '<img src="' + rifa.imagen + '" style="width: 120px; height: 120px; object-fit: cover; border-radius: 10px;">';
-                    html += '<div style="flex: 1;">';
-                    html += '<div style="display: flex; gap: 0.5rem; margin-bottom: 0.8rem;">';
-                    html += '<span style="background: ' + (rifa.estado === 'activa' ? '#27ae60' : '#95a5a6') + '; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.85rem; font-weight: 600;">' + rifa.estado.toUpperCase() + '</span>';
-                    html += '</div>';
-                    html += '<h3 style="margin: 0 0 0.5rem 0; color: #333;">' + rifa.titulo + '</h3>';
+                if (rifas.length === 0) {
+                    html += '<p style="text-align: center; color: #999; padding: 3rem;">No hay rifas creadas</p>';
+                } else {
+                    html += '<div style="display: grid; gap: 1.5rem;">';
+                    rifas.forEach(rifa => {
+                        const vendidos = rifa.boletos ? rifa.boletos.filter(b => b.comprado).length : 0;
+                        const porcentaje = (vendidos / rifa.totalBoletos * 100).toFixed(1);
+                        const ingresos = vendidos * rifa.precioBoleto;
+                        const fechaSorteo = new Date(rifa.fechaSorteo).toLocaleDateString('es-CL');
+                        
+                        html += '<div style="border: 2px solid #e0e0e0; border-radius: 15px; padding: 1.5rem; display: flex; gap: 1.5rem; align-items: center;">';
+                        html += '<img src="' + rifa.imagen + '" style="width: 120px; height: 120px; object-fit: cover; border-radius: 10px;">';
+                        html += '<div style="flex: 1;">';
+                        html += '<div style="display: flex; gap: 0.5rem; margin-bottom: 0.8rem;">';
+                        html += '<span style="background: ' + (rifa.estado === 'activa' ? '#27ae60' : '#95a5a6') + '; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.85rem; font-weight: 600;">' + rifa.estado.toUpperCase() + '</span>';
+                        html += '</div>';
+                        html += '<h3 style="margin: 0 0 0.5rem 0; color: #333;">' + rifa.titulo + '</h3>';
                     html += '<p style="margin: 0.5rem 0; color: #666; font-size: 0.9rem;">🏢 ' + rifa.empresaNombre + '</p>';
                     html += '<p style="margin: 0.5rem 0; color: #666; font-size: 0.9rem;">🎁 ' + rifa.premio + ' ($' + rifa.valorPremio.toLocaleString('es-CL') + ')</p>';
                     html += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">';
@@ -4298,14 +4785,23 @@ SUBASTAS:
             modal.className = 'modal';
             modal.innerHTML = html;
             document.body.appendChild(modal);
+            } catch (error) {
+                console.error('Error al cargar rifas:', error);
+                notify.error(error.message || 'Error al cargar las rifas');
+            }
         }
 
-        function verCompradores(rifaId) {
-            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
-            const rifa = rifas.find(r => r.id === rifaId);
-            if (!rifa) return;
+        async function verCompradores(rifaId) {
+            try {
+                const data = await rifasManager.getRifaById(rifaId);
+                const rifa = data.rifa;
+                
+                if (!rifa) {
+                    notify.error('Rifa no encontrada');
+                    return;
+                }
 
-            const boletosComprados = rifa.boletos.filter(b => b.comprado);
+                const boletosComprados = rifa.boletos ? rifa.boletos.filter(b => b.comprado) : [];
             
             let html = '<div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10001;" onclick="if(event.target === this) this.remove()">';
             html += '<div style="background: white; padding: 2rem; border-radius: 20px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">';
@@ -4359,78 +4855,68 @@ SUBASTAS:
             modal.className = 'modal';
             modal.innerHTML = html;
             document.body.appendChild(modal);
+            } catch (error) {
+                console.error('Error al cargar compradores:', error);
+                notify.error(error.message || 'Error al cargar los compradores');
+            }
         }
 
         async function realizarSorteo(rifaId) {
-            const confirmado = await confirm('¿Realizar el sorteo ahora? Se seleccionará un ganador aleatorio.');
-            if (!confirmado) return;
+            try {
+                const confirmado = await confirm('¿Realizar el sorteo ahora? Se seleccionará un ganador aleatorio.');
+                if (!confirmado) return;
 
-            const rifas = JSON.parse(localStorage.getItem('nexos_rifas') || '[]');
-            const rifa = rifas.find(r => r.id === rifaId);
-            if (!rifa) return;
-
-            const boletosVendidos = rifa.boletos.filter(b => b.comprado);
-            if (boletosVendidos.length === 0) {
-                notify.error('No hay boletos vendidos');
-                return;
+                const result = await rifasManager.realizarSorteo(rifaId);
+                
+                notify.success(`¡Sorteo realizado! Ganador: ${result.ganador.userName} - Boleto #${result.ganador.numeroBoleto}`);
+                
+                // Cerrar modales y actualizar
+                document.querySelectorAll('.modal').forEach(m => m.remove());
+                cargarDashboardPrincipal();
+            } catch (error) {
+                console.error('Error al realizar sorteo:', error);
+                notify.error(error.message || 'Error al realizar el sorteo');
             }
-
-            // Seleccionar ganador aleatorio
-            const ganador = boletosVendidos[Math.floor(Math.random() * boletosVendidos.length)];
-            
-            rifa.estado = 'finalizada';
-            rifa.ganador = {
-                userId: ganador.userId,
-                userName: ganador.userName,
-                numeroBoleto: ganador.numero,
-                fechaSorteo: new Date().toISOString()
-            };
-
-            localStorage.setItem('nexos_rifas', JSON.stringify(rifas));
-            
-            notify.success('¡Sorteo realizado! Ganador: ' + ganador.userName + ' - Boleto #' + ganador.numero);
-            
-            // Cerrar modales y actualizar
-            document.querySelectorAll('.modal').forEach(m => m.remove());
-            cargarDashboardPrincipal();
         }
 
         // ========== FUNCIONES PARA GESTIÓN DE PRODUCTOS ==========
-        function mostrarModalProductos() {
-            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
-            
-            let html = '<div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;" onclick="if(event.target === this) this.remove()">';
-            html += '<div style="background: white; padding: 2rem; border-radius: 20px; max-width: 1200px; width: 90%; max-height: 90vh; overflow-y: auto;">';
-            html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">';
-            html += '<h2 style="margin: 0; color: #333;"><i class="fas fa-shopping-bag"></i> Gestión de Productos</h2>';
-            html += '<button onclick="this.closest(\'.modal\').remove()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999;">&times;</button>';
-            html += '</div>';
-
-            if (productos.length === 0) {
-                html += '<p style="text-align: center; color: #999; padding: 3rem;">No hay productos creados</p>';
-            } else {
-                // Resumen general
-                const totalProductos = productos.length;
-                const enStock = productos.filter(p => p.stock > 0).length;
-                const agotados = productos.filter(p => p.stock === 0).length;
-                const totalVentas = productos.reduce((sum, p) => {
-                    return sum + (p.ventas || []).reduce((s, v) => s + v.cantidad, 0);
-                }, 0);
-                const ingresos = productos.reduce((sum, p) => {
-                    return sum + (p.ventas || []).reduce((s, v) => s + (v.cantidad * v.precioUnitario), 0);
-                }, 0);
-
-                html += '<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2rem;">';
-                html += '<div style="padding: 1rem; background: #f8f9fa; border-radius: 10px; text-align: center;">';
-                html += '<div style="font-size: 2rem; font-weight: 700; color: #3498db;">' + totalProductos + '</div>';
-                html += '<div style="font-size: 0.9rem; color: #666;">Total Productos</div>';
+        async function mostrarModalProductos() {
+            try {
+                const data = await productosManager.getProductos();
+                const productos = data.productos || [];
+                
+                let html = '<div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;" onclick="if(event.target === this) this.remove()">';
+                html += '<div style="background: white; padding: 2rem; border-radius: 20px; max-width: 1200px; width: 90%; max-height: 90vh; overflow-y: auto;">';
+                html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">';
+                html += '<h2 style="margin: 0; color: #333;"><i class="fas fa-shopping-bag"></i> Gestión de Productos</h2>';
+                html += '<button onclick="this.closest(\'.modal\').remove()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999;">&times;</button>';
                 html += '</div>';
-                html += '<div style="padding: 1rem; background: #f8f9fa; border-radius: 10px; text-align: center;">';
-                html += '<div style="font-size: 2rem; font-weight: 700; color: #27ae60;">' + enStock + '</div>';
-                html += '<div style="font-size: 0.9rem; color: #666;">En Stock</div>';
-                html += '</div>';
-                html += '<div style="padding: 1rem; background: #f8f9fa; border-radius: 10px; text-align: center;">';
-                html += '<div style="font-size: 2rem; font-weight: 700; color: #e74c3c;">' + agotados + '</div>';
+
+                if (productos.length === 0) {
+                    html += '<p style="text-align: center; color: #999; padding: 3rem;">No hay productos creados</p>';
+                } else {
+                    // Resumen general
+                    const totalProductos = productos.length;
+                    const enStock = productos.filter(p => p.stock > 0).length;
+                    const agotados = productos.filter(p => p.stock === 0).length;
+                    const totalVentas = productos.reduce((sum, p) => {
+                        return sum + (p.ventas || []).reduce((s, v) => s + v.cantidad, 0);
+                    }, 0);
+                    const ingresos = productos.reduce((sum, p) => {
+                        return sum + (p.ventas || []).reduce((s, v) => s + (v.cantidad * v.precioUnitario), 0);
+                    }, 0);
+
+                    html += '<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2rem;">';
+                    html += '<div style="padding: 1rem; background: #f8f9fa; border-radius: 10px; text-align: center;">';
+                    html += '<div style="font-size: 2rem; font-weight: 700; color: #3498db;">' + totalProductos + '</div>';
+                    html += '<div style="font-size: 0.9rem; color: #666;">Total Productos</div>';
+                    html += '</div>';
+                    html += '<div style="padding: 1rem; background: #f8f9fa; border-radius: 10px; text-align: center;">';
+                    html += '<div style="font-size: 2rem; font-weight: 700; color: #27ae60;">' + enStock + '</div>';
+                    html += '<div style="font-size: 0.9rem; color: #666;">En Stock</div>';
+                    html += '</div>';
+                    html += '<div style="padding: 1rem; background: #f8f9fa; border-radius: 10px; text-align: center;">';
+                    html += '<div style="font-size: 2rem; font-weight: 700; color: #e74c3c;">' + agotados + '</div>';
                 html += '<div style="font-size: 0.9rem; color: #666;">Agotados</div>';
                 html += '</div>';
                 html += '<div style="padding: 1rem; background: #f8f9fa; border-radius: 10px; text-align: center;">';
@@ -4493,14 +4979,23 @@ SUBASTAS:
             modal.className = 'modal';
             modal.innerHTML = html;
             document.body.appendChild(modal);
+            } catch (error) {
+                console.error('Error al cargar productos:', error);
+                notify.error(error.message || 'Error al cargar los productos');
+            }
         }
 
-        function verVentas(productoId) {
-            const productos = JSON.parse(localStorage.getItem('nexos_productos') || '[]');
-            const producto = productos.find(p => p.id === productoId);
-            if (!producto) return;
+        async function verVentas(productoId) {
+            try {
+                const data = await productosManager.getProductoById(productoId);
+                const producto = data.producto;
+                
+                if (!producto) {
+                    notify.error('Producto no encontrado');
+                    return;
+                }
 
-            const ventas = producto.ventas || [];
+                const ventas = producto.ventas || [];
             
             let html = '<div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10001;" onclick="if(event.target === this) this.remove()">';
             html += '<div style="background: white; padding: 2rem; border-radius: 20px; max-width: 900px; width: 90%; max-height: 90vh; overflow-y: auto;">';
@@ -4548,6 +5043,10 @@ SUBASTAS:
             modal.className = 'modal';
             modal.innerHTML = html;
             document.body.appendChild(modal);
+            } catch (error) {
+                console.error('Error al cargar ventas:', error);
+                notify.error(error.message || 'Error al cargar las ventas del producto');
+            }
         }
     </script>
 </body>

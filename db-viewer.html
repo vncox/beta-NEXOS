@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXOS - Visor de Base de Datos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 2rem;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select, button {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        select {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 2rem;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-modal.active {
+            display: flex;
+        }
+
+        .login-form {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-form h2 {
+            color: #667eea;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            background: white;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .user-info .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .user-info .info {
+            flex: 1;
+        }
+
+        .user-info .info strong {
+            display: block;
+            color: #333;
+        }
+
+        .user-info .info small {
+            color: #6c757d;
+        }
+
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-logout:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal de Login -->
+    <div id="loginModal" class="login-modal active">
+        <div class="login-form">
+            <h2>🔐 Iniciar Sesión</h2>
+            <div id="loginError" class="error" style="display: none; margin-bottom: 1rem;"></div>
+            <div class="form-group">
+                <label for="username">Usuario:</label>
+                <input type="text" id="username" placeholder="admin" value="admin">
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" placeholder="••••••••" value="admin123">
+            </div>
+            <button class="btn-login" onclick="login()">Iniciar Sesión</button>
+            <p style="text-align: center; margin-top: 1rem; color: #6c757d; font-size: 0.9rem;">
+                Usuario por defecto: <strong>admin</strong> / <strong>admin123</strong>
+            </p>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer" style="display: none;">
+        <div class="header">
+            <h1>🗄️ NEXOS Database Viewer</h1>
+            <p>Visualiza y explora tu base de datos PostgreSQL en tiempo real</p>
+        </div>
+
+        <div class="user-info" id="userInfo" style="display: none;">
+            <div class="avatar" id="userAvatar">A</div>
+            <div class="info">
+                <strong id="userName">Admin</strong>
+                <small id="userRole">Administrador</small>
+            </div>
+            <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+        </div>
+
+        <div class="stats" id="stats">
+            <!-- Stats will be loaded here -->
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <select id="tableSelect">
+                    <option value="">Selecciona una tabla...</option>
+                </select>
+                <button onclick="loadTable()">📋 Cargar Tabla</button>
+                <button onclick="refreshStats()">🔄 Actualizar Estadísticas</button>
+                <button onclick="exportToCSV()">💾 Exportar CSV</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div id="tableContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Selecciona una tabla para comenzar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:4000/api';
+        let currentData = [];
+        let currentTable = '';
+        let currentUser = null;
+
+        // Check if user is already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                verifyToken(token);
+            }
+        });
+
+        // Login function
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+
+            console.log('🔑 Intentando login con usuario:', username);
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Credenciales incorrectas');
+                }
+
+                const data = await response.json();
+                console.log('✅ Login exitoso:', data);
+                
+                // El backend devuelve 'account' en lugar de 'user'
+                const user = data.account || data.user || data;
+                
+                localStorage.setItem('token', data.token);
+                currentUser = user;
+
+                // Show main container
+                document.getElementById('loginModal').classList.remove('active');
+                document.getElementById('mainContainer').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'flex';
+
+                // Update user info
+                document.getElementById('userAvatar').textContent = user.username[0].toUpperCase();
+                document.getElementById('userName').textContent = user.username;
+                document.getElementById('userRole').textContent = user.role === 'admin' ? 'Administrador' : 'Usuario';
+
+                // Initialize
+                console.log('📊 Inicializando tablas desde login...');
+                initTables();
+                console.log('📈 Cargando estadísticas desde login...');
+                await refreshStats();
+
+            } catch (error) {
+                console.error('❌ Error en login:', error);
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // Verify token
+        async function verifyToken(token) {
+            try {
+                console.log('🔐 Verificando token...');
+                const response = await fetch(`${API_URL}/auth/verify`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('📦 Datos recibidos de verify:', data);
+                    
+                    // El backend puede devolver directamente el usuario o dentro de data.user
+                    const user = data.user || data;
+                    currentUser = user;
+                    
+                    if (!user || !user.username) {
+                        console.error('❌ Datos de usuario inválidos:', data);
+                        localStorage.removeItem('token');
+                        return;
+                    }
+                    
+                    console.log('✅ Token verificado. Usuario:', user.username);
+
+                    document.getElementById('loginModal').classList.remove('active');
+                    document.getElementById('mainContainer').style.display = 'block';
+                    document.getElementById('userInfo').style.display = 'flex';
+
+                    document.getElementById('userAvatar').textContent = user.username[0].toUpperCase();
+                    document.getElementById('userName').textContent = user.username;
+                    document.getElementById('userRole').textContent = user.role === 'admin' ? 'Administrador' : 'Usuario';
+
+                    console.log('📊 Inicializando tablas...');
+                    initTables();
+                    console.log('📈 Cargando estadísticas...');
+                    refreshStats();
+                } else {
+                    console.error('❌ Token inválido, status:', response.status);
+                    localStorage.removeItem('token');
+                }
+            } catch (error) {
+                console.error('❌ Error verificando token:', error);
+                localStorage.removeItem('token');
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            currentUser = null;
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('loginModal').classList.add('active');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // Tablas disponibles
+        const tables = [
+            { name: 'users', label: '👥 Usuarios', endpoint: '/admin/usuarios' },
+            { name: 'empresas', label: '🏢 Empresas', endpoint: '/admin/empresas?estado=aprobada' },
+            { name: 'empresas_pendientes', label: '⏳ Empresas Pendientes', endpoint: '/admin/empresas?estado=pendiente' },
+            { name: 'empresas_rechazadas', label: '❌ Empresas Rechazadas', endpoint: '/admin/empresas?estado=rechazada' },
+            { name: 'subastas', label: '🔨 Subastas', endpoint: '/admin/subastas' },
+            { name: 'rifas', label: '🎰 Rifas', endpoint: '/rifas?limit=100' },
+            { name: 'productos', label: '📦 Productos', endpoint: '/productos' },
+            { name: 'causas', label: '❤️ Causas', endpoint: '/causas' },
+            { name: 'donaciones', label: '💝 Donaciones', endpoint: '/donaciones' }
+        ];
+
+        // Cargar opciones de tabla
+        function initTables() {
+            const select = document.getElementById('tableSelect');
+            // Limpiar opciones existentes excepto la primera
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+            
+            // Agregar opciones de tablas
+            tables.forEach(table => {
+                const option = document.createElement('option');
+                option.value = table.name;
+                option.textContent = table.label;
+                option.dataset.endpoint = table.endpoint;
+                select.appendChild(option);
+            });
+            
+            console.log(`✅ ${tables.length} tablas cargadas en el selector`);
+        }
+
+        // Cargar estadísticas
+        async function refreshStats() {
+            try {
+                const token = localStorage.getItem('token');
+                console.log('📊 Token para stats:', token ? 'Presente' : 'No encontrado');
+                
+                if (!token) {
+                    console.error('No hay token disponible');
+                    return;
+                }
+
+                console.log('🌐 Haciendo fetch a:', `${API_URL}/admin/estadisticas`);
+                
+                const response = await fetch(`${API_URL}/admin/estadisticas`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('📡 Respuesta stats - Status:', response.status);
+
+                if (response.status === 401) {
+                    console.error('Token expirado o inválido');
+                    localStorage.removeItem('token');
+                    logout();
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('✅ Datos de estadísticas recibidos:', data);
+
+                // Normalizar nombres de campos del backend
+                const usuarios = data.totalUsuarios || data.usuarios || 0;
+                const empresas = data.totalEmpresas || data.empresas || 0;
+                const subastas = data.totalSubastas || data.subastas || 0;
+                const causas = data.totalCausas || data.causas || 0;
+                const circulacionTotal = data.totalRecaudado || data.circulacionTotal || 0;
+
+                const statsHTML = `
+                    <div class="stat-card">
+                        <h3>${usuarios}</h3>
+                        <p>👥 Usuarios</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${empresas}</h3>
+                        <p>🏢 Empresas</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${subastas}</h3>
+                        <p>🔨 Subastas</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${causas}</h3>
+                        <p>❤️ Causas</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>$${circulacionTotal.toLocaleString('es-CL')}</h3>
+                        <p>💰 Circulación Total</p>
+                    </div>
+                `;
+
+                const statsElement = document.getElementById('stats');
+                if (statsElement) {
+                    statsElement.innerHTML = statsHTML;
+                    console.log('✅ Estadísticas renderizadas en el DOM');
+                    console.log('📊 Stats HTML:', statsHTML.substring(0, 100) + '...');
+                } else {
+                    console.error('❌ Elemento #stats no encontrado en el DOM');
+                }
+            } catch (error) {
+                console.error('❌ Error loading stats:', error);
+            }
+        }
+
+        // Cargar tabla
+        async function loadTable() {
+            const select = document.getElementById('tableSelect');
+            const selectedOption = select.options[select.selectedIndex];
+            
+            if (!selectedOption.value) return;
+
+            currentTable = selectedOption.value;
+            const endpoint = selectedOption.dataset.endpoint;
+            const contentDiv = document.getElementById('tableContent');
+
+            contentDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando ${selectedOption.textContent}...</p>
+                </div>
+            `;
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No hay token de autenticación');
+                }
+
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.status === 401) {
+                    console.error('Token expirado o inválido');
+                    localStorage.removeItem('token');
+                    logout();
+                    throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText} en ${endpoint}`);
+                }
+
+                const data = await response.json();
+                
+                console.log('Response data:', data); // Debug
+                
+                // Extraer array de datos según estructura
+                let records = [];
+                if (Array.isArray(data)) {
+                    records = data;
+                } else if (data.data) {
+                    records = Array.isArray(data.data) ? data.data : [data.data];
+                } else if (data.subastas) {
+                    records = data.subastas;
+                } else if (data.usuarios) {
+                    records = data.usuarios;
+                } else if (data.empresas) {
+                    records = data.empresas;
+                } else if (data.rifas) {
+                    records = data.rifas;
+                } else if (data.productos) {
+                    records = data.productos;
+                } else if (data.causas) {
+                    records = data.causas;
+                } else if (data.donaciones) {
+                    records = data.donaciones;
+                } else if (data.transacciones) {
+                    records = data.transacciones;
+                } else {
+                    // Try to find first array property
+                    for (let key in data) {
+                        if (Array.isArray(data[key])) {
+                            records = data[key];
+                            break;
+                        }
+                    }
+                }
+
+                currentData = records;
+
+                if (records.length === 0) {
+                    contentDiv.innerHTML = `
+                        <div class="loading">
+                            <p>No hay registros en esta tabla</p>
+                            <small style="color: #999;">Endpoint: ${endpoint}</small>
+                        </div>
+                    `;
+                    return;
+                }
+
+                renderTable(records, selectedOption.textContent);
+
+            } catch (error) {
+                console.error('Error details:', error);
+                contentDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Error al cargar datos:</strong><br>
+                        ${error.message}<br><br>
+                        <small>Endpoint: ${endpoint}</small><br>
+                        <small>Asegúrate de que el backend esté corriendo y que tengas permisos.</small>
+                    </div>
+                `;
+            }
+        }
+
+        // Renderizar tabla
+        function renderTable(data, tableName) {
+            if (data.length === 0) return;
+
+            const keys = Object.keys(data[0]).filter(key => 
+                typeof data[0][key] !== 'object' || data[0][key] === null
+            );
+
+            let tableHTML = `
+                <h2 style="margin-bottom: 1rem; color: #667eea;">
+                    📊 ${tableName} (${data.length} registros)
+                </h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                ${keys.map(key => `<th>${key}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.forEach(row => {
+                tableHTML += '<tr>';
+                keys.forEach(key => {
+                    let value = row[key];
+                    
+                    // Formatear valores especiales
+                    if (value === null || value === undefined) {
+                        value = '<em style="color: #999;">null</em>';
+                    } else if (typeof value === 'boolean') {
+                        value = `<span class="badge ${value ? 'badge-success' : 'badge-danger'}">${value ? 'Sí' : 'No'}</span>`;
+                    } else if (key.includes('fecha') || key.includes('Date') || key.includes('At')) {
+                        value = new Date(value).toLocaleString('es-CL');
+                    } else if (key.includes('saldo') || key.includes('precio') || key.includes('monto')) {
+                        value = '$' + Number(value).toLocaleString('es-CL');
+                    } else if (key === 'estado') {
+                        const badgeClass = value === 'activa' || value === 'aprobada' ? 'badge-success' : 
+                                         value === 'pendiente' ? 'badge-warning' : 
+                                         value === 'rechazada' || value === 'cancelada' ? 'badge-danger' : 'badge-info';
+                        value = `<span class="badge ${badgeClass}">${value}</span>`;
+                    }
+                    
+                    tableHTML += `<td>${value}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+
+            tableHTML += '</tbody></table></div>';
+
+            document.getElementById('tableContent').innerHTML = tableHTML;
+        }
+
+        // Exportar a CSV
+        function exportToCSV() {
+            if (currentData.length === 0) {
+                alert('No hay datos para exportar');
+                return;
+            }
+
+            const keys = Object.keys(currentData[0]).filter(key => 
+                typeof currentData[0][key] !== 'object' || currentData[0][key] === null
+            );
+
+            let csv = keys.join(',') + '\n';
+
+            currentData.forEach(row => {
+                const values = keys.map(key => {
+                    let value = row[key];
+                    if (value === null || value === undefined) return '';
+                    if (typeof value === 'string' && value.includes(',')) {
+                        return `"${value}"`;
+                    }
+                    return value;
+                });
+                csv += values.join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentTable}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        // Inicializar (removed from here, called after login)
+    </script>
+</body>
+</html>

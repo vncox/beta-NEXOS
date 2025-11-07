@@ -44,6 +44,8 @@
             <ul class="nav-links">
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="subastas.html">Subastas</a></li>
+                <li><a href="rifas.html">Rifas</a></li>
+                <li><a href="ventas.html">Ventas</a></li>
                 <li><a href="causas.html">Causas</a></li>
                 <li><a href="empresas.html">Empresas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
@@ -345,8 +347,8 @@
         </div>
     </footer>
 
-    <script src="notifications.js"></script>
-    <script src="auth.js"></script>
+    <script src="api-config.js"></script>
+    <script src="auth-backend.js"></script>
     <script>
         if (auth.isLoggedIn()) {
             window.location.href = 'index.html';
@@ -376,31 +378,60 @@
             setTimeout(function() { alert.style.display = 'none'; }, 5000);
         }
 
-        function loginUsuario(e) {
+        async function loginUsuario(e) {
             e.preventDefault();
             const form = e.target;
-            const result = auth.login(form.username.value, form.password.value, 'user');
-            if (result.success) {
-                mostrarAlerta('Usuario', result.message, false);
-                setTimeout(function() { window.location.href = 'index.html'; }, 1000);
-            } else {
-                mostrarAlerta('Usuario', result.message, true);
+            const btn = form.querySelector('button[type="submit"]');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 0.5rem;"></i>Iniciando sesión...';
+            
+            try {
+                const result = await auth.login(form.username.value, form.password.value);
+                if (result.success) {
+                    mostrarAlerta('Usuario', result.message, false);
+                    setTimeout(function() { 
+                        auth.redirectToDashboard();
+                    }, 1000);
+                } else {
+                    mostrarAlerta('Usuario', result.message, true);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i>Iniciar Sesión';
+                }
+            } catch (error) {
+                mostrarAlerta('Usuario', 'Error al conectar con el servidor', true);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i>Iniciar Sesión';
             }
         }
 
-        function loginEmpresa(e) {
+        async function loginEmpresa(e) {
             e.preventDefault();
             const form = e.target;
-            const result = auth.login(form.username.value, form.password.value, 'empresa');
-            if (result.success) {
-                mostrarAlerta('Empresa', result.message, false);
-                setTimeout(function() { window.location.href = 'index.html'; }, 1000);
-            } else {
-                mostrarAlerta('Empresa', result.message, true);
+            const btn = form.querySelector('button[type="submit"]');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 0.5rem;"></i>Iniciando sesión...';
+            
+            try {
+                const result = await auth.login(form.username.value, form.password.value);
+                if (result.success) {
+                    mostrarAlerta('Empresa', result.message, false);
+                    setTimeout(function() { 
+                        auth.redirectToDashboard();
+                    }, 1000);
+                } else {
+                    mostrarAlerta('Empresa', result.message, true);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i>Iniciar Sesión';
+                }
+            } catch (error) {
+                mostrarAlerta('Empresa', 'Error al conectar con el servidor', true);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i>Iniciar Sesión';
             }
         }
 
-        // Función para validar contraseña segura
         function validarContraseñaSegura(password) {
             const requisitos = {
                 minLength: password.length >= 8,
@@ -423,9 +454,10 @@
             };
         }
 
-        function registrarUsuario(e) {
+        async function registrarUsuario(e) {
             e.preventDefault();
             const form = e.target;
+            const btn = form.querySelector('button[type="submit"]');
             
             if (form.password.value !== form.password2.value) {
                 mostrarAlerta('Usuario', 'Las contraseñas no coinciden', true);
@@ -439,21 +471,33 @@
                 mostrarAlerta('Usuario', mensaje, true);
                 return;
             }
-            const result = auth.registerUser({
-                username: form.username.value,
-                nombre: form.nombre.value,
-                apellido: form.apellido.value,
-                rut: form.rut.value,
-                email: form.email.value,
-                telefono: form.telefono.value,
-                password: form.password.value
-            });
-            if (result.success) {
-                mostrarAlerta('Usuario', result.message, false);
-                form.reset();
-                setTimeout(function() { cambiarTab('usuario', 'login'); }, 2000);
-            } else {
-                mostrarAlerta('Usuario', result.message, true);
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 0.5rem;"></i>Registrando...';
+            
+            try {
+                const result = await auth.registerUser({
+                    username: form.username.value,
+                    nombre: form.nombre.value,
+                    apellido: form.apellido.value,
+                    rut: form.rut.value,
+                    email: form.email.value,
+                    telefono: form.telefono.value,
+                    password: form.password.value
+                });
+                
+                if (result.success) {
+                    mostrarAlerta('Usuario', result.message, false);
+                    form.reset();
+                    setTimeout(function() { cambiarTab('usuario', 'login'); }, 2000);
+                } else {
+                    mostrarAlerta('Usuario', result.message, true);
+                }
+            } catch (error) {
+                mostrarAlerta('Usuario', 'Error al conectar con el servidor', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-user-plus" style="margin-right: 0.5rem;"></i>Registrarse';
             }
         }
 
@@ -542,24 +586,35 @@
                 sitioWeb = 'https://' + sitioWeb;
             }
             
-            const result = auth.registerEmpresa({
-                username: form.username.value,
-                razonSocial: form.razonSocial.value,
-                rut: form.rut.value,
-                email: form.email.value,
-                telefono: form.telefono.value,
-                direccion: form.direccion.value,
-                sitioWeb: sitioWeb,
-                password: form.password.value,
-                documentosLegales: documentosLegales
-            });
+            const btn = form.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 0.5rem;"></i>Registrando empresa...';
             
-            if (result.success) {
-                mostrarAlerta('Empresa', result.message, false);
-                form.reset();
-                setTimeout(function() { cambiarTab('empresa', 'login'); }, 2000);
-            } else {
-                mostrarAlerta('Empresa', result.message, true);
+            try {
+                const result = await auth.registerEmpresa({
+                    username: form.username.value,
+                    razonSocial: form.razonSocial.value,
+                    rut: form.rut.value,
+                    email: form.email.value,
+                    telefono: form.telefono.value,
+                    direccion: form.direccion.value,
+                    sitioWeb: sitioWeb,
+                    password: form.password.value,
+                    documentosLegales: documentosLegales
+                });
+                
+                if (result.success) {
+                    mostrarAlerta('Empresa', result.message, false);
+                    form.reset();
+                    setTimeout(function() { cambiarTab('empresa', 'login'); }, 2000);
+                } else {
+                    mostrarAlerta('Empresa', result.message, true);
+                }
+            } catch (error) {
+                mostrarAlerta('Empresa', 'Error al conectar con el servidor', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-building" style="margin-right: 0.5rem;"></i>Registrar Empresa';
             }
         }
         
@@ -598,29 +653,30 @@
             }, 5000);
         }
 
-        function solicitarRecuperacion(e) {
+        async function solicitarRecuperacion(e) {
             e.preventDefault();
             const email = document.getElementById('emailRecuperacion').value;
+            const btn = e.target.querySelector('button[type="submit"]');
             
-            const result = auth.requestPasswordReset(email);
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 0.5rem;"></i>Enviando...';
             
-            if (result.success) {
-                mostrarAlertaModal(result.message, false);
+            try {
+                const result = await auth.requestPasswordReset(email, tipoRecuperacion);
                 
-                // Si es usuario, mostrar la contraseña temporal en el modal
-                if (result.request && result.request.type === 'user' && result.request.tempPassword) {
-                    setTimeout(async function() {
-                        cerrarModalRecuperacion();
-                        await alert('Solicitud procesada.\n\nTu nueva contraseña temporal es:\n\n' + result.request.tempPassword + '\n\nPuedes usarla para iniciar sesión ahora.');
-                    }, 1500);
-                } else {
-                    // Para empresas
+                if (result.success) {
+                    mostrarAlertaModal(result.message, false);
                     setTimeout(function() {
                         cerrarModalRecuperacion();
                     }, 2000);
+                } else {
+                    mostrarAlertaModal(result.message, true);
                 }
-            } else {
-                mostrarAlertaModal(result.message, true);
+            } catch (error) {
+                mostrarAlertaModal('Error al conectar con el servidor', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right: 0.5rem;"></i>Solicitar Recuperación';
             }
         }
 

@@ -21,29 +21,28 @@
             </a>
             <ul class="nav-links">
                 <li><a href="index.html">Inicio</a></li>
-                <li><a href="subastas.html" class="active">Subastas</a></li>
+                <li><a href="subastas.html">Subastas</a></li>
                 <li><a href="rifas.html">Rifas</a></li>
                 <li><a href="ventas.html">Ventas</a></li>
                 <li><a href="causas.html">Causas</a></li>
                 <li><a href="empresas.html">Empresas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
             </ul>
-            <button class="cta-button" onclick="window.location.href='login.html'">Iniciar Sesión</button>
+            <button class="cta-button" id="navAuthButton">Iniciar Sesión</button>
         </nav>
     </header>
 
-        <section class="hero" style="padding: 3rem 5%; min-height: 300px;">
-            <div class="hero-content">
-                <h1>Todas las Subastas</h1>
-                <p>Subasta ahora y ayuda las organizaciones, y podras llevarte increibles productos </p>
-            </div>
-        </section>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>🔨 Todas las Subastas</h1>
+            <p>Subasta ahora y ayuda a las organizaciones, podrás llevarte increíbles productos</p>
+        </div>
+    </section>
 
-        <main>
+    <main>
         <section class="trending-section">
-            <h2 class="section-title">Todas las Subastas🔥</h2>
-
-            <div class="auctions-grid">
+            <h2 class="section-title">Subastas Activas 🔥</h2>
+            <div id="auctions-grid" class="auctions-grid">
                 <!-- Las subastas se cargan dinámicamente con JavaScript -->
             </div>
         </section>
@@ -66,440 +65,60 @@
         </div>
     </footer>
     <script src="notifications.js"></script>
-    <script src="auth.js"></script>
-    <script src="config.js"></script>
+    <script src="api-config.js"></script>
+    <script src="auth-backend.js"></script>
+    <script src="wallet-manager.js"></script>
+    <script src="subastas-manager.js"></script>
+    <script src="navbar-helper.js"></script>
     <script>
-        // Inicializar subastas de prueba si no existen
-        function inicializarSubastasPrueba() {
-            let subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
+        // Inicializar página de subastas con datos del backend
+        async function inicializarPaginaSubastas() {
+            console.log('Inicializando página de subastas...');
             
-            // Verificar si ya existen subastas de prueba
-            const yaExistenPrueba = subastas.some(function(s) { return s.esPrueba === true; });
-            
-            if (!yaExistenPrueba) {
-                const ahora = new Date();
-                const fechaFin = new Date(ahora.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 días después
+            try {
+                const result = await subastasManager.getSubastas({ estado: 'activa', limit: 50 });
+                console.log('Resultado de getSubastas:', result);
                 
-                const subastasPrueba = [
-                    {
-                        id: 'prueba_1',
-                        empresaId: 'prueba',
-                        empresaNombre: 'Teletón',
-                        tipo: 'subasta',
-                        titulo: 'Camiseta de Fútbol Autografiada',
-                        descripcion: 'Camiseta firmada por el equipo nacional de fútbol de Chile. Esta exclusiva prenda deportiva cuenta con las firmas de todos los jugadores del plantel y el cuerpo técnico. Los fondos recaudados beneficiarán directamente a niños con cáncer que reciben tratamiento en centros de la Teletón a lo largo del país.',
-                        imagen: 'images/polera.png',
-                        precioInicial: 50000,
-                        precioActual: 85000,
-                        fechaInicio: new Date(ahora.getTime() - (7 * 24 * 60 * 60 * 1000)).toISOString(),
-                        fechaFin: fechaFin.toISOString(),
-                        estado: 'activa',
-                        participantes: ['María González', 'Pedro Ramírez', 'Ana Torres'],
-                        pujas: [],
-                        esPrueba: true,
-                        fechaCreacion: ahora.toISOString()
-                    },
-                    {
-                        id: 'prueba_2',
-                        empresaId: 'prueba',
-                        empresaNombre: 'Fundación Duchenne',
-                        tipo: 'subasta',
-                        titulo: 'Consola Retro Coleccionable',
-                        descripcion: 'Consola de videojuegos retro de edición limitada, perfecta para coleccionistas. Incluye 50 juegos clásicos precargados y dos controles inalámbricos. Esta subasta apoya la investigación del síndrome de Duchenne, una enfermedad neuromuscular degenerativa que afecta principalmente a niños.',
-                        imagen: 'images/consola.png',
-                        precioInicial: 80000,
-                        precioActual: 120000,
-                        fechaInicio: new Date(ahora.getTime() - (5 * 24 * 60 * 60 * 1000)).toISOString(),
-                        fechaFin: fechaFin.toISOString(),
-                        estado: 'activa',
-                        participantes: ['Carlos López', 'Sofía Martínez', 'Diego Silva', 'Carmen Rojas'],
-                        pujas: [],
-                        esPrueba: true,
-                        fechaCreacion: ahora.toISOString()
-                    },
-                    {
-                        id: 'prueba_3',
-                        empresaId: 'prueba',
-                        empresaNombre: 'Coaniquem',
-                        tipo: 'subasta',
-                        titulo: 'Experiencia con Artista Nacional',
-                        descripcion: 'Encuentro exclusivo y privado con un reconocido artista musical chileno. Incluye sesión de fotos, autógrafos personalizados y una conversación íntima sobre su carrera artística. Esta experiencia única ayuda a Coaniquem en su labor de rehabilitación de niños quemados.',
-                        imagen: 'images/experiencia.png',
-                        precioInicial: 50000,
-                        precioActual: 75000,
-                        fechaInicio: new Date(ahora.getTime() - (10 * 24 * 60 * 60 * 1000)).toISOString(),
-                        fechaFin: fechaFin.toISOString(),
-                        estado: 'activa',
-                        participantes: ['Laura Pérez', 'Roberto Núñez'],
-                        pujas: [],
-                        esPrueba: true,
-                        fechaCreacion: ahora.toISOString()
-                    },
-                    {
-                        id: 'prueba_4',
-                        empresaId: 'prueba',
-                        empresaNombre: 'Fundación Cáncer Infantil',
-                        tipo: 'subasta',
-                        titulo: 'Paquete de Equipo Gamer',
-                        descripcion: 'Set completo de gaming de última generación que incluye: PC de alto rendimiento, monitor 4K 144Hz, teclado mecánico RGB, mouse gamer profesional, audífonos con cancelación de ruido y silla ergonómica. Perfecto para gamers profesionales o entusiastas. Los fondos se destinan a tratamientos oncológicos pediátricos.',
-                        imagen: 'images/setup.png',
-                        precioInicial: 500000,
-                        precioActual: 620000,
-                        fechaInicio: new Date(ahora.getTime() - (3 * 24 * 60 * 60 * 1000)).toISOString(),
-                        fechaFin: fechaFin.toISOString(),
-                        estado: 'activa',
-                        participantes: ['Matías Fernández', 'Valentina Cruz', 'Javier Morales'],
-                        pujas: [],
-                        esPrueba: true,
-                        fechaCreacion: ahora.toISOString()
-                    },
-                    {
-                        id: 'prueba_5',
-                        empresaId: 'prueba',
-                        empresaNombre: 'Hogar de Cristo',
-                        tipo: 'subasta',
-                        titulo: 'Polera de Jugador Profesional',
-                        descripcion: 'Camiseta oficial del Colo-Colo usada y firmada por un jugador destacado del primer equipo durante la final del campeonato nacional. Incluye certificado de autenticidad y marco de exhibición profesional. Esta subasta benéfica apoya los programas de alimentación del Hogar de Cristo.',
-                        imagen: 'images/colocolo.png',
-                        precioInicial: 60000,
-                        precioActual: 92500,
-                        fechaInicio: new Date(ahora.getTime() - (4 * 24 * 60 * 60 * 1000)).toISOString(),
-                        fechaFin: fechaFin.toISOString(),
-                        estado: 'activa',
-                        participantes: ['Andrés Vargas', 'Camila Soto'],
-                        pujas: [],
-                        esPrueba: true,
-                        fechaCreacion: ahora.toISOString()
-                    },
-                    {
-                        id: 'prueba_6',
-                        empresaId: 'prueba',
-                        empresaNombre: 'Techo para Chile',
-                        tipo: 'subasta',
-                        titulo: 'Equipo Tecnológico Última Generación',
-                        descripcion: 'Laptop gaming de última generación con procesador Intel i9, 32GB RAM, RTX 4070, SSD 2TB NVMe y pantalla 17" 240Hz. Ideal para trabajo profesional, diseño gráfico, edición de video y gaming de alto nivel. Apoya la educación de niños en situación vulnerable.',
-                        imagen: 'images/laptop.png',
-                        precioInicial: 800000,
-                        precioActual: 980000,
-                        fechaInicio: new Date(ahora.getTime() - (2 * 24 * 60 * 60 * 1000)).toISOString(),
-                        fechaFin: fechaFin.toISOString(),
-                        estado: 'activa',
-                        participantes: ['Fernando Ríos', 'Patricia Campos', 'Sebastián Muñoz'],
-                        pujas: [],
-                        esPrueba: true,
-                        fechaCreacion: ahora.toISOString()
-                    },
-                    {
-                        id: 'prueba_7',
-                        empresaId: 'prueba',
-                        empresaNombre: 'Fundación Cáncer Infantil',
-                        tipo: 'subasta',
-                        titulo: 'Obra de Arte Original',
-                        descripcion: 'Pintura al óleo original de un reconocido artista nacional contemporáneo. Dimensiones: 100x80 cm. Esta obra única representa el paisaje costero chileno con una técnica impresionista moderna. Incluye certificado de autenticidad firmado por el artista. Los fondos apoyan la investigación médica oncológica.',
-                        imagen: 'images/pintura.png',
-                        precioInicial: 200000,
-                        precioActual: 250000,
-                        fechaInicio: new Date(ahora.getTime() - (6 * 24 * 60 * 60 * 1000)).toISOString(),
-                        fechaFin: fechaFin.toISOString(),
-                        estado: 'activa',
-                        participantes: ['Gloria Herrera', 'Ricardo Pinto'],
-                        pujas: [],
-                        esPrueba: true,
-                        fechaCreacion: ahora.toISOString()
-                    },
-                    {
-                        id: 'prueba_8',
-                        empresaId: 'prueba',
-                        empresaNombre: 'Hogar de Cristo',
-                        tipo: 'subasta',
-                        titulo: 'Bicicleta de Montaña Profesional',
-                        descripcion: 'Bicicleta de montaña de alta gama, ideal para competencias y rutas extremas. Incluye sistema de suspensión dual, frenos de disco hidráulicos y cambios Shimano de 21 velocidades. Los fondos recaudados apoyan programas de vivienda social del Hogar de Cristo.',
-                        imagen: 'images/bici.png',
-                        precioInicial: 300000,
-                        precioActual: 450000,
-                        precioFinal: 450000,
-                        fechaInicio: new Date(ahora.getTime() - (15 * 24 * 60 * 60 * 1000)).toISOString(),
-                        fechaFin: new Date(ahora.getTime() - (1 * 24 * 60 * 60 * 1000)).toISOString(),
-                        estado: 'finalizada',
-                        participantes: ['Carlos Méndez', 'Patricia Soto', 'Roberto Fuentes', 'Daniela Vega'],
-                        pujas: [
-                            {
-                                usuario: 'Carlos Méndez',
-                                monto: 350000,
-                                fecha: new Date(ahora.getTime() - (10 * 24 * 60 * 60 * 1000)).toISOString()
-                            },
-                            {
-                                usuario: 'Patricia Soto',
-                                monto: 380000,
-                                fecha: new Date(ahora.getTime() - (8 * 24 * 60 * 60 * 1000)).toISOString()
-                            },
-                            {
-                                usuario: 'Roberto Fuentes',
-                                monto: 420000,
-                                fecha: new Date(ahora.getTime() - (5 * 24 * 60 * 60 * 1000)).toISOString()
-                            },
-                            {
-                                usuario: 'Daniela Vega',
-                                monto: 450000,
-                                fecha: new Date(ahora.getTime() - (3 * 24 * 60 * 60 * 1000)).toISOString()
-                            }
-                        ],
-                        ganador: {
-                            nombre: 'Daniela Vega',
-                            monto: 450000,
-                            fecha: new Date(ahora.getTime() - (3 * 24 * 60 * 60 * 1000)).toISOString()
-                        },
-                        esPrueba: true,
-                        fechaCreacion: new Date(ahora.getTime() - (15 * 24 * 60 * 60 * 1000)).toISOString()
-                    }
-                ];
-
-                // Agregar subastas de prueba
-                subastas = subastas.concat(subastasPrueba);
-                localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
-            }
-        }
-
-        // Cargar subastas dinámicamente
-        document.addEventListener('DOMContentLoaded', function() {
-            inicializarSubastasPrueba();
-            // Actualizar estados de subastas antes de cargar
-            auth.actualizarEstadosSubastas();
-            cargarSubastas();
-        });
-
-        function cargarSubastas() {
-            const subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-            const grid = document.querySelector('.auctions-grid');
-
-            if (!grid) return;
-
-            // Mostrar todas las subastas (activas y finalizadas)
-            if (subastas.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #999;">' +
-                    '<i class="fas fa-inbox" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;"></i>' +
-                    '<h3>No hay subastas disponibles</h3>' +
-                    '<p>Las empresas pueden crear subastas desde su perfil</p>' +
-                    '</div>';
-                return;
-            }
-
-            grid.innerHTML = '';
-            subastas.forEach(function(subasta) {
-                const card = document.createElement('div');
-                card.className = 'auction-card';
-                card.onclick = function() {
-                    window.location.href = 'detalle-subasta.html?id=' + subasta.id;
-                };
-                card.style.cursor = 'pointer';
-
-                const esFinalizada = subasta.estado === 'finalizada';
-
-                const tipoIconos = {
-                    'subasta': 'gavel',
-                    'rifa': 'ticket-alt',
-                    'venta': 'shopping-cart'
-                };
-                const icono = tipoIconos[subasta.tipo] || 'gavel';
-
-                const imagenStyle = subasta.imagen 
-                    ? 'background-image: url(' + subasta.imagen + '); background-size: cover; background-position: center;' + (esFinalizada ? ' filter: grayscale(50%); opacity: 0.85;' : '')
-                    : 'background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%), linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%); background-size: 20px 20px; background-position: 0 0, 10px 10px;';
-
-                const fechaFin = new Date(subasta.fechaFin);
-                const diasRestantes = Math.ceil((fechaFin - new Date()) / (1000 * 60 * 60 * 24));
-
-                // Formatear descripción para mejor presentación
-                var descripcionCorta = subasta.descripcion;
-                if (descripcionCorta.length > 120) {
-                    descripcionCorta = descripcionCorta.substring(0, 120).trim() + '...';
-                }
-
-                var estadoHTML = '';
-                var statsHTML = '';
-
-                if (esFinalizada) {
-                    // Badge de finalizada
-                    estadoHTML = '<div style="position: absolute; top: 10px; right: 10px; background: rgba(231, 76, 60, 0.95); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 700; font-size: 0.85rem; backdrop-filter: blur(10px);">' +
-                        '<i class="fas fa-flag-checkered"></i> FINALIZADA' +
-                        '</div>';
-
-                    // Estadísticas para finalizada
-                    statsHTML = '<div class="auction-stats" style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); border: 2px solid #e74c3c;">' +
-                        '<div class="stat">' +
-                        '<span class="stat-value" style="color: #e74c3c;">$' + (subasta.precioFinal || subasta.precioActual).toLocaleString('es-CL') + '</span>' +
-                        '<span class="stat-label">Pozo Final</span>' +
-                        '</div>' +
-                        '<div class="stat">' +
-                        '<span class="stat-value" style="color: #e74c3c;">' + ((subasta.pujas || []).length) + '</span>' +
-                        '<span class="stat-label">Pujas Totales</span>' +
-                        '</div>' +
-                        '</div>';
-
-                    if (subasta.ganador) {
-                        statsHTML += '<div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 1rem; border-radius: 10px; margin-top: 1rem; border: 2px solid #28a745;">' +
-                            '<div style="text-align: center;">' +
-                            '<i class="fas fa-trophy" style="color: #ffd700; font-size: 2rem; margin-bottom: 0.5rem;"></i>' +
-                            '<p style="margin: 0; font-weight: 700; color: #155724; font-size: 0.9rem;">GANADOR</p>' +
-                            '<p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #155724;">' + subasta.ganador.nombre + '</p>' +
-                            '</div>' +
-                            '</div>';
-                    } else {
-                        statsHTML += '<div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; margin-top: 1rem; text-align: center;">' +
-                            '<p style="margin: 0; color: #666; font-size: 0.9rem;">Sin pujas</p>' +
-                            '</div>';
-                    }
+                if (result.success && result.subastas && result.subastas.length > 0) {
+                    console.log('Renderizando', result.subastas.length, 'subastas');
+                    subastasManager.renderSubastas('auctions-grid', result.subastas);
                 } else {
-                    // Estadísticas para activa
-                    statsHTML = '<div class="auction-stats">' +
-                        '<div class="stat">' +
-                        '<span class="stat-value">$' + subasta.precioActual.toLocaleString('es-CL') + '</span>' +
-                        '<span class="stat-label">Precio Actual</span>' +
-                        '</div>' +
-                        '<div class="stat">' +
-                        '<span class="stat-value">' + ((subasta.pujas || []).length) + '</span>' +
-                        '<span class="stat-label">Pujas</span>' +
-                        '</div>' +
-                        '<div class="stat">' +
-                        '<span class="stat-value">' + (diasRestantes > 0 ? diasRestantes : 0) + 'd</span>' +
-                        '<span class="stat-label">Restantes</span>' +
-                        '</div>' +
-                        '</div>';
+                    console.warn('No hay subastas o error:', result);
+                    const grid = document.querySelector('.auctions-grid');
+                    if (grid) {
+                        grid.innerHTML = `
+                            <div style="grid-column: 1/-1; text-align: center; padding: 4rem 2rem;">
+                                <i class="fas fa-gavel" style="font-size: 4rem; color: #999; margin-bottom: 1rem;"></i>
+                                <h3 style="color: #666;">No hay subastas activas en este momento</h3>
+                                <p style="color: #999;">Vuelve pronto para descubrir nuevas oportunidades</p>
+                            </div>
+                        `;
+                    }
                 }
-
-                card.innerHTML = '<div class="card-image" style="position: relative; ' + imagenStyle + '">' + estadoHTML + '</div>' +
-                    '<div class="card-content">' +
-                    '<span class="auction-type"><i class="fas fa-' + icono + '"></i> ' + subasta.tipo.charAt(0).toUpperCase() + subasta.tipo.slice(1) + '</span>' +
-                    '<h3 style="color: var(--dark); margin-bottom: 0.8rem; font-size: 1.3rem; line-height: 1.4;">' + subasta.titulo + '</h3>' +
-                    '<p style="color: #555; line-height: 1.6; margin-bottom: 1.2rem; font-size: 0.95rem; text-align: justify;">' + descripcionCorta + '</p>' +
-                    '<div class="organizer">' +
-                    '<i class="fas fa-heart"></i>' +
-                    '<span style="font-weight: 500;">' + subasta.empresaNombre + '</span>' +
-                    '</div>' +
-                    statsHTML +
-                    '<button class="bid-button" onclick="event.stopPropagation(); window.location.href=\'detalle-subasta.html?id=' + subasta.id + '\'" style="margin-top: auto;">' +
-                    '<i class="fas fa-eye"></i> Ver Detalles de la Subasta' +
-                    '</button>' +
-                    '</div>';
-
-                grid.appendChild(card);
-            });
-        }
-
-        // Función para inicializar subastas de ejemplo si no existen
-        function inicializarSubastasEjemplo() {
-            console.log('=== INICIALIZANDO SUBASTAS DE EJEMPLO ===');
-            let subastas = JSON.parse(localStorage.getItem('nexos_subastas') || '[]');
-            console.log('Subastas actuales en localStorage:', subastas.length);
-            
-            // IDs de las subastas de ejemplo
-            const idsEjemplo = ['prueba_2', 'prueba_3', 'prueba_6', 'prueba_7'];
-            console.log('Buscando IDs:', idsEjemplo);
-            
-            // Verificar cuáles faltan
-            const idsFaltantes = idsEjemplo.filter(function(id) {
-                return !subastas.find(function(s) { return s.id === id; });
-            });
-            
-            console.log('IDs faltantes:', idsFaltantes);
-            
-            if (idsFaltantes.length === 0) {
-                console.log('Todas las subastas de ejemplo ya existen');
-                return; // Ya existen todas
+            } catch (error) {
+                console.error('Error al inicializar subastas:', error);
+                const grid = document.querySelector('.auctions-grid');
+                if (grid) {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 4rem 2rem;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #e74c3c; margin-bottom: 1rem;"></i>
+                            <h3 style="color: #999;">Error al cargar subastas</h3>
+                            <p style="color: #bbb;">${error.message || 'Por favor, intenta nuevamente'}</p>
+                            <button class="cta-button" onclick="inicializarPaginaSubastas()" style="margin-top: 1rem;">
+                                Reintentar
+                            </button>
+                        </div>
+                    `;
+                }
             }
-            
-            const fechaInicio = new Date();
-            const fechaFin = new Date();
-            fechaFin.setDate(fechaFin.getDate() + 7);
-            
-            const subastasEjemplo = {
-                'prueba_2': {
-                    id: 'prueba_2',
-                    tipo: 'subasta',
-                    titulo: 'Figura Coleccionable Limitada',
-                    descripcion: 'Pieza única de colección, edición limitada para apoyar a niños con enfermedades raras. Esta figura representa esperanza y solidaridad.',
-                    imagen: 'images/coleccionable.png',
-                    precioInicial: 80000,
-                    precioActual: 80000,
-                    fechaInicio: fechaInicio.toISOString(),
-                    fechaFin: fechaFin.toISOString(),
-                    estado: 'activa',
-                    empresaId: '76543210-9',
-                    empresaNombre: 'Asociación Duchenne',
-                    pujas: [],
-                    participantes: []
-                },
-                'prueba_3': {
-                    id: 'prueba_3',
-                    tipo: 'subasta',
-                    titulo: 'Experiencia VIP en Evento',
-                    descripcion: 'Acceso exclusivo a evento deportivo con meet & greet, entradas preferenciales y experiencia inolvidable. Todo lo recaudado va para Coaniquem.',
-                    imagen: 'images/evento.png',
-                    precioInicial: 150000,
-                    precioActual: 150000,
-                    fechaInicio: fechaInicio.toISOString(),
-                    fechaFin: fechaFin.toISOString(),
-                    estado: 'activa',
-                    empresaId: '87654321-0',
-                    empresaNombre: 'Coaniquem',
-                    pujas: [],
-                    participantes: []
-                },
-                'prueba_6': {
-                    id: 'prueba_6',
-                    tipo: 'subasta',
-                    titulo: 'Equipo Tecnológico Última Generación',
-                    descripcion: 'Laptop gaming de alta gama, perfecta para estudios y entretenimiento. Apoya la educación de niños en situación vulnerable.',
-                    imagen: 'images/laptop.png',
-                    precioInicial: 500000,
-                    precioActual: 500000,
-                    fechaInicio: fechaInicio.toISOString(),
-                    fechaFin: fechaFin.toISOString(),
-                    estado: 'activa',
-                    empresaId: '98765432-1',
-                    empresaNombre: 'Techo para Chile',
-                    pujas: [],
-                    participantes: []
-                },
-                'prueba_7': {
-                    id: 'prueba_7',
-                    tipo: 'subasta',
-                    titulo: 'Clase de Música con Músico Nacional',
-                    descripcion: 'Experiencia única de aprender música con reconocido artista nacional. Sesión privada de 2 horas incluyendo técnicas y consejos profesionales.',
-                    imagen: 'images/pintura.png',
-                    precioInicial: 120000,
-                    precioActual: 120000,
-                    fechaInicio: fechaInicio.toISOString(),
-                    fechaFin: fechaFin.toISOString(),
-                    estado: 'activa',
-                    empresaId: '11223344-5',
-                    empresaNombre: 'Fundación Musical',
-                    pujas: [],
-                    participantes: []
-                }
-            };
-            
-            // Agregar solo las que faltan
-            idsFaltantes.forEach(function(id) {
-                if (subastasEjemplo[id]) {
-                    console.log('Agregando subasta:', id, subastasEjemplo[id].titulo);
-                    subastas.push(subastasEjemplo[id]);
-                }
-            });
-            
-            localStorage.setItem('nexos_subastas', JSON.stringify(subastas));
-            console.log('✅ Subastas de ejemplo guardadas en localStorage:', idsFaltantes);
-            console.log('Total de subastas ahora:', subastas.length);
-            
-            // Recargar las subastas en la página
-            cargarSubastas();
         }
         
         // Inicializar al cargar la página
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', inicializarSubastasEjemplo);
+            document.addEventListener('DOMContentLoaded', inicializarPaginaSubastas);
         } else {
-            inicializarSubastasEjemplo();
+            inicializarPaginaSubastas();
         }
     </script>
 </body>
+</html>
