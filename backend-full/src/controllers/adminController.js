@@ -364,3 +364,206 @@ exports.deleteEmpresa = async (req, res, next) => {
     }
 };
 
+/**
+ * Obtener actividad reciente del sistema
+ */
+exports.getActividadReciente = async (req, res, next) => {
+    try {
+        const limite = parseInt(req.query.limite) || 10;
+
+        // Obtener últimas transacciones
+        const transacciones = await Transaccion.findAll({
+            limit: limite,
+            order: [['createdAt', 'DESC']],
+            include: [
+                { model: User, as: 'usuario', attributes: ['id', 'nombre', 'apellido', 'username'] }
+            ]
+        });
+
+        // Obtener últimas pujas
+        const pujas = await Puja.findAll({
+            limit: limite,
+            order: [['createdAt', 'DESC']],
+            include: [
+                { model: User, as: 'usuario', attributes: ['id', 'nombre', 'apellido', 'username'] },
+                { model: Subasta, as: 'subasta', attributes: ['id', 'titulo'] }
+            ]
+        });
+
+        // Obtener últimas empresas registradas
+        const empresasNuevas = await Empresa.findAll({
+            limit: 5,
+            order: [['createdAt', 'DESC']],
+            attributes: ['id', 'razon_social', 'estado', 'createdAt']
+        });
+
+        // Obtener últimos usuarios registrados
+        const usuariosNuevos = await User.findAll({
+            limit: 5,
+            order: [['createdAt', 'DESC']],
+            attributes: ['id', 'nombre', 'apellido', 'username', 'createdAt']
+        });
+
+        // Combinar y formatear actividades
+        const actividades = [];
+
+        // Agregar transacciones
+        transacciones.forEach(t => {
+            actividades.push({
+                tipo: 'transaccion',
+                icono: 'fa-exchange-alt',
+                color: '#3498db',
+                titulo: `Transacción de ${t.tipo}`,
+                descripcion: `${t.usuario?.nombre || 'Usuario'} realizó una ${t.tipo} por $${t.monto.toLocaleString('es-CL')}`,
+                fecha: t.createdAt,
+                monto: t.monto
+            });
+        });
+
+        // Agregar pujas
+        pujas.forEach(p => {
+            actividades.push({
+                tipo: 'puja',
+                icono: 'fa-gavel',
+                color: '#9b59b6',
+                titulo: 'Nueva puja en subasta',
+                descripcion: `${p.usuario?.nombre || 'Usuario'} pujó $${p.monto.toLocaleString('es-CL')} en "${p.subasta?.titulo || 'Subasta'}"`,
+                fecha: p.createdAt,
+                monto: p.monto
+            });
+        });
+
+        // Agregar empresas nuevas
+        empresasNuevas.forEach(e => {
+            actividades.push({
+                tipo: 'empresa_registro',
+                icono: 'fa-building',
+                color: '#27ae60',
+                titulo: 'Nueva empresa registrada',
+                descripcion: `${e.razon_social} se registró (${e.estado})`,
+                fecha: e.createdAt
+            });
+        });
+
+        // Agregar usuarios nuevos
+        usuariosNuevos.forEach(u => {
+            actividades.push({
+                tipo: 'usuario_registro',
+                icono: 'fa-user-plus',
+                color: '#f39c12',
+                titulo: 'Nuevo usuario registrado',
+                descripcion: `${u.nombre} ${u.apellido} (@${u.username}) se unió a la plataforma`,
+                fecha: u.createdAt
+            });
+        });
+
+        // Ordenar por fecha y limitar
+        actividades.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+        const actividadesLimitadas = actividades.slice(0, limite);
+
+        res.json({
+            actividades: actividadesLimitadas,
+            total: actividadesLimitadas.length
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Obtener dashboard financiero completo
+ */
+exports.getDashboardFinanciero = async (req, res, next) => {
+    try {
+        // Obtener saldos totales
+        const [usuariosResult, empresasResult] = await Promise.all([
+            User.findAll({
+                attributes: [
+                    [Sequelize.fn('COUNT', Sequelize.col('id')), 'total'],
+                    [Sequelize.fn('SUM', Sequelize.col('saldo')), 'saldoTotal']
+                ]
+            }),
+            Empresa.findAll({
+                where: { estado: 'aprobada' },
+                attributes: [
+                    [Sequelize.fn('COUNT', Sequelize.col('id')), 'total'],
+                    [Sequelize.fn('SUM', Sequelize.col('saldo')), 'saldoTotal']
+                ]
+            })
+        ]);
+
+        const totalUsuarios = parseInt(usuariosResult[0]?.dataValues?.total || 0);
+        const saldoTotalUsuarios = parseFloat(usuariosResult[0]?.dataValues?.saldoTotal || 0);
+        const totalEmpresas = parseInt(empresasResult[0]?.dataValues?.total || 0);
+        const saldoTotalEmpresas = parseFloat(empresasResult[0]?.dataValues?.saldoTotal || 0);
+
+        // Obtener transacciones totales
+        const transaccionesCount = await Transaccion.count({
+            where: { estado: 'completada' }
+        });
+
+        const transaccionesSum = await Transaccion.findAll({
+            where: { estado: 'completada' },
+            attributes: [[Sequelize.fn('SUM', Sequelize.col('monto')), 'total']]
+        });
+        const circulacionTotal = parseFloat(transaccionesSum[0]?.dataValues?.total || 0);
+
+        // Obtener subastas activas
+        const subastasActivas = await Subasta.count({
+            where: { estado: 'activa' }
+        });
+
+        // Obtener rifas activas (si existe el modelo Rifa)
+        let rifasActivas = 0;
+        try {
+            const Rifa = require('../models').Rifa;
+            if (Rifa) {
+                rifasActivas = await Rifa.count({
+                    where: { estado: 'activa' }
+                });
+            }
+        } catch (error) {
+            console.log('Modelo Rifa no encontrado');
+        }
+
+        // Obtener productos en venta (si existe el modelo Producto)
+        let productosVenta = 0;
+        try {
+            const Producto = require('../models').Producto;
+            if (Producto) {
+                productosVenta = await Producto.count({
+                    where: { estado: 'activo' }
+                });
+            }
+        } catch (error) {
+            console.log('Modelo Producto no encontrado');
+        }
+
+        res.json({
+            usuarios: {
+                total: totalUsuarios,
+                saldoTotal: saldoTotalUsuarios
+            },
+            empresas: {
+                total: totalEmpresas,
+                saldoTotal: saldoTotalEmpresas
+            },
+            circulacion: {
+                total: circulacionTotal,
+                transacciones: transaccionesCount
+            },
+            subastas: {
+                activas: subastasActivas
+            },
+            rifas: {
+                activas: rifasActivas
+            },
+            productos: {
+                enVenta: productosVenta
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+

@@ -116,7 +116,16 @@ const Producto = sequelize.define('Producto', {
         { fields: ['estado'] },
         { fields: ['destacado'] },
         { fields: ['precio'] }
-    ]
+    ],
+    getterMethods: {
+        imagen() {
+            // Si no hay imagen singular pero hay imagenes array, devolver la primera
+            if (!this.getDataValue('imagen') && this.getDataValue('imagenes') && this.getDataValue('imagenes').length > 0) {
+                return this.getDataValue('imagenes')[0];
+            }
+            return this.getDataValue('imagen');
+        }
+    }
 });
 
 module.exports = Producto;

@@ -995,6 +995,34 @@
                     <p style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.9rem; font-weight: 600;">En Subastas</p>
                     <h3 style="margin: 0; color: #9b59b6; font-size: 2rem; font-weight: 700;" id="total-subastas-activas">0</h3>
                 </div>
+
+                <!-- Rifas Activas -->
+                <div style="background: white; padding: 1.8rem; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 5px solid #e91e63; transition: transform 0.3s, box-shadow 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.05)'">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem;">
+                        <div style="background: linear-gradient(135deg, #e91e63, #c2185b); width: 55px; height: 55px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);">
+                            <i class="fas fa-ticket-alt" style="font-size: 1.6rem; color: white;"></i>
+                        </div>
+                        <span style="background: #fce4ec; color: #c2185b; padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
+                            <i class="fas fa-dice"></i> Activas
+                        </span>
+                    </div>
+                    <p style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.9rem; font-weight: 600;">Rifas Activas</p>
+                    <h3 style="margin: 0; color: #e91e63; font-size: 2rem; font-weight: 700;" id="rifas-activas-count">0</h3>
+                </div>
+
+                <!-- Productos en Venta -->
+                <div style="background: white; padding: 1.8rem; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 5px solid #00bcd4; transition: transform 0.3s, box-shadow 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.05)'">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem;">
+                        <div style="background: linear-gradient(135deg, #00bcd4, #0097a7); width: 55px; height: 55px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);">
+                            <i class="fas fa-shopping-bag" style="font-size: 1.6rem; color: white;"></i>
+                        </div>
+                        <span style="background: #e0f7fa; color: #0097a7; padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
+                            <i class="fas fa-store"></i> En venta
+                        </span>
+                    </div>
+                    <p style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.9rem; font-weight: 600;">Productos en Venta</p>
+                    <h3 style="margin: 0; color: #00bcd4; font-size: 2rem; font-weight: 700;" id="productos-venta-count">0</h3>
+                </div>
             </div>
 
             <!-- Acciones Rápidas -->
@@ -1696,18 +1724,21 @@
         </div>
     </footer>
 
-    <script src="notifications.js?v=4"></script>
-    <script src="api-config.js?v=4"></script>
-    <script src="auth-backend.js?v=4"></script>
-    <script src="wallet-manager.js?v=4"></script>
-    <script src="navbar-helper.js?v=4"></script>
-    <script src="subastas-manager.js?v=4"></script>
-    <script src="rifas-manager.js?v=4"></script>
-    <script src="productos-manager.js?v=4"></script>
-    <script src="admin-manager.js?v=4"></script>
+    <script src="notifications.js?v=6"></script>
+    <script src="api-config.js?v=6"></script>
+    <script src="auth-backend.js?v=6"></script>
+    <script src="wallet-manager.js?v=6"></script>
+    <script src="navbar-helper.js?v=6"></script>
+    <script src="subastas-manager.js?v=6"></script>
+    <script src="rifas-manager.js?v=6"></script>
+    <script src="productos-manager.js?v=6"></script>
+    <script src="admin-manager.js?v=6"></script>
     <script>
         // ===== DEFINIR FUNCIÓN cambiarTab PRIMERO (antes de verificaciones) =====
+        console.log('🚀 Iniciando script admin.html v6...');
+        
         function cambiarTab(tab, element) {
+            console.log('✅ cambiarTab llamada para tab:', tab);
             // Ocultar todos los tabs
             const tabs = document.querySelectorAll('.tab-content');
             tabs.forEach(function(t) { t.classList.remove('active'); });
@@ -1744,6 +1775,10 @@
                 }
             }
         }
+        
+        console.log('✅ Función cambiarTab definida');
+        window.cambiarTab = cambiarTab; // Asegurar que esté en el scope global
+        console.log('✅ cambiarTab asignada a window');
 
         // Alias para compatibilidad con código viejo (solo si no existe)
         if (typeof auth === 'undefined') {
@@ -1771,33 +1806,13 @@
 
         // Cargar datos iniciales desde el backend usando adminManager
         async function inicializarDashboard() {
-            // Cargar estadísticas
-            const statsResult = await adminManager.getEstadisticas();
-            if (statsResult.success) {
-                adminManager.renderEstadisticas();
-            }
+            console.log('🔄 Iniciando carga del dashboard...');
             
-            // Cargar empresas pendientes
-            const empresasResult = await adminManager.getEmpresas({ estado: 'pendiente' });
-            if (empresasResult.success) {
-                adminManager.renderEmpresasPendientes('empresas-pendientes-list');
-                
-                // Actualizar contador de pendientes
-                const badge = document.querySelector('.pending-badge');
-                if (badge && empresasResult.total > 0) {
-                    badge.textContent = empresasResult.total;
-                    badge.style.display = 'inline-block';
-                }
-            }
+            // Solo cargar el dashboard principal (que ya carga estadísticas y actividad)
+            await cargarDashboardPrincipal();
             
-            // Cargar otras funciones del dashboard
-            cargarDashboardPrincipal();
-            cargarPendientes();
-            cargarRestablecimientos();
-            cargarEmpresas();
-            cargarUsuarios();
-            cargarRechazadas();
-            calcularEspacioUsado();
+            // Las demás funciones se cargan SOLO cuando el usuario cambia de tab
+            console.log('✅ Dashboard principal cargado');
         }
 
         // Iniciar dashboard
@@ -1822,13 +1837,18 @@
         // Función para cargar el dashboard principal
         async function cargarDashboardPrincipal() {
             try {
-                // Cargar estadísticas desde el backend
-                const stats = await adminManager.getEstadisticas();
+                console.log('📊 Cargando estadísticas...');
                 
-                if (!stats) {
+                // Cargar estadísticas desde el backend
+                const statsResult = await adminManager.getEstadisticas();
+                
+                if (!statsResult || !statsResult.success) {
                     console.error('No se pudieron cargar las estadísticas');
+                    notify.error('Error al cargar estadísticas del dashboard');
                     return;
                 }
+
+                const stats = statsResult.data || statsResult;
 
                 // Actualizar el DOM con las estadísticas
                 const totalCuentas = (stats.usuarios || 0) + (stats.empresas || 0);
@@ -1844,11 +1864,15 @@
                 document.getElementById('dash-productos-activos').textContent = stats.productosActivos || 0;
                 document.getElementById('dash-productos-vendidos').textContent = stats.productosVendidos || 0;
 
+                console.log('📊 Estadísticas cargadas correctamente');
+
                 // Cargar actividad reciente
+                console.log('📋 Cargando actividad reciente...');
                 await cargarActividadReciente();
+                
             } catch (error) {
                 console.error('Error cargando dashboard:', error);
-                mostrarNotificacion('Error al cargar el dashboard', 'error');
+                notify.error('Error al cargar el dashboard');
             }
         }
 
@@ -1857,48 +1881,46 @@
             try {
                 const actividadDiv = document.getElementById('actividad-reciente');
                 
-                // TODO: Implementar getActividadReciente en backend
-                console.warn('getActividadReciente() no implementado - mostrando placeholder');
-                actividadDiv.innerHTML = '<p style="text-align: center; color: #999;"><i class="fas fa-info-circle"></i><br>Actividad reciente en desarrollo</p>';
-                return;
+                // Mostrar loading
+                actividadDiv.innerHTML = '<p style="text-align: center; color: #999;"><i class="fas fa-spinner fa-spin"></i> Cargando actividad...</p>';
                 
-                /* CÓDIGO COMENTADO - FALTA IMPLEMENTAR
-                // Obtener actividad reciente desde el backend (últimas 10 transacciones/pujas/registros)
-                const actividades = await adminManager.getActividadReciente();
+                // Obtener actividad reciente desde el backend
+                const resultado = await adminManager.getActividadReciente(10);
                 
-                if (!actividades || actividades.length === 0) {
-                    actividadDiv.innerHTML = '<p style="text-align: center; color: #999;">No hay actividad reciente</p>';
+                if (!resultado.success || !resultado.actividades || resultado.actividades.length === 0) {
+                    actividadDiv.innerHTML = '<p style="text-align: center; color: #999;"><i class="fas fa-inbox"></i><br>No hay actividad reciente</p>';
                     return;
                 }
-                */
 
-                let html = '<div class="actividad-lista">';
+                const actividades = resultado.actividades;
+
+                let html = '<div class="actividad-lista" style="display: flex; flex-direction: column; gap: 1rem;">';
                 actividades.forEach(act => {
-                    const icono = act.tipo === 'puja' ? '🔨' : 
-                                  act.tipo === 'registro' ? '👤' : 
-                                  act.tipo === 'venta' ? '💰' : '📝';
-                    const fecha = new Date(act.fecha).toLocaleString('es-CL', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
+                    const fechaRelativa = obtenerFechaRelativa(new Date(act.fecha));
                     
                     html += `
-                        <div class="actividad-item">
-                            <span class="actividad-icono">${icono}</span>
-                            <div class="actividad-info">
-                                <p><strong>${act.descripcion}</strong></p>
-                                <small>${fecha}</small>
+                        <div style="background: white; padding: 1rem 1.2rem; border-radius: 10px; border-left: 4px solid ${act.color}; display: flex; align-items: center; gap: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            <div style="background: ${act.color}; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
+                                <i class="fas ${act.icono}"></i>
                             </div>
+                            <div style="flex: 1;">
+                                <strong style="color: #333; font-size: 0.95rem;">${act.titulo}</strong>
+                                <p style="margin: 0.2rem 0 0 0; color: #666; font-size: 0.85rem;">${act.descripcion}</p>
+                            </div>
+                            <span style="color: #999; font-size: 0.8rem; white-space: nowrap;">${fechaRelativa}</span>
                         </div>
                     `;
                 });
                 html += '</div>';
                 
                 actividadDiv.innerHTML = html;
+                console.log('✅ Actividad reciente cargada:', actividades.length, 'elementos');
             } catch (error) {
                 console.error('Error cargando actividad reciente:', error);
+                const actividadDiv = document.getElementById('actividad-reciente');
+                if (actividadDiv) {
+                    actividadDiv.innerHTML = '<p style="text-align: center; color: #e74c3c;"><i class="fas fa-exclamation-triangle"></i><br>Error al cargar actividad</p>';
+                }
             }
         }
 
@@ -2600,36 +2622,32 @@
             cargarDashboardPrincipal();
         }
 
-        function cargarPendientes() {
-            // TODO: Ya está gestionado por adminManager.getEmpresas()
-            console.warn('cargarPendientes() deshabilitado - usar adminManager');
-            return;
+        // NOTA: Estas funciones ahora se llaman SOLO desde cambiarTab() cuando el usuario cambia de pestaña
+        // Esto evita hacer múltiples llamadas al backend al cargar la página
+
+        async function cargarPendientes() {
+            // Esta función ahora es redundante, cargarSolicitudesPendientes() hace el trabajo completo
+            console.log('ℹ️ cargarPendientes() - redirigiendo a cargarSolicitudesPendientes()');
         }
 
-        // cargarRestablecimientos() movida a línea 2970 - eliminada duplicación
-
-        function cargarEmpresas() {
-            // TODO: Ya está gestionado por adminManager.getEmpresas()
-            console.warn('cargarEmpresas() deshabilitado - usar adminManager');
-            return;
+        async function cargarEmpresas() {
+            // Esta función se ejecuta cuando se necesita, no al inicio
+            console.log('ℹ️ cargarEmpresas() - se cargará cuando se acceda a la pestaña correspondiente');
         }
 
-        function cargarUsuarios() {
-            // TODO: Ya está gestionado por adminManager.getUsuarios()
-            console.warn('cargarUsuarios() deshabilitado - usar adminManager');
-            return;
+        async function cargarUsuarios() {
+            // Esta función se ejecuta cuando se necesita, no al inicio
+            console.log('ℹ️ cargarUsuarios() - se cargará cuando se acceda a la pestaña correspondiente');
         }
 
-        function cargarRechazadas() {
-            // TODO: Implementar con backend
-            console.warn('cargarRechazadas() no implementado');
-            return;
+        async function cargarRechazadas() {
+            // Esta función se ejecuta cuando se necesita, no al inicio
+            console.log('ℹ️ cargarRechazadas() - se cargará cuando se acceda a la pestaña correspondiente');
         }
 
         function calcularEspacioUsado() {
-            // TODO: Implementar con backend
-            console.warn('calcularEspacioUsado() no implementado');
-            return;
+            // Esta función ahora es parte de la pestaña de finanzas
+            console.log('ℹ️ calcularEspacioUsado() - se ejecutará desde la pestaña de finanzas');
         }
 
         // ===== FUNCIONES DE SUBASTAS =====
@@ -3295,6 +3313,9 @@
                             </td>
                             <td>
                                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <button class="btn-icon-small" onclick="verDetallesEmpresa('${empresa.id}')" title="Ver todos los detalles" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                        <i class="fas fa-eye"></i> Detalles
+                                    </button>
                                     <button class="btn-icon-small" onclick="aprobarEmpresaAdmin('${empresa.id}')" title="Aprobar" style="background: linear-gradient(135deg, #50c878, #3da35d);">
                                         <i class="fas fa-check"></i> Aprobar
                                     </button>
@@ -3401,6 +3422,238 @@
             } catch (error) {
                 console.error('Error cargando documentos:', error);
                 notify.error('Error al cargar documentos');
+            }
+        }
+
+        // Ver todos los detalles de la empresa
+        async function verDetallesEmpresa(id) {
+            try {
+                const resultado = await adminManager.getEmpresas();
+                const empresa = resultado.empresas.find(e => e.id === id);
+                
+                if (!empresa) {
+                    notify.error('Empresa no encontrada');
+                    return;
+                }
+
+                // Formatear fechas
+                const fechaRegistro = empresa.createdAt ? new Date(empresa.createdAt).toLocaleDateString('es-CL', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : 'N/A';
+
+                const fechaActualizacion = empresa.updatedAt ? new Date(empresa.updatedAt).toLocaleDateString('es-CL', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : 'N/A';
+
+                // Crear modal con todos los detalles
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000; animation: fadeIn 0.3s;';
+                
+                modal.innerHTML = `
+                    <div style="background: white; padding: 2.5rem; border-radius: 20px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: slideIn 0.3s;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 3px solid #667eea; padding-bottom: 1rem;">
+                            <h2 style="margin: 0; color: #667eea; display: flex; align-items: center; gap: 0.75rem;">
+                                <i class="fas fa-building"></i>
+                                Detalles de la Empresa
+                            </h2>
+                            <button onclick="this.closest('div[style*=fixed]').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; transition: color 0.2s;" onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <div style="display: grid; gap: 1.5rem;">
+                            <!-- Información Básica -->
+                            <div style="background: linear-gradient(135deg, #667eea15, #764ba215); padding: 1.5rem; border-radius: 12px; border-left: 4px solid #667eea;">
+                                <h3 style="margin: 0 0 1rem 0; color: #333; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-info-circle" style="color: #667eea;"></i>
+                                    Información Básica
+                                </h3>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                    <div>
+                                        <label style="font-weight: 600; color: #666; font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Razón Social</label>
+                                        <p style="margin: 0; color: #333; font-size: 1rem;">${empresa.razon_social || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <label style="font-weight: 600; color: #666; font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">RUT</label>
+                                        <p style="margin: 0; color: #333; font-family: monospace; font-size: 1rem;">${empresa.rut || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <label style="font-weight: 600; color: #666; font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Giro Comercial</label>
+                                        <p style="margin: 0; color: #333;">${empresa.giro || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <label style="font-weight: 600; color: #666; font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Estado</label>
+                                        <p style="margin: 0;">
+                                            <span style="display: inline-block; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; 
+                                                ${empresa.estado === 'pendiente' ? 'background: #fff3cd; color: #856404;' : 
+                                                  empresa.estado === 'aprobada' ? 'background: #d4edda; color: #155724;' : 
+                                                  'background: #f8d7da; color: #721c24;'}">
+                                                <i class="fas fa-${empresa.estado === 'pendiente' ? 'clock' : empresa.estado === 'aprobada' ? 'check-circle' : 'times-circle'}"></i>
+                                                ${empresa.estado || 'N/A'}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Información de Contacto -->
+                            <div style="background: linear-gradient(135deg, #50c87815, #3da35d15); padding: 1.5rem; border-radius: 12px; border-left: 4px solid #50c878;">
+                                <h3 style="margin: 0 0 1rem 0; color: #333; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-address-card" style="color: #50c878;"></i>
+                                    Información de Contacto
+                                </h3>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                    <div>
+                                        <label style="font-weight: 600; color: #666; font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Email</label>
+                                        <p style="margin: 0;">
+                                            <a href="mailto:${empresa.email}" style="color: #667eea; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                                                <i class="fas fa-envelope"></i>
+                                                ${empresa.email || 'N/A'}
+                                            </a>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label style="font-weight: 600; color: #666; font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Teléfono</label>
+                                        <p style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                            <i class="fas fa-phone" style="color: #50c878;"></i>
+                                            ${empresa.telefono || 'N/A'}
+                                        </p>
+                                    </div>
+                                    <div style="grid-column: 1 / -1;">
+                                        <label style="font-weight: 600; color: #666; font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Dirección</label>
+                                        <p style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                            <i class="fas fa-map-marker-alt" style="color: #50c878;"></i>
+                                            ${empresa.direccion || 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Información del Sistema -->
+                            <div style="background: linear-gradient(135deg, #3498db15, #2980b915); padding: 1.5rem; border-radius: 12px; border-left: 4px solid #3498db;">
+                                <h3 style="margin: 0 0 1rem 0; color: #333; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-database" style="color: #3498db;"></i>
+                                    Información del Sistema
+                                </h3>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                    <div>
+                                        <label style="font-weight: 600; color: #666; font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">ID</label>
+                                        <p style="margin: 0; font-family: monospace; font-size: 0.9rem; color: #666;">${empresa.id || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <label style="font-weight: 600; color: #666; font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Rol</label>
+                                        <p style="margin: 0;">
+                                            <span style="background: #e3f2fd; color: #1976d2; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
+                                                ${empresa.role || 'empresa'}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label style="font-weight: 600; color: #666; font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Fecha de Registro</label>
+                                        <p style="margin: 0; color: #333; font-size: 0.9rem;">
+                                            <i class="fas fa-calendar-plus" style="color: #3498db;"></i>
+                                            ${fechaRegistro}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label style="font-weight: 600; color: #666; font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Última Actualización</label>
+                                        <p style="margin: 0; color: #333; font-size: 0.9rem;">
+                                            <i class="fas fa-calendar-check" style="color: #3498db;"></i>
+                                            ${fechaActualizacion}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Documentos de Verificación -->
+                            ${empresa.documentos_verificacion ? `
+                                <div style="background: linear-gradient(135deg, #f39c1215, #e67e2215); padding: 1.5rem; border-radius: 12px; border-left: 4px solid #f39c12;">
+                                    <h3 style="margin: 0 0 1rem 0; color: #333; display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="fas fa-file-contract" style="color: #f39c12;"></i>
+                                        Documentos de Verificación
+                                    </h3>
+                                    <div style="background: #f5f5f5; padding: 1rem; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+                                        ${typeof empresa.documentos_verificacion === 'string' 
+                                            ? `<p style="margin: 0; white-space: pre-wrap;">${empresa.documentos_verificacion}</p>`
+                                            : `<pre style="margin: 0; font-size: 0.85rem; white-space: pre-wrap;">${JSON.stringify(empresa.documentos_verificacion, null, 2)}</pre>`
+                                        }
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <!-- Descripción -->
+                            ${empresa.descripcion ? `
+                                <div style="background: linear-gradient(135deg, #9b59b615, #8e44ad15); padding: 1.5rem; border-radius: 12px; border-left: 4px solid #9b59b6;">
+                                    <h3 style="margin: 0 0 1rem 0; color: #333; display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="fas fa-align-left" style="color: #9b59b6;"></i>
+                                        Descripción
+                                    </h3>
+                                    <p style="margin: 0; color: #555; line-height: 1.6;">${empresa.descripcion}</p>
+                                </div>
+                            ` : ''}
+
+                            <!-- Motivo de Rechazo (si existe) -->
+                            ${empresa.motivo_rechazo ? `
+                                <div style="background: linear-gradient(135deg, #e7473c15, #c0392b15); padding: 1.5rem; border-radius: 12px; border-left: 4px solid #e74c3c;">
+                                    <h3 style="margin: 0 0 1rem 0; color: #e74c3c; display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Motivo de Rechazo
+                                    </h3>
+                                    <p style="margin: 0; color: #555; line-height: 1.6;">${empresa.motivo_rechazo}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                            ${empresa.estado === 'pendiente' ? `
+                                <button onclick="aprobarEmpresaAdmin('${empresa.id}'); this.closest('div[style*=fixed]').remove();" 
+                                    style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #50c878, #3da35d); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: transform 0.2s;"
+                                    onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                    <i class="fas fa-check"></i> Aprobar Empresa
+                                </button>
+                                <button onclick="rechazarEmpresaAdmin('${empresa.id}'); this.closest('div[style*=fixed]').remove();" 
+                                    style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: transform 0.2s;"
+                                    onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                    <i class="fas fa-times"></i> Rechazar Empresa
+                                </button>
+                            ` : ''}
+                            <button onclick="this.closest('div[style*=fixed]').remove()" 
+                                style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                <i class="fas fa-times"></i> Cerrar
+                            </button>
+                        </div>
+                    </div>
+
+                    <style>
+                        @keyframes fadeIn {
+                            from { opacity: 0; }
+                            to { opacity: 1; }
+                        }
+                        @keyframes slideIn {
+                            from { transform: translateY(-50px); opacity: 0; }
+                            to { transform: translateY(0); opacity: 1; }
+                        }
+                    </style>
+                `;
+                
+                modal.onclick = (e) => {
+                    if (e.target === modal) modal.remove();
+                };
+                
+                document.body.appendChild(modal);
+                
+            } catch (error) {
+                console.error('Error cargando detalles de empresa:', error);
+                notify.error('Error al cargar detalles de la empresa');
             }
         }
 
@@ -3562,13 +3815,31 @@ SUBASTAS:
 
         // ===== FUNCIONES DE RESTABLECIMIENTOS =====
 
-        function cargarRestablecimientos() {
-            console.warn('cargarRestablecimientos() deshabilitado - implementar en backend');
+        async function cargarRestablecimientos() {
             const tbody = document.getElementById('tabla-restablecimientos');
-            tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-info-circle"></i><p>Función de restablecimientos en desarrollo</p></div></td></tr>';
+            
+            // Mostrar mensaje temporal ya que esta función requiere endpoint específico en el backend
+            tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-info-circle"></i><p>Función de restablecimientos de contraseña disponible próximamente</p></div></td></tr>';
+            console.log('ℹ️ cargarRestablecimientos() - endpoint pendiente de implementación en backend');
+            
+            // Retornar aquí para evitar que se ejecute código viejo
             return;
             
-            /* CÓDIGO VIEJO COMENTADO
+            /* TODO: Implementar cuando el backend tenga el endpoint
+            try {
+                const resultado = await fetch(`${API_CONFIG.baseURL}/api/admin/password-resets`, {
+                    headers: {
+                        'Authorization': `Bearer ${authBackend.getToken()}`
+                    }
+                });
+                const data = await resultado.json();
+                // Renderizar datos
+            } catch (error) {
+                console.error('Error:', error);
+            }
+            */
+            
+            /* CÓDIGO VIEJO COMENTADO - NO USAR
             const requests = auth.getPasswordResetRequests();
             const tbody = document.getElementById('tabla-restablecimientos');
 
@@ -3578,7 +3849,7 @@ SUBASTAS:
             }
 
             tbody.innerHTML = '';
-            */
+            
             requests.forEach(function(req) {
                 const fecha = new Date(req.createdAt).toLocaleString('es-ES', { 
                     year: 'numeric', 
@@ -3613,6 +3884,7 @@ SUBASTAS:
 
                 tbody.appendChild(row);
             });
+            */
         }
 
         let resetRequestIdActual = null;
@@ -4283,52 +4555,63 @@ SUBASTAS:
             document.getElementById('modal-gestion-finanzas').style.display = 'none';
         }
 
-        function cargarCuentasFinanzas(tipo) {
+        async function cargarCuentasFinanzas(tipo) {
             const tbody = document.getElementById('tabla-cuentas-finanzas');
             let cuentas = [];
 
-            if (tipo === 'user') {
-                cuentas = auth.getUsers().filter(function(u) { return u.role !== 'admin'; }); // Excluir admin
-            } else {
-                cuentas = auth.getEmpresas();
+            try {
+                if (tipo === 'user') {
+                    const resultado = await adminManager.getUsuarios();
+                    if (resultado.success) {
+                        cuentas = resultado.usuarios.filter(function(u) { return u.role !== 'admin'; }); // Excluir admin
+                    }
+                } else {
+                    const resultado = await adminManager.getEmpresas({ estado: 'aprobada' });
+                    if (resultado.success) {
+                        cuentas = resultado.empresas;
+                    }
+                }
+
+                if (cuentas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: #999;">No hay cuentas registradas</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                cuentas.forEach(function(cuenta) {
+                    const nombre = tipo === 'user' 
+                        ? (cuenta.nombre + ' ' + cuenta.apellido) 
+                        : cuenta.razon_social;
+                    const saldo = cuenta.saldo || 0;
+                    const saldoFormateado = new Intl.NumberFormat('es-CL', {
+                        style: 'currency',
+                        currency: 'CLP',
+                        minimumFractionDigits: 0
+                    }).format(saldo);
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td>' + nombre + '</td>' +
+                        '<td>' + cuenta.email + '</td>' +
+                        '<td><strong style="color: var(--primary); font-size: 1.1rem;">' + saldoFormateado + '</strong></td>' +
+                        '<td>' +
+                        '<button class="btn-action btn-edit" onclick=\'abrirModalModificarSaldo(' + JSON.stringify(cuenta).replace(/'/g, "\\'") + ', "' + tipo + '")\'>' +
+                        '<i class="fas fa-edit"></i> Modificar' +
+                        '</button>' +
+                        '</td>';
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error cargando cuentas financieras:', error);
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: #e74c3c;">Error al cargar cuentas</td></tr>';
             }
-
-            if (cuentas.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: #999;">No hay cuentas registradas</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = '';
-            cuentas.forEach(function(cuenta) {
-                const nombre = tipo === 'user' 
-                    ? cuenta.nombre + ' ' + cuenta.apellido 
-                    : cuenta.razonSocial;
-                const saldo = cuenta.saldo || 0;
-                const saldoFormateado = new Intl.NumberFormat('es-CL', {
-                    style: 'currency',
-                    currency: 'CLP',
-                    minimumFractionDigits: 0
-                }).format(saldo);
-
-                const row = document.createElement('tr');
-                row.innerHTML = '<td>' + nombre + '</td>' +
-                    '<td>' + cuenta.email + '</td>' +
-                    '<td><strong style="color: var(--primary); font-size: 1.1rem;">' + saldoFormateado + '</strong></td>' +
-                    '<td>' +
-                    '<button class="btn-action btn-edit" onclick=\'abrirModalModificarSaldo(' + JSON.stringify(cuenta).replace(/'/g, "\\'") + ', "' + tipo + '")\'>' +
-                    '<i class="fas fa-edit"></i> Modificar' +
-                    '</button>' +
-                    '</td>';
-                tbody.appendChild(row);
-            });
         }
 
         function abrirModalModificarSaldo(cuenta, tipo) {
             cuentaSeleccionada = { ...cuenta, tipo: tipo };
             
             const nombre = tipo === 'user' 
-                ? cuenta.nombre + ' ' + cuenta.apellido 
-                : cuenta.razonSocial;
+                ? (cuenta.nombre + ' ' + cuenta.apellido) 
+                : cuenta.razon_social; // Cambiado de razonSocial a razon_social
             
             const saldo = cuenta.saldo || 0;
             const saldoFormateado = new Intl.NumberFormat('es-CL', {
@@ -4384,16 +4667,62 @@ SUBASTAS:
             }
         }
 
-        function actualizarResumenFinanciero() {
-            // TODO: Migrar a adminManager completamente
-            console.warn('actualizarResumenFinanciero() usa código viejo de localStorage - DESHABILITADO');
-            return;
+        async function actualizarResumenFinanciero() {
+            try {
+                // Obtener dashboard financiero desde el backend
+                const resultado = await adminManager.getDashboardFinanciero();
+                
+                if (resultado.success && resultado.dashboard) {
+                    const dash = resultado.dashboard;
+                    
+                    // Actualizar Total en Usuarios
+                    const totalUsuariosCountEl = document.getElementById('total-usuarios-count');
+                    const totalUsuariosSaldoEl = document.getElementById('total-usuarios-saldo');
+                    if (totalUsuariosCountEl) totalUsuariosCountEl.textContent = dash.usuarios.total || 0;
+                    if (totalUsuariosSaldoEl) totalUsuariosSaldoEl.textContent = '$' + ((dash.usuarios.saldoTotal || 0).toLocaleString('es-CL'));
+                    
+                    // Actualizar Total en Empresas
+                    const totalEmpresasCountEl = document.getElementById('total-empresas-count');
+                    const totalEmpresasSaldoEl = document.getElementById('total-empresas-saldo');
+                    if (totalEmpresasCountEl) totalEmpresasCountEl.textContent = dash.empresas.total || 0;
+                    if (totalEmpresasSaldoEl) totalEmpresasSaldoEl.textContent = '$' + ((dash.empresas.saldoTotal || 0).toLocaleString('es-CL'));
+                    
+                    // Actualizar Circulación Total
+                    const totalCirculacionEl = document.getElementById('total-circulacion');
+                    const totalTransaccionesEl = document.getElementById('total-transacciones');
+                    if (totalCirculacionEl) totalCirculacionEl.textContent = '$' + ((dash.circulacion.total || 0).toLocaleString('es-CL'));
+                    if (totalTransaccionesEl) totalTransaccionesEl.textContent = (dash.circulacion.transacciones || 0) + ' transacciones';
+                    
+                    // Actualizar Subastas Activas
+                    const totalSubastasCountEl = document.getElementById('total-subastas-count');
+                    const totalSubastasActivasEl = document.getElementById('total-subastas-activas');
+                    if (totalSubastasCountEl) totalSubastasCountEl.textContent = dash.subastas.activas || 0;
+                    if (totalSubastasActivasEl) totalSubastasActivasEl.textContent = dash.subastas.activas || 0;
+                    
+                    // Actualizar Rifas Activas (nueva tarjeta)
+                    const rifasActivasEl = document.getElementById('rifas-activas-count');
+                    if (rifasActivasEl) rifasActivasEl.textContent = dash.rifas.activas || 0;
+                    
+                    // Actualizar Productos en Venta (nueva tarjeta)
+                    const productosVentaEl = document.getElementById('productos-venta-count');
+                    if (productosVentaEl) productosVentaEl.textContent = dash.productos.enVenta || 0;
+                    
+                    console.log('✅ Resumen financiero actualizado con datos reales');
+                }
+            } catch (error) {
+                console.error('Error actualizando resumen financiero:', error);
+            }
         }
 
-        function actualizarDashboardFinanciero() {
-            // TODO: Migrar a adminManager completamente
-            console.warn('actualizarDashboardFinanciero() deshabilitado');
-            notify.info('Esta función será migrada al nuevo sistema');
+        async function actualizarDashboardFinanciero() {
+            try {
+                await actualizarResumenFinanciero();
+                await cargarCuentasFinanzas(tipoCuentasActual);
+                notify.success('Dashboard financiero actualizado');
+            } catch (error) {
+                console.error('Error actualizando dashboard financiero:', error);
+                notify.error('Error al actualizar el dashboard');
+            }
         }
 
         // ===== FUNCIONES DE AUDITORÍA =====
@@ -4975,10 +5304,10 @@ SUBASTAS:
 
             html += '</div></div>';
             
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = html;
-            document.body.appendChild(modal);
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = html;
+                document.body.appendChild(modal);
             } catch (error) {
                 console.error('Error al cargar productos:', error);
                 notify.error(error.message || 'Error al cargar los productos');
@@ -4997,52 +5326,52 @@ SUBASTAS:
 
                 const ventas = producto.ventas || [];
             
-            let html = '<div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10001;" onclick="if(event.target === this) this.remove()">';
-            html += '<div style="background: white; padding: 2rem; border-radius: 20px; max-width: 900px; width: 90%; max-height: 90vh; overflow-y: auto;">';
-            html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">';
-            html += '<h2 style="margin: 0; color: #333;"><i class="fas fa-chart-line"></i> Ventas - ' + producto.nombre + '</h2>';
-            html += '<button onclick="this.closest(\'.modal\').remove()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999;">&times;</button>';
-            html += '</div>';
-
-            if (ventas.length === 0) {
-                html += '<p style="text-align: center; color: #999; padding: 2rem;">No hay ventas registradas</p>';
-            } else {
-                html += '<table style="width: 100%; border-collapse: collapse;">';
-                html += '<thead><tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">';
-                html += '<th style="padding: 1rem; text-align: left;">Fecha</th>';
-                html += '<th style="padding: 1rem; text-align: left;">Comprador</th>';
-                html += '<th style="padding: 1rem; text-align: center;">Cantidad</th>';
-                html += '<th style="padding: 1rem; text-align: right;">Precio Unit.</th>';
-                html += '<th style="padding: 1rem; text-align: right;">Total</th>';
-                html += '</tr></thead><tbody>';
-
-                ventas.forEach(venta => {
-                    const fecha = new Date(venta.fecha).toLocaleDateString('es-CL');
-                    html += '<tr style="border-bottom: 1px solid #e0e0e0;">';
-                    html += '<td style="padding: 1rem;">' + fecha + '</td>';
-                    html += '<td style="padding: 1rem;">' + venta.userName + '</td>';
-                    html += '<td style="padding: 1rem; text-align: center;">' + venta.cantidad + '</td>';
-                    html += '<td style="padding: 1rem; text-align: right;">$' + venta.precioUnitario.toLocaleString('es-CL') + '</td>';
-                    html += '<td style="padding: 1rem; text-align: right; font-weight: 600;">$' + venta.total.toLocaleString('es-CL') + '</td>';
-                    html += '</tr>';
-                });
-
-                html += '</tbody></table>';
-                
-                const totalUnidades = ventas.reduce((sum, v) => sum + v.cantidad, 0);
-                const totalIngresos = ventas.reduce((sum, v) => sum + v.total, 0);
-                html += '<div style="margin-top: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">';
-                html += '<div style="text-align: center;"><strong>Total Unidades Vendidas:</strong><br><span style="font-size: 1.5rem; color: #3498db;">' + totalUnidades + '</span></div>';
-                html += '<div style="text-align: center;"><strong>Total Recaudado:</strong><br><span style="font-size: 1.5rem; color: #27ae60;">$' + totalIngresos.toLocaleString('es-CL') + '</span></div>';
+                let html = '<div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10001;" onclick="if(event.target === this) this.remove()">';
+                html += '<div style="background: white; padding: 2rem; border-radius: 20px; max-width: 900px; width: 90%; max-height: 90vh; overflow-y: auto;">';
+                html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">';
+                html += '<h2 style="margin: 0; color: #333;"><i class="fas fa-chart-line"></i> Ventas - ' + producto.nombre + '</h2>';
+                html += '<button onclick="this.closest(\'.modal\').remove()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999;">&times;</button>';
                 html += '</div>';
-            }
 
-            html += '</div></div>';
-            
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = html;
-            document.body.appendChild(modal);
+                if (ventas.length === 0) {
+                    html += '<p style="text-align: center; color: #999; padding: 2rem;">No hay ventas registradas</p>';
+                } else {
+                    html += '<table style="width: 100%; border-collapse: collapse;">';
+                    html += '<thead><tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">';
+                    html += '<th style="padding: 1rem; text-align: left;">Fecha</th>';
+                    html += '<th style="padding: 1rem; text-align: left;">Comprador</th>';
+                    html += '<th style="padding: 1rem; text-align: center;">Cantidad</th>';
+                    html += '<th style="padding: 1rem; text-align: right;">Precio Unit.</th>';
+                    html += '<th style="padding: 1rem; text-align: right;">Total</th>';
+                    html += '</tr></thead><tbody>';
+
+                    ventas.forEach(venta => {
+                        const fecha = new Date(venta.fecha).toLocaleDateString('es-CL');
+                        html += '<tr style="border-bottom: 1px solid #e0e0e0;">';
+                        html += '<td style="padding: 1rem;">' + fecha + '</td>';
+                        html += '<td style="padding: 1rem;">' + venta.userName + '</td>';
+                        html += '<td style="padding: 1rem; text-align: center;">' + venta.cantidad + '</td>';
+                        html += '<td style="padding: 1rem; text-align: right;">$' + venta.precioUnitario.toLocaleString('es-CL') + '</td>';
+                        html += '<td style="padding: 1rem; text-align: right; font-weight: 600;">$' + venta.total.toLocaleString('es-CL') + '</td>';
+                        html += '</tr>';
+                    });
+
+                    html += '</tbody></table>';
+                    
+                    const totalUnidades = ventas.reduce((sum, v) => sum + v.cantidad, 0);
+                    const totalIngresos = ventas.reduce((sum, v) => sum + v.total, 0);
+                    html += '<div style="margin-top: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">';
+                    html += '<div style="text-align: center;"><strong>Total Unidades Vendidas:</strong><br><span style="font-size: 1.5rem; color: #3498db;">' + totalUnidades + '</span></div>';
+                    html += '<div style="text-align: center;"><strong>Total Recaudado:</strong><br><span style="font-size: 1.5rem; color: #27ae60;">$' + totalIngresos.toLocaleString('es-CL') + '</span></div>';
+                    html += '</div>';
+                }
+
+                html += '</div></div>';
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = html;
+                document.body.appendChild(modal);
             } catch (error) {
                 console.error('Error al cargar ventas:', error);
                 notify.error(error.message || 'Error al cargar las ventas del producto');

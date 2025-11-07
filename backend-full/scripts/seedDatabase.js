@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const {
     sequelize,
     User,
@@ -15,15 +15,15 @@ const {
 
 async function seedDatabase() {
     try {
-        console.log('🌱 Iniciando seed de base de datos...');
+        console.log('­ƒî▒ Iniciando seed de base de datos...');
 
         await sequelize.authenticate();
-        console.log('✅ Conexión establecida');
+        console.log('Ô£à Conexi├│n establecida');
 
         // Verificar si ya hay datos
         const userCount = await User.count();
-        if (userCount > 1) { // Más que admin
-            console.log('\n⚠️  La base de datos ya tiene datos de prueba.');
+        if (userCount > 1) { // M├ís que admin
+            console.log('\nÔÜá´©Å  La base de datos ya tiene datos de prueba.');
             console.log('   Para volver a poblar, ejecuta primero: npm run init-db\n');
             process.exit(0);
         }
@@ -31,7 +31,7 @@ async function seedDatabase() {
         // ============================================
         // USUARIOS DE PRUEBA
         // ============================================
-        console.log('\n🔄 Creando usuarios de prueba...');
+        console.log('\n­ƒöä Creando usuarios de prueba...');
 
         const users = await User.bulkCreate([
             {
@@ -69,12 +69,12 @@ async function seedDatabase() {
             }
         ], { individualHooks: true }); // Para que se ejecuten los hooks de hash de password
 
-        console.log(`✅ ${users.length} usuarios creados`);
+        console.log(`Ô£à ${users.length} usuarios creados`);
 
         // ============================================
         // EMPRESAS DE PRUEBA
         // ============================================
-        console.log('\n🔄 Creando empresas de prueba...');
+        console.log('\n­ƒöä Creando empresas de prueba...');
 
         const empresas = await Empresa.bulkCreate([
             {
@@ -124,12 +124,12 @@ async function seedDatabase() {
             }
         ], { individualHooks: true });
 
-        console.log(`✅ ${empresas.length} empresas creadas`);
+        console.log(`Ô£à ${empresas.length} empresas creadas`);
 
         // ============================================
         // SUBASTAS DE PRUEBA
         // ============================================
-        console.log('\n🔄 Creando subastas de prueba...');
+        console.log('\n­ƒöä Creando subastas de prueba...');
 
         const ahora = new Date();
         const en7Dias = new Date(ahora.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -187,12 +187,12 @@ async function seedDatabase() {
             }
         ]);
 
-        console.log(`✅ ${subastas.length} subastas creadas`);
+        console.log(`Ô£à ${subastas.length} subastas creadas`);
 
         // ============================================
         // PUJAS DE PRUEBA
         // ============================================
-        console.log('\n🔄 Creando pujas de prueba...');
+        console.log('\n­ƒöä Creando pujas de prueba...');
 
         const pujas = await Puja.bulkCreate([
             {
@@ -222,12 +222,12 @@ async function seedDatabase() {
         await subastas[0].update({ precio_actual: 520000, cantidad_pujas: 2 });
         await subastas[1].update({ precio_actual: 1250000, cantidad_pujas: 1 });
 
-        console.log(`✅ ${pujas.length} pujas creadas`);
+        console.log(`Ô£à ${pujas.length} pujas creadas`);
 
         // ============================================
         // RIFAS DE PRUEBA
         // ============================================
-        console.log('\n🔄 Creando rifas de prueba...');
+        console.log('\n­ƒöä Creando rifas de prueba...');
 
         const en14Dias = new Date(ahora.getTime() + 14 * 24 * 60 * 60 * 1000);
 
@@ -262,12 +262,12 @@ async function seedDatabase() {
             }
         ]);
 
-        console.log(`✅ ${rifas.length} rifas creadas`);
+        console.log(`Ô£à ${rifas.length} rifas creadas`);
 
         // ============================================
         // BOLETOS DE RIFA
         // ============================================
-        console.log('\n🔄 Creando boletos de rifa de prueba...');
+        console.log('\n­ƒöä Creando boletos de rifa de prueba...');
 
         const boletos = [];
         for (let i = 1; i <= 10; i++) {
@@ -281,50 +281,64 @@ async function seedDatabase() {
         }
 
         await BoletoRifa.bulkCreate(boletos);
-        console.log(`✅ ${boletos.length} boletos creados`);
+        console.log(`Ô£à ${boletos.length} boletos creados`);
 
         // ============================================
         // PRODUCTOS DE PRUEBA
         // ============================================
-        console.log('\n🔄 Creando productos de prueba...');
+        console.log('\n­ƒöä Creando productos de prueba...');
 
         const productos = await Producto.bulkCreate([
             {
                 empresa_id: empresas[0].id,
-                nombre: 'Mouse Logitech MX Master 3S',
-                descripcion: 'Mouse ergonómico inalámbrico con sensor de 8K DPI y botones personalizables.',
-                precio: 89990,
-                stock: 25,
-                stock_inicial: 30,
-                imagenes: ['/images/mouse.jpg'],
-                categoria: 'Accesorios',
-                sku: 'LGT-MX3S-001',
-                etiquetas: ['mouse', 'logitech', 'inalambrico'],
+                nombre: 'Gorra NEXOS Edición Limitada',
+                descripcion: 'Gorra ajustable con logo bordado NEXOS, 100% algodón premium.',
+                precio: 15990,
+                stock: 50,
+                stock_inicial: 100,
+                imagenes: ['/images/gorra.jpg'],
+                categoria: 'Ropa',
+                sku: 'NXS-GOR-001',
+                etiquetas: ['gorra', 'merchandising', 'nexos'],
                 destacado: true,
                 estado: 'disponible'
             },
             {
                 empresa_id: empresas[0].id,
-                nombre: 'Teclado Mecánico Keychron K8',
-                descripcion: 'Teclado mecánico Bluetooth con retroiluminación RGB, switches Gateron Brown.',
-                precio: 119990,
-                stock: 15,
-                stock_inicial: 20,
-                imagenes: ['/images/teclado.jpg'],
-                categoria: 'Accesorios',
-                sku: 'KEY-K8-BRN-001',
-                etiquetas: ['teclado', 'mecanico', 'keychron'],
+                nombre: 'Camiseta NEXOS Original',
+                descripcion: 'Camiseta de algodón con diseño exclusivo NEXOS. Disponible en tallas S, M, L, XL.',
+                precio: 19990,
+                stock: 75,
+                stock_inicial: 150,
+                imagenes: ['/images/camiseta.jpg'],
+                categoria: 'Ropa',
+                sku: 'NXS-CAM-001',
+                etiquetas: ['camiseta', 'merchandising', 'nexos'],
+                destacado: true,
+                estado: 'disponible'
+            },
+            {
+                empresa_id: empresas[0].id,
+                nombre: 'Taza NEXOS Cerámica Premium',
+                descripcion: 'Taza de cerámica premium de 350ml con logo NEXOS. Apta para microondas y lavavajillas.',
+                precio: 8990,
+                stock: 100,
+                stock_inicial: 200,
+                imagenes: ['/images/taza.jpg'],
+                categoria: 'Hogar',
+                sku: 'NXS-TAZ-001',
+                etiquetas: ['taza', 'merchandising', 'nexos'],
                 destacado: true,
                 estado: 'disponible'
             }
         ]);
 
-        console.log(`✅ ${productos.length} productos creados`);
+        console.log(`Ô£à ${productos.length} productos creados`);
 
         // ============================================
         // CAUSAS DE PRUEBA
         // ============================================
-        console.log('\n🔄 Creando causas de prueba...');
+        console.log('\n­ƒöä Creando causas de prueba...');
 
         const causas = await Causa.bulkCreate([
             {
@@ -361,12 +375,12 @@ async function seedDatabase() {
             }
         ]);
 
-        console.log(`✅ ${causas.length} causas creadas`);
+        console.log(`Ô£à ${causas.length} causas creadas`);
 
         // ============================================
         // DONACIONES DE PRUEBA
         // ============================================
-        console.log('\n🔄 Creando donaciones de prueba...');
+        console.log('\n­ƒöä Creando donaciones de prueba...');
 
         const donaciones = await Donacion.bulkCreate([
             {
@@ -398,25 +412,25 @@ async function seedDatabase() {
             }
         ]);
 
-        console.log(`✅ ${donaciones.length} donaciones creadas`);
+        console.log(`Ô£à ${donaciones.length} donaciones creadas`);
 
         // ============================================
         // RESUMEN
         // ============================================
         console.log('\n' + '='.repeat(50));
-        console.log('✅ BASE DE DATOS POBLADA EXITOSAMENTE');
+        console.log('Ô£à BASE DE DATOS POBLADA EXITOSAMENTE');
         console.log('='.repeat(50));
-        console.log(`👥 Usuarios: ${users.length}`);
-        console.log(`🏢 Empresas: ${empresas.length}`);
-        console.log(`🔨 Subastas: ${subastas.length}`);
-        console.log(`💰 Pujas: ${pujas.length}`);
-        console.log(`🎲 Rifas: ${rifas.length}`);
-        console.log(`🎫 Boletos: ${boletos.length}`);
-        console.log(`📦 Productos: ${productos.length}`);
-        console.log(`❤️  Causas: ${causas.length}`);
-        console.log(`🎁 Donaciones: ${donaciones.length}`);
+        console.log(`­ƒæÑ Usuarios: ${users.length}`);
+        console.log(`­ƒÅó Empresas: ${empresas.length}`);
+        console.log(`­ƒö¿ Subastas: ${subastas.length}`);
+        console.log(`­ƒÆ░ Pujas: ${pujas.length}`);
+        console.log(`­ƒÄ▓ Rifas: ${rifas.length}`);
+        console.log(`­ƒÄ½ Boletos: ${boletos.length}`);
+        console.log(`­ƒôª Productos: ${productos.length} (Gorra, Camiseta, Taza)`);
+        console.log(`ÔØñ´©Å  Causas: ${causas.length}`);
+        console.log(`­ƒÄü Donaciones: ${donaciones.length}`);
         console.log('='.repeat(50));
-        console.log('\n📝 Credenciales de prueba:');
+        console.log('\n­ƒôØ Credenciales de prueba:');
         console.log('   Usuarios:');
         console.log('   - juan_perez / password123');
         console.log('   - maria_gonzalez / password123');
@@ -429,7 +443,7 @@ async function seedDatabase() {
 
         process.exit(0);
     } catch (error) {
-        console.error('❌ Error al poblar base de datos:', error);
+        console.error('ÔØî Error al poblar base de datos:', error);
         process.exit(1);
     }
 }

@@ -25,6 +25,12 @@ router.delete('/usuarios/:id', adminController.deleteUsuario);
 // Gestión de subastas
 router.get('/subastas', adminController.getSubastasAdmin);
 
+// Actividad reciente
+router.get('/actividad-reciente', adminController.getActividadReciente);
+
+// Dashboard financiero
+router.get('/dashboard-financiero', adminController.getDashboardFinanciero);
+
 // Reportes
 router.get('/reportes/transacciones', adminController.getReporteTransacciones);
 router.get('/reportes/donaciones', adminController.getReporteDonaciones);

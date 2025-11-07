@@ -33,10 +33,14 @@ function inicializarNavbar() {
                 <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
             </button>
             <div id="userDropdown" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 0.5rem; background: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 1000;">
-                <a href="${session.role === 'admin' ? 'admin.html' : (session.role === 'empresa' ? 'perfil-empresa.html' : 'perfil.html')}" style="display: block; padding: 1rem; color: #333; text-decoration: none; border-bottom: 1px solid #eee;">
+                <a href="${session.role === 'admin' ? 'perfil.html' : (session.role === 'empresa' ? 'perfil-empresa.html' : 'perfil.html')}" style="display: block; padding: 1rem; color: #333; text-decoration: none; border-bottom: 1px solid #eee;">
                     <i class="fas fa-user" style="margin-right: 0.5rem;"></i>Mi Perfil
                 </a>
-                ${session.role === 'admin' ? '<a href="admin.html" style="display: block; padding: 1rem; color: #333; text-decoration: none; border-bottom: 1px solid #eee;"><i class="fas fa-cog" style="margin-right: 0.5rem;"></i>Administración</a>' : ''}
+                ${session.role === 'admin' ? '<a href="admin.html" style="display: block; padding: 1rem; color: #333; text-decoration: none; border-bottom: 1px solid #eee;"><i class="fas fa-user-shield" style="margin-right: 0.5rem;"></i>Panel Admin</a>' : ''}
+                ${session.role === 'admin' ? '<a href="db-viewer.html" style="display: block; padding: 1rem; color: #333; text-decoration: none; border-bottom: 1px solid #eee;"><i class="fas fa-database" style="margin-right: 0.5rem;"></i>DB Viewer</a>' : ''}
+                <a href="${session.role === 'admin' ? 'perfil.html#configuracion' : (session.role === 'empresa' ? 'perfil-empresa.html#configuracion' : 'perfil.html#configuracion')}" style="display: block; padding: 1rem; color: #333; text-decoration: none; border-bottom: 1px solid #eee;">
+                    <i class="fas fa-cog" style="margin-right: 0.5rem;"></i>Configuración
+                </a>
                 <a href="#" onclick="authBackend.logout(); window.location.reload(); return false;" style="display: block; padding: 1rem; color: #e74c3c; text-decoration: none;">
                     <i class="fas fa-sign-out-alt" style="margin-right: 0.5rem;"></i>Cerrar Sesión
                 </a>

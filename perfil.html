@@ -1246,6 +1246,7 @@
     <script src="notifications.js"></script>
     <script src="api-config.js"></script>
     <script src="auth-backend.js"></script>
+    <script src="navbar-helper.js"></script>
     <script src="wallet-manager.js"></script>
     <script src="perfil-manager.js"></script>
     <script src="config.js"></script>
@@ -1263,6 +1264,49 @@
         // Actualizar navbar con info del usuario
         authBackend.updateUIWithUserInfo();
 
+        // ===== COMPATIBILITY LAYER: Crear objeto auth para compatibilidad =====
+        // Esto permite que el código legacy funcione con el nuevo authBackend
+        const auth = {
+            getSession: () => {
+                const user = authBackend.getCurrentUser();
+                return {
+                    id: user.id,
+                    username: user.username,
+                    email: user.email,
+                    role: user.role,
+                    type: user.role === 'empresa' ? 'empresa' : 'user'
+                };
+            },
+            getCurrentAccount: () => {
+                return authBackend.getCurrentUser();
+            },
+            getSaldo: async (userId, tipo) => {
+                const wallet = await perfilManager.walletManager.getWallet();
+                return wallet.success ? wallet.wallet.saldo : 0;
+            },
+            getTransacciones: async (userId, tipo) => {
+                const result = await perfilManager.walletManager.getTransactions();
+                return result.success ? result.transactions : [];
+            },
+            updateProfilePhoto: async (photoBase64, tipo) => {
+                const result = await perfilManager.actualizarPerfil({ avatar: photoBase64 });
+                return result;
+            },
+            updateConfig: async (updates) => {
+                const result = await perfilManager.actualizarPerfil(updates);
+                return result;
+            },
+            changePassword: async (currentPassword, newPassword) => {
+                const result = await perfilManager.cambiarPassword(currentPassword, newPassword);
+                return result;
+            },
+            modificarSaldo: async (userId, monto, motivo, tipo) => {
+                // Esta función no tiene equivalente en backend, pero podemos retornar un success
+                console.warn('modificarSaldo no está implementado en el backend');
+                return { success: false, message: 'Función no disponible' };
+            }
+        };
+
         // Cargar datos del perfil desde el backend
         async function inicializarPerfil() {
             const result = await perfilManager.cargarPerfil();
@@ -1276,65 +1320,88 @@
         }
 
         // Inicializar al cargar la página
-        inicializarPerfil();
+        inicializarPerfil().then(() => {
+            // Después de cargar el perfil desde el backend, actualizar la UI
+            cargarDatosUsuarioEnUI();
+        });
 
-        // Cargar datos del usuario (función legacy - ahora usa backend)
-        const usuario = auth.getCurrentAccount();
-        if (usuario) {
-            // Mostrar nombre de usuario en vez de nombre real
+        // Cargar datos del usuario en la UI
+        async function cargarDatosUsuarioEnUI() {
+            const result = await perfilManager.cargarPerfil();
+            if (!result.success || !result.user) {
+                console.error('No se pudo cargar el perfil del usuario');
+                return;
+            }
+
+            const usuario = result.user;
             const username = usuario.username || 'Usuario';
+            const nombreCompleto = usuario.nombre ? 
+                (usuario.apellido ? `${usuario.nombre} ${usuario.apellido}` : usuario.nombre) : 
+                username;
             
-            document.getElementById('userName').textContent = username;
+            // Actualizar información del header
+            document.getElementById('userName').textContent = nombreCompleto;
             document.getElementById('userEmail').textContent = usuario.email;
             document.getElementById('userPhone').textContent = usuario.telefono || 'No especificado';
-            document.getElementById('userDate').textContent = new Date(usuario.fechaRegistro).getFullYear();
+            document.getElementById('userDate').textContent = usuario.createdAt ? new Date(usuario.createdAt).getFullYear() : new Date().getFullYear();
             
             // Avatar con iniciales del username o foto
             const iniciales = username.length >= 2 ? username.substring(0, 2) : username[0] + 'U';
             const avatarElement = document.getElementById('avatarInitials');
             
-            if (usuario.profilePhoto) {
+            if (usuario.avatar || usuario.profilePhoto) {
                 // Mostrar foto si existe
-                avatarElement.innerHTML = `<img src="${usuario.profilePhoto}" alt="Foto de perfil">`;
+                avatarElement.innerHTML = `<img src="${usuario.avatar || usuario.profilePhoto}" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
             } else {
                 // Mostrar iniciales
                 avatarElement.innerHTML = `<span class="profile-avatar-text">${iniciales.toUpperCase()}</span>`;
             }
 
             // Rellenar formulario de datos personales
-            document.getElementById('inputNombre').value = nombreCompleto;
-            document.getElementById('inputRut').value = usuario.rut || usuario.username;
-            document.getElementById('inputEmail').value = usuario.email;
-            document.getElementById('inputTelefono').value = usuario.telefono || '';
-            document.getElementById('inputFechaNacimiento').value = usuario.fechaNacimiento || '';
+            if (document.getElementById('inputNombre')) {
+                document.getElementById('inputNombre').value = usuario.nombre || '';
+            }
+            if (document.getElementById('inputRut')) {
+                document.getElementById('inputRut').value = usuario.rut || usuario.username;
+            }
+            if (document.getElementById('inputEmail')) {
+                document.getElementById('inputEmail').value = usuario.email;
+            }
+            if (document.getElementById('inputTelefono')) {
+                document.getElementById('inputTelefono').value = usuario.telefono || '';
+            }
+            if (document.getElementById('inputFechaNacimiento')) {
+                document.getElementById('inputFechaNacimiento').value = usuario.fechaNacimiento || '';
+            }
 
             // Rellenar formulario de dirección
-            if (usuario.direccionEnvio) {
-                document.getElementById('inputDireccion').value = usuario.direccionEnvio.direccion || '';
-                document.getElementById('inputComuna').value = usuario.direccionEnvio.comuna || '';
-                document.getElementById('inputCiudad').value = usuario.direccionEnvio.ciudad || '';
-                document.getElementById('inputRegion').value = usuario.direccionEnvio.region || '';
-                document.getElementById('inputCodigoPostal').value = usuario.direccionEnvio.codigoPostal || '';
-                document.getElementById('inputReferencia').value = usuario.direccionEnvio.referencia || '';
+            if (usuario.direccion) {
+                if (document.getElementById('inputDireccion')) {
+                    document.getElementById('inputDireccion').value = usuario.direccion || '';
+                }
+                if (document.getElementById('inputComuna')) {
+                    document.getElementById('inputComuna').value = usuario.comuna || '';
+                }
+                if (document.getElementById('inputCiudad')) {
+                    document.getElementById('inputCiudad').value = usuario.ciudad || '';
+                }
+                if (document.getElementById('inputRegion')) {
+                    document.getElementById('inputRegion').value = usuario.region || '';
+                }
+                if (document.getElementById('inputCodigoPostal')) {
+                    document.getElementById('inputCodigoPostal').value = usuario.codigoPostal || '';
+                }
+                if (document.getElementById('inputReferencia')) {
+                    document.getElementById('inputReferencia').value = usuario.referencia || '';
+                }
             }
 
             // Rellenar nombre de usuario actual en configuración
             if (document.getElementById('currentUsername')) {
                 document.getElementById('currentUsername').value = usuario.username;
             }
-
-            // Configuraciones
-            if (usuario.configuraciones) {
-                document.getElementById('notificaciones').checked = usuario.configuraciones.notificaciones;
-                document.getElementById('emailNotificaciones').checked = usuario.configuraciones.emailNotificaciones;
-                document.getElementById('tema').value = usuario.configuraciones.tema;
-                document.getElementById('idioma').value = usuario.configuraciones.idioma;
-
-                if (usuario.configuraciones.accesibilidad) {
-                    document.getElementById('altoContraste').checked = usuario.configuraciones.accesibilidad.altoContraste;
-                    document.getElementById('tamañoTexto').value = usuario.configuraciones.accesibilidad.tamañoTexto;
-                    document.getElementById('animacionesReducidas').checked = usuario.configuraciones.accesibilidad.animacionesReducidas;
-                }
+            if (document.getElementById('profileUsername')) {
+                document.getElementById('profileUsername').textContent = username;
             }
 
             // Ocultar pestaña de finanzas si es admin

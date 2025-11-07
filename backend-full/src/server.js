@@ -53,11 +53,15 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Rate limiting (más permisivo para desarrollo)
+// Rate limiting (muy permisivo para desarrollo)
 const limiter = rateLimit({
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 1 * 60 * 1000, // 1 minuto
-    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000, // 1000 requests por minuto para desarrollo
-    message: 'Demasiadas peticiones, por favor intenta de nuevo más tarde.'
+    windowMs: 15 * 1000, // 15 segundos (ventana más corta)
+    max: 100, // 100 requests cada 15 segundos (400 req/min)
+    message: 'Demasiadas peticiones, por favor intenta de nuevo más tarde.',
+    standardHeaders: true, // Retorna info de rate limit en los headers
+    legacyHeaders: false, // Deshabilita headers legacy (X-RateLimit-*)
+    skipSuccessfulRequests: false, // Contar requests exitosas
+    skipFailedRequests: false // Contar requests fallidas también
 });
 app.use('/api/', limiter);
 

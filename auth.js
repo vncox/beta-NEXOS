@@ -1233,6 +1233,7 @@ function updateNavbar() {
             userMenu.id = 'user-menu';
             userMenu.className = 'user-menu';
             const adminLink = session.role === 'admin' ? '<a href="admin.html"><i class="fas fa-user-shield"></i> Panel Admin</a>' : '';
+            const dbViewerLink = session.role === 'admin' ? '<a href="db-viewer.html"><i class="fas fa-database"></i> DB Viewer</a>' : '';
             
             // Solo mostrar wallet si NO es usuario admin (pero sí para empresa admin)
             let walletHTML = '';
@@ -1286,11 +1287,12 @@ function updateNavbar() {
                 '<i class="fas fa-chevron-down"></i>' +
                 '</button>' +
                 '<div class="user-dropdown" id="user-dropdown" style="display: none;">' +
-                '<a href="' + (session.type === 'user' ? 'perfil.html' : 'perfil-empresa.html') + '">' +
+                '<a href="' + (session.role === 'admin' || session.type === 'user' || session.type === 'usuario' ? 'perfil.html' : 'perfil-empresa.html') + '">' +
                 '<i class="fas fa-user"></i> Mi Perfil</a>' +
                 walletLinkDropdown +
                 adminLink +
-                '<a href="' + (session.type === 'user' ? 'perfil.html#configuracion' : 'perfil-empresa.html#configuracion') + '">' +
+                dbViewerLink +
+                '<a href="' + (session.role === 'admin' || session.type === 'user' || session.type === 'usuario' ? 'perfil.html#configuracion' : 'perfil-empresa.html#configuracion') + '">' +
                 '<i class="fas fa-cog"></i> Configuración</a>' +
                 '<a href="#" onclick="logoutUser(); return false;">' +
                 '<i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>' +

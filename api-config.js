@@ -383,6 +383,14 @@ class APIClient {
         return await this.get(API_CONFIG.ENDPOINTS.ADMIN_REPORTE_DONACIONES);
     }
 
+    async getActividadReciente(limite = 10) {
+        return await this.get(`/admin/actividad-reciente?limite=${limite}`);
+    }
+
+    async getDashboardFinanciero() {
+        return await this.get('/admin/dashboard-financiero');
+    }
+
     // ==================== RIFAS ====================
 
     async getRifas(filtros = {}) {

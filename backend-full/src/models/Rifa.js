@@ -100,7 +100,16 @@ const Rifa = sequelize.define('Rifa', {
         { fields: ['estado'] },
         { fields: ['fecha_sorteo'] },
         { fields: ['destacada'] }
-    ]
+    ],
+    getterMethods: {
+        imagen() {
+            // Si no hay imagen singular pero hay imagenes array, devolver la primera
+            if (!this.getDataValue('imagen') && this.getDataValue('imagenes') && this.getDataValue('imagenes').length > 0) {
+                return this.getDataValue('imagenes')[0];
+            }
+            return this.getDataValue('imagen');
+        }
+    }
 });
 
 module.exports = Rifa;

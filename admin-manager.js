@@ -390,6 +390,44 @@ class AdminManager {
             };
         }
     }
+
+    /**
+     * Obtener actividad reciente
+     */
+    async getActividadReciente(limite = 10) {
+        try {
+            const data = await apiClient.getActividadReciente(limite);
+            return {
+                success: true,
+                actividades: data.actividades || []
+            };
+        } catch (error) {
+            console.error('Error obteniendo actividad reciente:', error);
+            return {
+                success: false,
+                message: error.message || 'Error al cargar actividad'
+            };
+        }
+    }
+
+    /**
+     * Obtener dashboard financiero
+     */
+    async getDashboardFinanciero() {
+        try {
+            const data = await apiClient.getDashboardFinanciero();
+            return {
+                success: true,
+                dashboard: data
+            };
+        } catch (error) {
+            console.error('Error obteniendo dashboard financiero:', error);
+            return {
+                success: false,
+                message: error.message || 'Error al cargar dashboard'
+            };
+        }
+    }
 }
 
 // Instancia global

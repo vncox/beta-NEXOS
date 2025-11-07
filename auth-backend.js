@@ -55,6 +55,19 @@ class AuthSystemBackend {
     saveSession(token, user) {
         localStorage.setItem('nexos_token', token);
         localStorage.setItem('nexos_user', JSON.stringify(user));
+        
+        // También guardar en formato de auth.js para compatibilidad con navbar
+        const session = {
+            id: user.id,
+            username: user.username,
+            type: user.role === 'admin' ? 'user' : (user.razon_social ? 'empresa' : 'user'),
+            role: user.role || 'user',
+            email: user.email,
+            avatar: user.avatar || user.logo || null,
+            profilePhoto: user.avatar || user.logo || null
+        };
+        localStorage.setItem('nexos_session', JSON.stringify(session));
+        
         this.currentUser = user;
     }
 
@@ -64,6 +77,7 @@ class AuthSystemBackend {
     clearSession() {
         localStorage.removeItem('nexos_token');
         localStorage.removeItem('nexos_user');
+        localStorage.removeItem('nexos_session');
         this.currentUser = null;
     }
 
